@@ -61,3 +61,29 @@ def get_variant(db, variant):
     """
     variant_id = variant['variant_id']
     return db.variant.find_one({'variant_id': variant_id})
+
+def delete_variant(db, variant):
+    """Remove variant from database
+        
+        This means that we take down the observations variable with one.
+        If 'observations' == 1 we remove the variant.
+        
+        Args:
+            db (MongoClient): A connection to the mongodb
+            variant (dict): A variant dictionary            
+    """
+    
+    mongo_variant = get_variant(db, variant)
+    if mongo_variant:
+        if mongo_variant['observations'] == 1:
+            db.variant.remove({'variant_id': variant['variant_id']})
+        else:
+            db.variant.update({
+                '_id': mongo_variant['_id']
+                },{
+                    '$inc': {
+                        'observations': -1
+                    }
+                }, upsert=False)
+            
+    return
