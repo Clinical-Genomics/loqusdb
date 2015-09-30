@@ -76,8 +76,14 @@ def delete_variant(db, variant):
     mongo_variant = get_variant(db, variant)
     if mongo_variant:
         if mongo_variant['observations'] == 1:
+            logger.debug("Removing variant {0}".format(
+                mongo_variant.get('variant_id')
+            ))
             db.variant.remove({'variant_id': variant['variant_id']})
         else:
+            logger.debug("Decreasing observations for {0}".format(
+                mongo_variant.get('variant_id')
+            ))
             db.variant.update({
                 '_id': mongo_variant['_id']
                 },{
