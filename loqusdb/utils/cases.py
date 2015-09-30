@@ -41,3 +41,22 @@ def add_case(db, case):
     mongo_case_id = db.case.insert_one(case).inserted_id
     
     return mongo_case_id
+
+def delete_case(db, case):
+    """Delete case from the database
+    
+        Delete a case from the database
+        
+        Args:
+            db (MongoClient): A connection to the mongodb
+            case (dict): A case dictionary
+        
+    """
+    mongo_case = get_case(db, case)
+    if mongo_case:
+        logger.info("Removing case {0} from database".format(
+            mongo_case.get('case_id')
+        ))
+        db.case.remove({'_id': mongo_case['_id']})
+    
+    return

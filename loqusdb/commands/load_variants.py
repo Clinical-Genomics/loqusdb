@@ -1,6 +1,6 @@
 import click
 
-@click.group()
+@click.command()
 @click.argument('variant_file',
                     nargs=1,
                     type=click.File('r'),
@@ -16,12 +16,9 @@ import click
                 default='ped',
                 help='If the analysis use one of the known setups, please specify which one.'
 )
-def cli(variant_file, family_file, family_type):
-    """Tool for manipulating a variant frequency database
+def load(variant_file, family_file, family_type):
+    """Load the variant frequency database
     
     """
     pass
 
-
-if __name__ == '__main__':
-    cli()

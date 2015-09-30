@@ -35,7 +35,7 @@ setup(name='loqusdb',
         "loqusdb = loqusdb.commands.run_loqusdb:cli",
         ],
         "loqusdb.subcommands": [
-            "load = loqusdb.commands.load_variants:cli"
+            "load = loqusdb.commands:load_command",
         ]
     },
     keywords = ['vcf', 'variants'],

@@ -34,7 +34,7 @@ from loqusdb.log import init_log, LEVELS
 )
 @click.version_option(__version__)
 def cli(logfile, verbose):
-    """Tool for manipulating a variant frequency database
+    """Tool for manipulating a local variant frequency database
     
     """
     loglevel = LEVELS.get(min(verbose,2), "WARNING")
@@ -44,11 +44,8 @@ def cli(logfile, verbose):
         loglevel = loglevel
     )
 
-print('hej')
 for entry_point in iter_entry_points('loqusdb.subcommands'):
-    print(entry_point)
     cli.add_command(entry_point.load())
-print('du')
 
 if __name__ == '__main__':
     cli()
