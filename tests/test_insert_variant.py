@@ -1,5 +1,5 @@
 from mongomock import MongoClient
-from loqusdb.utils import get_variant, add_variant
+from loqusdb.utils import add_variant
 
 def test_insert_one_variant():
     """Test to insert one variant"""
