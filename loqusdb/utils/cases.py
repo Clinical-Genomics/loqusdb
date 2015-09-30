@@ -15,7 +15,7 @@ def get_case(db, case):
         Returns:
             mongo_case (dict): A mongo case dictionary
     """
-    case_id = variant['case_id']
+    case_id = case['case_id']
     return db.case.find_one({'case_id': case_id})
 
 
