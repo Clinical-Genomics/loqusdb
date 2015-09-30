@@ -30,13 +30,14 @@ setup(name='loqusdb',
     ],
     packages=find_packages(exclude=('tests*', 'docs', 'examples')),
     
-    # package_data = {
-    #     'genmod': ['annotations/*.db']
-    # },
-    # entry_points= { "console_scripts" : [
-    #     "loqusdb = loqusdb.commands.run_loqusdb:cli",
-    #     ]
-    # },
+    entry_points= {
+        "console_scripts" : [
+        "loqusdb = loqusdb.commands.run_loqusdb:cli",
+        ],
+        "loqusdb.subcommands": [
+            "load = loqusdb.commands.load_variants:cli"
+        ]
+    },
     keywords = ['vcf', 'variants'],
     classifiers = [
         "Programming Language :: Python",

@@ -11,13 +11,12 @@ Copyright (c) 2015 __MoonsoInc__. All rights reserved.
 
 from __future__ import (print_function)
 
-import sys
-import os
 import click
 import logging
+from pkg_resources import iter_entry_points
 
-from locusdb import __version__, logger
-from locusdb.log import init_log, LEVELS
+from loqusdb import __version__, logger
+from loqusdb.log import init_log, LEVELS
 
 
 ###         This is the main script         ###
@@ -45,6 +44,11 @@ def cli(logfile, verbose):
         loglevel = loglevel
     )
 
+print('hej')
+for entry_point in iter_entry_points('loqusdb.subcommands'):
+    print(entry_point)
+    cli.add_command(entry_point.load())
+print('du')
 
 if __name__ == '__main__':
     cli()
