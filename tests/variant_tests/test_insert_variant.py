@@ -16,6 +16,7 @@ def test_insert_one_variant():
     
     assert mongo_variant['variant_id'] == 'test'
     assert mongo_variant['observations'] == 1
+    assert mongo_variant.get('homozygote',0) == 0
 
 def test_insert_one_variant_twice():
     """Test to insert one variant"""
