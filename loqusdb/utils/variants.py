@@ -2,25 +2,44 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def update_variant(db, mongo_variant):
+def update_variant(db, mongo_variant, homozygote=False):
     """Update the information for a variant that exists in the database
     
     Args:
         db (MongoClient): A connection to the mongodb
-        variant (dict): A mongo variant dictionary. 
+        mongo_variant (dict): A mongo variant dictionary. 
                         (this should include an '_id')
+        homozygote (bool): If the variant is homozygote
     """
-    logger.debug("Updating variant: {0}".format(
-        mongo_variant.get('variant_id')))
-    
-    db.variant.update({
-        '_id': mongo_variant['_id']
-        },{
-            '$inc': {
-                'observations': 1
-            }
-        }, upsert=False)
-    
+    if homozygote:
+        logger.debug("Updating hom calls for variant: {0}".format(
+            mongo_variant.get('variant_id')))
+        logger.debug("Updating observations for variant: {0}".format(
+            mongo_variant.get('variant_id')))
+        
+        db.variant.update({
+            '_id': mongo_variant['_id']
+            },{
+                '$inc': {
+                    'homozygote': 1
+                },
+                 '$inc': {
+                    'observations': 1
+                }
+            }, upsert=False)
+    else:
+        logger.debug("Updating observations for variant: {0}".format(
+            mongo_variant.get('variant_id')))
+        
+        db.variant.update({
+            '_id': mongo_variant['_id']
+            },{
+                '$inc': {
+                    'observations': 1
+                }
+            }, upsert=False)
+        
+        
     return
 
 def add_variant(db, variant):
@@ -40,8 +59,11 @@ def add_variant(db, variant):
     existing_variant = get_variant(db, variant)
     
     if existing_variant:
-        update_variant(db, existing_variant)
+        update_variant(db, existing_variant, variant.get('homozygote', 0))
     else:
+        logger.debug("Adding variant {0} to database".format(
+            variant.get("variant_id")
+        ))
         variant['observations'] = 1
         variant_mongo_id = db.variant.insert_one(variant).inserted_id
     
@@ -72,7 +94,6 @@ def delete_variant(db, variant):
             db (MongoClient): A connection to the mongodb
             variant (dict): A variant dictionary            
     """
-    
     mongo_variant = get_variant(db, variant)
     if mongo_variant:
         if mongo_variant['observations'] == 1:
@@ -91,5 +112,18 @@ def delete_variant(db, variant):
                         'observations': -1
                     }
                 }, upsert=False)
+            if variant.get('homozygote'):
+                logger.debug("Decreasing hom calls for {0}".format(
+                    mongo_variant.get('variant_id')
+                    ))
+        
+                db.variant.update({
+                    '_id': mongo_variant['_id']
+                    },{
+                        '$inc': {
+                            'homozygote': -1
+                        }
+                    }, upsert=False)
+            
             
     return

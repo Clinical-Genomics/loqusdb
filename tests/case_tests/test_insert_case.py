@@ -1,6 +1,7 @@
 import pytest
 from mongomock import MongoClient
 from loqusdb.utils import add_case
+from loqusdb.exceptions import CaseError
 
 def test_insert_one_case():
     """Test to insert one case"""
@@ -31,5 +32,5 @@ def test_insert_one_case_twice():
     }
     add_case(db, case)
     
-    with pytest.raises(Exception):
+    with pytest.raises(CaseError):
         add_case(db, case)

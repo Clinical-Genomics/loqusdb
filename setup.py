@@ -30,14 +30,11 @@ setup(name='loqusdb',
     ],
     packages=find_packages(exclude=('tests*', 'docs', 'examples')),
     
-    entry_points= {
-        "console_scripts" : [
-        "loqusdb = loqusdb.commands.run_loqusdb:cli",
+    entry_points=dict(
+        console_scripts=[
+        "loqusdb = loqusdb.__main__:base_command",
         ],
-        "loqusdb.subcommands": [
-            "load = loqusdb.commands:load_command",
-        ]
-    },
+    ),
     keywords = ['vcf', 'variants'],
     classifiers = [
         "Programming Language :: Python",

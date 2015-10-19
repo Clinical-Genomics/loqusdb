@@ -37,7 +37,7 @@ def cli(logfile, verbose):
     """Tool for manipulating a local variant frequency database
     
     """
-    loglevel = LEVELS.get(min(verbose,2), "WARNING")
+    loglevel = LEVELS.get(min(verbose,1), "WARNING")
     init_log(
         logger = logger, 
         filename = logfile, 

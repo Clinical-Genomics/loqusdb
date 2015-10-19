@@ -1,4 +1,5 @@
 import logging
+from loqusdb.exceptions import CaseError
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,8 @@ def get_case(db, case):
         Returns:
             mongo_case (dict): A mongo case dictionary
     """
+    logger.debug("Getting case {0} from database".format(
+        case.get('case_id')))
     case_id = case['case_id']
     return db.case.find_one({'case_id': case_id})
 
@@ -33,7 +36,7 @@ def add_case(db, case):
         case.get('case_id')
     ))
     if get_case(db, case):
-        raise Exception("Case {0} already exists in database."\
+        raise CaseError("Case {0} already exists in database."\
         " Can not add case twice.".format(
             case.get('case_id')
         ))
@@ -53,10 +56,14 @@ def delete_case(db, case):
         
     """
     mongo_case = get_case(db, case)
+    
     if mongo_case:
         logger.info("Removing case {0} from database".format(
             mongo_case.get('case_id')
         ))
         db.case.remove({'_id': mongo_case['_id']})
-    
+    else:
+        logger.warning("Tryed to delete case {0} but could not find case".format(
+            case.get('case_id')
+        ))
     return
