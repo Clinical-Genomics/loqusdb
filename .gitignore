@@ -1,0 +1,16 @@
+/data
+/res
+/doc
+/dist
+/build
+/pickles
+*.pyc
+*__pycache__*
+.DS_Store
+*.egg-info
+*.tmproj
+*.ipynb
+*.tmp
+*.temp
+*.bak
+notes.mdsite/

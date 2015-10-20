@@ -2,6 +2,34 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+def add_bulk(db, list_of_variants):
+    """Insert a bulk of variants
+        
+        Args:
+            db (MongoClient): A connection to the mongodb
+            list_of_variants : A list of variants
+        
+    """
+    bulk = db.variant.initialize_ordered_bulk_op()
+    for variant in list_of_variants:
+        if variant:
+            bulk.find({'_id': variant['_id']}).upsert().update(
+                {
+                    '$inc': {
+                        'homozygote': variant.get('homozygote', 0),
+                        'observations': 1
+                    }
+                 }
+            )
+    message = bulk.execute()
+    logger.debug("Number of variants inserted: {0}".format(
+        message.get('nInserted')
+    ))
+    logger.debug("Number of variants upserted: {0}".format(
+        message.get('nUpserted')
+    ))
+    return
+
 def add_variant(db, variant):
     """Add a variant to the variant collection
         

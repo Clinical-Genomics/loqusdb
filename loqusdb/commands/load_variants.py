@@ -3,6 +3,8 @@ import os
 import logging
 import click
 
+from datetime import datetime
+
 from loqusdb.utils import (get_db, add_variant, add_case, get_family)
 from loqusdb.exceptions import CaseError
 from loqusdb.vcf_tools import get_formatted_variant
@@ -81,6 +83,10 @@ def load(ctx, variant_file, family_file, family_type):
     header = []
     nr_of_variants = 0
     nr_of_inserted = 0
+    
+    start_inserting = datetime.now()
+    start_ten_thousand = datetime.now()
+    
     for line in variant_file:
         line = line.rstrip()
         if line.startswith('#'):
@@ -103,8 +109,12 @@ def load(ctx, variant_file, family_file, family_type):
                 )
             if nr_of_variants % 10000 == 0:
                 logger.info("{0} of variants processed".format(nr_of_variants))
+                logger.info("Time to insert last 10000: {0}".format(
+                    datetime.now()-start_ten_thousand))
+                start_ten_thousand = datetime.now()
     
     logger.info("Nr of variants in vcf: {0}".format(nr_of_variants))
     logger.info("Nr of variants inserted: {0}".format(nr_of_inserted))
+    logger.info("Time to insert variants: {0}".format(datetime.now() - start_inserting))
     
     
