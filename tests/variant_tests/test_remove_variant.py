@@ -8,7 +8,7 @@ def test_remove_one_variant():
     db = client['loqusdb']
     
     variant = {
-        'variant_id': 'test',
+        '_id': 'test',
         'observations': 1
     }
     
@@ -25,7 +25,7 @@ def test_downcount_one_variant():
     db = client['loqusdb']
     
     variant = {
-        'variant_id': 'test',
+        '_id': 'test',
         'observations': 2
     }
     
@@ -45,7 +45,7 @@ def test_remove_non_existing():
     db = client['loqusdb']
     
     variant = {
-        'variant_id': 'test',
+        '_id': 'test',
         'observations': 1
     }
     

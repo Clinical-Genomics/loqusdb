@@ -88,30 +88,33 @@ def load(ctx, variant_file, family_file, family_type):
                 header = line[1:].split()
         else:
             nr_of_variants += 1
-            variant = get_variant_dict(
-                variant_line = line, 
-                header_line = header
-            )
+            variant_id = get_variant_id(variant_line=line)
+            
+            splitted_variant_line = line.rstrip().split('\t')
+            
             found_variant = False
             found_homozygote = False
             
-            for ind_id in affected_individuals:
-                gt_call = dict(zip(
-                    variant['FORMAT'].split(':'),
-                    variant[ind_id].split(':'))
-                )
-                genotype = Genotype(**gt_call)
-                if genotype.has_variant:
-                    logger.debug("Found variant in affected")
-                    found_variant = True
-                if genotype.homo_alt:
-                    logger.debug("Found homozygote alternative variant in affected")
-                    found_homozygote = True
+            format_field = splitted_variant_line[8].split(':')
+            
+            for index, ind_id in enumerate(header):
+                if ind_id in affected_individuals:
+                    gt_call = dict(zip(
+                        format_field,
+                        splitted_variant_line[index].split(':'))
+                    )
+                    genotype = Genotype(**gt_call)
+                    if genotype.has_variant:
+                        logger.debug("Found variant in affected")
+                        found_variant = True
+                    if genotype.homo_alt:
+                        logger.debug("Found homozygote alternative variant in affected")
+                        found_homozygote = True
             
             if found_variant:
                 nr_of_inserted += 1
                 mongo_variant = {
-                    'variant_id': get_variant_id(variant),
+                    'variant_id': get_variant_id(variant_line=line),
                     'homozygote': 0
                 }
                 if found_homozygote:
@@ -121,6 +124,9 @@ def load(ctx, variant_file, family_file, family_type):
                     db=db,
                     variant=mongo_variant
                 )
+            if nr_of_variants % 10000 == 0:
+                logger.info("{0} of variants processed")
+    
     logger.info("Nr of variants in vcf: {0}".format(nr_of_variants))
     logger.info("Nr of variants inserted: {0}".format(nr_of_inserted))
     
