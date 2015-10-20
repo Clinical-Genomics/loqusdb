@@ -3,11 +3,9 @@ import os
 import logging
 import click
 
-from vcftoolbox import (get_variant_dict, get_info_dict, Genotype, 
-get_variant_id)
-
 from loqusdb.utils import (get_db, add_variant, add_case, get_family)
 from loqusdb.exceptions import CaseError
+from loqusdb.vcf_tools import get_formatted_variant
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +56,9 @@ def load(ctx, variant_file, family_file, family_type):
         logger.info("Exiting")
         sys.exit(1)
 
-    analysis_individual = list(affected_individuals)[0]
+    logger.info("Found affected individuals in ped file: {0}".format(
+        ', '.join(affected_individuals)
+    ))
     
     db = get_db(
         host=ctx.parent.host, 
@@ -88,44 +88,21 @@ def load(ctx, variant_file, family_file, family_type):
                 header = line[1:].split()
         else:
             nr_of_variants += 1
-            variant_id = get_variant_id(variant_line=line)
             
-            splitted_variant_line = line.rstrip().split('\t')
+            formatted_variant = get_formatted_variant(
+                variant_line = line,
+                header_line = header,
+                affected_individuals = affected_individuals
+            )
             
-            found_variant = False
-            found_homozygote = False
-            
-            format_field = splitted_variant_line[8].split(':')
-            
-            for index, ind_id in enumerate(header):
-                if ind_id in affected_individuals:
-                    gt_call = dict(zip(
-                        format_field,
-                        splitted_variant_line[index].split(':'))
-                    )
-                    genotype = Genotype(**gt_call)
-                    if genotype.has_variant:
-                        logger.debug("Found variant in affected")
-                        found_variant = True
-                    if genotype.homo_alt:
-                        logger.debug("Found homozygote alternative variant in affected")
-                        found_homozygote = True
-            
-            if found_variant:
+            if formatted_variant:
                 nr_of_inserted += 1
-                mongo_variant = {
-                    'variant_id': get_variant_id(variant_line=line),
-                    'homozygote': 0
-                }
-                if found_homozygote:
-                    mongo_variant['homozygote'] = 1
-                
                 add_variant(
                     db=db,
-                    variant=mongo_variant
+                    variant=formatted_variant
                 )
             if nr_of_variants % 10000 == 0:
-                logger.info("{0} of variants processed")
+                logger.info("{0} of variants processed".format(nr_of_variants))
     
     logger.info("Nr of variants in vcf: {0}".format(nr_of_variants))
     logger.info("Nr of variants inserted: {0}".format(nr_of_inserted))
