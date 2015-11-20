@@ -1,0 +1,4 @@
+#FamilyID	SampleID	Father	Mother	Sex	Phenotype
+recessive_trio	proband	father	mother	1	2
+recessive_trio	mother	0	0	2	1
+recessive_trio	father	0	0	1	1

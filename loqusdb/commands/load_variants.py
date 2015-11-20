@@ -5,7 +5,7 @@ import click
 
 from datetime import datetime
 
-from loqusdb.utils import (get_db, add_variant, add_case, get_family)
+from loqusdb.utils import (get_db, add_variant, add_case, get_family, add_bulk)
 from loqusdb.exceptions import CaseError
 from loqusdb.vcf_tools import get_formatted_variant
 
@@ -27,8 +27,12 @@ logger = logging.getLogger(__name__)
                 default='ped',
                 help='If the analysis use one of the known setups, please specify which one.'
 )
+@click.option('-b' ,'--bulk_insert', 
+                is_flag=True, 
+                help='Insert bulks of variants for better performance'
+)
 @click.pass_context
-def load(ctx, variant_file, family_file, family_type):
+def load(ctx, variant_file, family_file, family_type, bulk_insert):
     """Load the variant frequency database
         
         The loading is based on if the variant is seen in a ny affected individual
@@ -87,6 +91,7 @@ def load(ctx, variant_file, family_file, family_type):
     start_inserting = datetime.now()
     start_ten_thousand = datetime.now()
     
+    variants = []
     for line in variant_file:
         line = line.rstrip()
         if line.startswith('#'):
@@ -103,15 +108,26 @@ def load(ctx, variant_file, family_file, family_type):
             
             if formatted_variant:
                 nr_of_inserted += 1
-                add_variant(
-                    db=db,
-                    variant=formatted_variant
-                )
+                if bulk_insert:
+                    variants.append(formatted_variant)
+                else:
+                    add_variant(
+                        db=db,
+                        variant=formatted_variant
+                    )
+            
             if nr_of_variants % 10000 == 0:
                 logger.info("{0} of variants processed".format(nr_of_variants))
                 logger.info("Time to insert last 10000: {0}".format(
                     datetime.now()-start_ten_thousand))
                 start_ten_thousand = datetime.now()
+                
+            if nr_of_variants % 100000 == 0:
+                if bulk_insert:
+                    add_bulk(db, variants)
+    
+    if bulk_insert:
+        add_bulk(db, variants)
     
     logger.info("Nr of variants in vcf: {0}".format(nr_of_variants))
     logger.info("Nr of variants inserted: {0}".format(nr_of_inserted))
