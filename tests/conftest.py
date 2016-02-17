@@ -30,7 +30,7 @@ def mongo_adapter(request, mongo_client):
 
 @pytest.fixture(scope='function')
 def simplest_variant(request):
-    """Return a mongo adapter"""
+    """Return a simple variant"""
     variant = {
         '_id': 'test',
     }
@@ -38,9 +38,18 @@ def simplest_variant(request):
 
 @pytest.fixture(scope='function')
 def homozygous_variant(request):
-    """Return a mongo adapter"""
+    """Return a homozygous variant"""
     variant = {
         '_id': 'test',
         'homozygote': 1,
     }
     return variant
+
+@pytest.fixture(scope='function')
+def simple_case(request):
+    """Return a simple case"""
+    case = {
+        'case_id': 'test',
+        'vcf_path': './test.vcf'
+    }
+    return case
