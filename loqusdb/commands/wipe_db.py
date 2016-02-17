@@ -2,8 +2,6 @@ import sys
 import logging
 import click
 
-from ped_parser import FamilyParser
-
 from loqusdb.utils import (get_db, delete_case, delete_variant, get_family)
 
 logger = logging.getLogger(__name__)

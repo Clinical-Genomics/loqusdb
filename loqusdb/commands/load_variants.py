@@ -5,6 +5,8 @@ import click
 
 from datetime import datetime
 
+from vcftoolbox import get_vcf_handle
+
 from loqusdb.utils import (get_db, add_variant, add_case, get_family, add_bulk)
 from loqusdb.exceptions import CaseError
 from loqusdb.vcf_tools import get_formatted_variant
@@ -14,7 +16,7 @@ logger = logging.getLogger(__name__)
 @click.command()
 @click.argument('variant_file',
                     nargs=1,
-                    type=click.File('rb'),
+                    type=click.Path(),
                     metavar='<vcf_file> or -'
 )
 @click.option('-f', '--family_file',
@@ -82,6 +84,18 @@ def load(ctx, variant_file, family_file, family_type, bulk_insert):
     except CaseError as e:
         logger.error(e.message)
         sys.exit(1)
+    
+    if variant_file == '-':
+        logger.info("Start parsing variants from stdin")
+        variant_file = get_vcf_handle(
+            fsock=sys.stdin, 
+        )
+    else:
+        logger.info("Start parsing variants from stdin")
+        variant_file = get_vcf_handle(
+            infile=variant_file, 
+        )
+    
     
     #This is the header line with mandatory vcf fields
     header = []

@@ -1,0 +1,11 @@
+#
+# Add packages here to install them using:
+#   pip install -r requirements.txt
+#
+
+click
+ped_parser
+pymongo
+pytest
+mongomock
+vcftoolbox
