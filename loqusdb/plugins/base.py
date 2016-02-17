@@ -9,3 +9,6 @@ class Base(object):
         """Establish a connection to databse"""
         raise NotImplementedError
     
+    def wipe_db(self):
+        """Wipe the databsae"""
+        raise NotImplementedError

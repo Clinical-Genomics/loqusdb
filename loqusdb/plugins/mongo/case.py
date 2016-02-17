@@ -63,7 +63,7 @@ class CaseMixin(BaseCaseMixin):
             ))
             self.db.case.remove({'_id': mongo_case['_id']})
         else:
-            logger.warning("Tryed to delete case {0} but could not find case".format(
+            raise CaseError("Tried to delete case {0} but could not find case".format(
                 case.get('case_id')
             ))
         return

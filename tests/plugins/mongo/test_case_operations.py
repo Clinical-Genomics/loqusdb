@@ -24,9 +24,8 @@ class TestDeleteCase:
     def test_delete_non_existing(self, mongo_adapter, simple_case):
         """Test to delete non exsting case"""
         
-        mongo_adapter.delete_case(simple_case)
-        
-        assert True
+        with pytest.raises(CaseError):
+            mongo_adapter.delete_case(simple_case)
 
 class TestInsertCase:
     

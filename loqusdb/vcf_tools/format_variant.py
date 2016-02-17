@@ -8,7 +8,7 @@ def get_variant_id(chrom, pos, ref, alt):
     """docstring for get_variant_id"""
     return '_'.join([chrom, pos, ref, alt])
 
-def get_formatted_variant(variant_line=None, variant_dict=None, header_line = None,
+def get_formated_variant(variant_line=None, variant_dict=None, header_line = None,
                         affected_individuals = None):
     """Return a formatted variant line
     

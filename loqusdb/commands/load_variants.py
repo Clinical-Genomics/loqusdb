@@ -1,4 +1,3 @@
-import sys
 import os
 import logging
 import click
@@ -7,13 +6,15 @@ from datetime import datetime
 
 from vcftoolbox import get_vcf_handle
 
-from loqusdb.utils import (get_db, add_variant, add_case, get_family, add_bulk)
 from loqusdb.exceptions import CaseError
-from loqusdb.vcf_tools import get_formatted_variant
+from loqusdb.vcf_tools import get_formated_variant
+from loqusdb.utils import get_family
+
+from . import base_command
 
 logger = logging.getLogger(__name__)
 
-@click.command()
+@base_command.command()
 @click.argument('variant_file',
                     nargs=1,
                     type=click.Path(),
@@ -42,18 +43,16 @@ def load(ctx, variant_file, family_file, family_type, bulk_insert):
     """
     if not family_file:
         logger.error("Please provide a family file")
-        logger.info("Exiting")
-        sys.exit()
+        ctx.abort()
     
     try:
         family = get_family(
-            family_file = family_file, 
+            family_lines = family_file, 
             family_type = family_type
         )
-    except SyntaxError:
-        logger.info("Exiting")
-        sys.exit(1)
-        
+    except SyntaxError as err:
+        logger.warning(err.message)
+        ctx.abort()
     
     family_id = family.family_id
     
@@ -61,29 +60,24 @@ def load(ctx, variant_file, family_file, family_type, bulk_insert):
     
     if not affected_individuals:
         logger.error("No affected individuals could be found in ped file")
-        logger.info("Exiting")
-        sys.exit(1)
+        ctx.abort()
 
     logger.info("Found affected individuals in ped file: {0}".format(
         ', '.join(affected_individuals)
     ))
     
-    db = get_db(
-        host=ctx.parent.host, 
-        port=ctx.parent.port, 
-        database=ctx.parent.db
-    )
+    adapter = ctx.obj['adapter']
     
     case = {
         'case_id': family_id,
-        'vcf_path': os.path.abspath(variant_file.name)
+        'vcf_path': os.path.abspath(variant_file)
     }
     
     try:
-        add_case(db, case)
+        adapter.add_case(case)
     except CaseError as e:
         logger.error(e.message)
-        sys.exit(1)
+        ctx.abort()
     
     if variant_file == '-':
         logger.info("Start parsing variants from stdin")
@@ -114,21 +108,18 @@ def load(ctx, variant_file, family_file, family_type, bulk_insert):
         else:
             nr_of_variants += 1
             
-            formatted_variant = get_formatted_variant(
+            formated_variant = get_formated_variant(
                 variant_line = line,
                 header_line = header,
                 affected_individuals = affected_individuals
             )
             
-            if formatted_variant:
+            if formated_variant:
                 nr_of_inserted += 1
                 if bulk_insert:
-                    variants.append(formatted_variant)
+                    variants.append(formated_variant)
                 else:
-                    add_variant(
-                        db=db,
-                        variant=formatted_variant
-                    )
+                    adapter.add_variant(variant=formated_variant)
             
             if nr_of_variants % 10000 == 0:
                 logger.info("{0} of variants processed".format(nr_of_variants))
@@ -138,10 +129,11 @@ def load(ctx, variant_file, family_file, family_type, bulk_insert):
                 
             if nr_of_variants % 100000 == 0:
                 if bulk_insert:
-                    add_bulk(db, variants)
+                    adapter.add_bulk(variants)
+                    variants = []
     
     if bulk_insert:
-        add_bulk(db, variants)
+        adapter.add_bulk(variants)
     
     logger.info("Nr of variants in vcf: {0}".format(nr_of_variants))
     logger.info("Nr of variants inserted: {0}".format(nr_of_inserted))

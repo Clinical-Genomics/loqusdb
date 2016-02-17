@@ -12,6 +12,8 @@ class MongoAdapter(VariantMixin, CaseMixin, Base):
     def __init__(self, debug=False):
         super(MongoAdapter, self).__init__()
         self.db = None
+        self.client = None
+        self.db_name = None
     
     def connect(self, host='localhost', port=27017, database='loqusdb', client=None):
         """Connect to a mongo database
@@ -28,5 +30,13 @@ class MongoAdapter(VariantMixin, CaseMixin, Base):
         if not client:
             client = MongoClient(host, port)
         
+        self.client = client
+        self.db_name = database
         self.db = client[database]
     
+    def wipe_db(self):
+        """Wipe the whole database"""
+        logger.warning("Wiping the whole database")
+        self.client.drop_database(self.db_name)
+        logger.debug("Database wiped")
+        

@@ -2,10 +2,10 @@ import click
 
 from loqusdb.log import LEVELS, init_log
 from loqusdb import logger, __version__
-from . import load_command, delete_command, wipe_command
+from loqusdb.plugins import MongoAdapter
 
 @click.group()
-@click.option('-db', '--mongo_db',
+@click.option('-db', '--database',
                 default='loqusdb',
 )
 @click.option('-u', '--username',
@@ -22,6 +22,11 @@ from . import load_command, delete_command, wipe_command
                 default='localhost',
                 help='Specify the host where to look for the mongo database.'
 )
+@click.option('-b', '--backend',
+                default='mongo',
+                type=click.Choice(['mongo', 'sql']),
+                help='Specify what backend to use.'
+)
 @click.option('-l', '--logfile',
                     type=click.Path(exists=False),
                     help=u"Path to log file. If none logging is "\
@@ -30,7 +35,7 @@ from . import load_command, delete_command, wipe_command
 @click.option('-v', '--verbose', count=True, default=1)
 @click.version_option(__version__)
 @click.pass_context
-def cli(ctx, mongo_db, username, password, port, host, verbose, logfile):
+def cli(ctx, database, username, password, port, host, verbose, logfile, backend):
     """loqusdb: manage a local variant count database."""
     # configure root logger to print to STDERR
     loglevel = LEVELS.get(min(verbose,1), "INFO")
@@ -40,13 +45,17 @@ def cli(ctx, mongo_db, username, password, port, host, verbose, logfile):
         loglevel = loglevel
     )
     
-    ctx.db = mongo_db
-    ctx.user = username
-    ctx.password = password
-    ctx.port = port
-    ctx.host = host
-
-
-cli.add_command(load_command)
-cli.add_command(delete_command)
-cli.add_command(wipe_command)
+    adapter = MongoAdapter()
+    adapter.connect(
+        host=host, 
+        port=port, 
+        database=database, 
+    )
+    
+    ctx.obj = {}
+    ctx.obj['db'] = database
+    ctx.obj['user'] = username
+    ctx.obj['password'] = password
+    ctx.obj['port'] = port
+    ctx.obj['host'] = host
+    ctx.obj['adapter'] = adapter
