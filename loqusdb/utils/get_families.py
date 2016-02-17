@@ -4,11 +4,11 @@ from ped_parser import FamilyParser
 
 logger = logging.getLogger(__name__)
 
-def get_family(family_file, family_type):
+def get_family(family_lines, family_type):
     """Return the families found in  a family file
     
         Args:
-            family_file (iterator): The family lines
+            family_lines (iterator): The family lines
             family_type (str): The format of the family lines
         
         Returns:
@@ -16,7 +16,7 @@ def get_family(family_file, family_type):
     """
     family = None
     logger.info("Parsing family information")
-    family_parser = FamilyParser(family_file, family_type)
+    family_parser = FamilyParser(family_lines, family_type)
     
     families = list(family_parser.families.keys())
     
@@ -27,6 +27,7 @@ def get_family(family_file, family_type):
         logger.info("Please update ped file")
         ##TODO raise proper exception here
         raise SyntaxError
+    
     family = family_parser.families[families[0]]
     
     return family
