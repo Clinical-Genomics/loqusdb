@@ -53,3 +53,15 @@ def simple_case(request):
         'vcf_path': './test.vcf'
     }
     return case
+
+@pytest.fixture(scope='function')
+def vcf_path(request):
+    """Return the path to a test vcf"""
+    file_path = 'tests/fixtures/test.vcf'
+    return file_path
+
+@pytest.fixture(scope='function')
+def ped_path(request):
+    """Return the path to a test vcf"""
+    file_path = 'tests/fixtures/recessive_trio.ped'
+    return file_path
