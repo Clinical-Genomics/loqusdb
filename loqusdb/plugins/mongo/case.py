@@ -36,7 +36,7 @@ class CaseMixin(BaseCaseMixin):
         logger.debug("Checking if case {0} exists in database".format(
             case.get('case_id')
         ))
-        if case(case):
+        if self.case(case):
             raise CaseError("Case {0} already exists in database."\
             " Can not add case twice.".format(
                 case.get('case_id')
@@ -55,7 +55,7 @@ class CaseMixin(BaseCaseMixin):
                 case (dict): A case dictionary
         
         """
-        mongo_case = get_case(case)
+        mongo_case = self.case(case)
     
         if mongo_case:
             logger.info("Removing case {0} from database".format(

@@ -2,6 +2,7 @@ import logging
 
 from loqusdb.plugins import BaseVariantMixin
 
+logger = logging.getLogger(__name__)
 
 class VariantMixin(BaseVariantMixin):
     
