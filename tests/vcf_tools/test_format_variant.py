@@ -1,4 +1,4 @@
-from loqusdb.vcf_tools import get_formatted_variant
+from loqusdb.vcf_tools import get_formated_variant
 import pytest
 
 def get_variant(chrom='1', pos='10', rs_id='.', ref='A', alt='T', qual='100', 
@@ -31,7 +31,7 @@ def test_format_variant():
     header_line = get_header_line()
     
     affected_individuals = set(['proband'])
-    formatted_variant = get_formatted_variant(
+    formatted_variant = get_formated_variant(
         variant_line = variant_line,
         header_line = header_line,
         affected_individuals = affected_individuals
@@ -46,7 +46,7 @@ def test_format_homozygote_variant():
     header_line = get_header_line()
     
     affected_individuals = set(['proband'])
-    formatted_variant = get_formatted_variant(
+    formatted_variant = get_formated_variant(
         variant_line = variant_line,
         header_line = header_line,
         affected_individuals = affected_individuals
@@ -63,7 +63,7 @@ def test_format_variant_no_header():
     affected_individuals = set(['proband'])
     
     with pytest.raises(Exception):
-        formatted_variant = get_formatted_variant(
+        formatted_variant = get_formated_variant(
             variant_line = variant_line,
             header_line = header_line,
             affected_individuals = affected_individuals
@@ -75,7 +75,7 @@ def test_format_variant_no_call():
     header_line = get_header_line()
     
     affected_individuals = set(['proband'])
-    formatted_variant = get_formatted_variant(
+    formatted_variant = get_formated_variant(
         variant_line = variant_line,
         header_line = header_line,
         affected_individuals = affected_individuals
