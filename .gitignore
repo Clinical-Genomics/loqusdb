@@ -63,8 +63,9 @@ docs/_build
 # Node.js
 node_modules/
 
-# otto
-.otto
 
 # mkdocs
 site/
+
+# Local Files
+NOTES.md

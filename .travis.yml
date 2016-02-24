@@ -1,0 +1,17 @@
+# config file for automatic testing at travis-ci.org
+language: python
+
+python:
+    - "2.7"
+
+install:
+    # install dependencies
+    - pip install pytest
+    - pip install .
+
+script:
+    # command to run tests and collect test coverage
+    - py.test tests/
+
+notifications:
+    email: false

@@ -45,11 +45,17 @@ def cli(ctx, database, username, password, port, host, verbose, logfile, backend
         loglevel = loglevel
     )
     
+    # mongo uri looks like:
+    #mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database][?options]]
+    uri = None
+    if username and password:
+        uri = "mongodb://{0}:{1}@{2}:{3}/{4}".format(username, password, host, port, database)
     adapter = MongoAdapter()
     adapter.connect(
         host=host, 
         port=port, 
-        database=database, 
+        database=database,
+        uri=uri
     )
     
     ctx.obj = {}

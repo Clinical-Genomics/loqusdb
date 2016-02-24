@@ -15,7 +15,8 @@ class MongoAdapter(VariantMixin, CaseMixin, Base):
         self.client = None
         self.db_name = None
     
-    def connect(self, host='localhost', port=27017, database='loqusdb', client=None):
+    def connect(self, host='localhost', port=27017, uri=None, database='loqusdb', client=None,
+                uri=None):
         """Connect to a mongo database
         
         Args:
@@ -28,7 +29,11 @@ class MongoAdapter(VariantMixin, CaseMixin, Base):
             host, port, database
         ))
         if not client:
-            client = MongoClient(host, port)
+            if uri:
+                logger.info("Connecting with uri {0}".format(uri))
+                client=MongoClient(uri)
+            else:
+                client = MongoClient(host, port)
         
         self.client = client
         self.db_name = database
