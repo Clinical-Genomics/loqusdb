@@ -10,16 +10,16 @@ def mongo_client(request):
     client = MongoClient()
     return client
 
-@pytest.fixture(scope='function')
-def real_mongo_client(request):
-    """Return a mongo client"""
-    client = RealMongoClient()
-    
-    def teardown():
-        client.drop_database('test')
-    
-    request.addfinalizer(teardown)
-    return client
+# @pytest.fixture(scope='function')
+# def real_mongo_client(request):
+#     """Return a mongo client"""
+#     client = RealMongoClient()
+#
+#     def teardown():
+#         client.drop_database('test')
+#
+#     request.addfinalizer(teardown)
+#     return client
 
 @pytest.fixture(scope='function')
 def mongo_adapter(request, mongo_client):

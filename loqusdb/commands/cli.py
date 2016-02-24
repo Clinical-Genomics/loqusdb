@@ -7,6 +7,7 @@ from loqusdb.plugins import MongoAdapter
 @click.group()
 @click.option('-db', '--database',
                 default='loqusdb',
+                show_default=True,
 )
 @click.option('-u', '--username',
                 type=str
@@ -16,16 +17,24 @@ from loqusdb.plugins import MongoAdapter
 )
 @click.option('-port', '--port',
                 default=27017,
+                show_default=True,
                 help='Specify the port where to look for the mongo database.'
 )
 @click.option('-h', '--host',
                 default='localhost',
+                show_default=True,
                 help='Specify the host where to look for the mongo database.'
 )
 @click.option('-b', '--backend',
                 default='mongo',
-                type=click.Choice(['mongo', 'sql']),
+                show_default=True,
+                type=click.Choice(['mongo',]),
                 help='Specify what backend to use.'
+)
+@click.option('-c', '--conn_host',
+                default='mongodb://',
+                show_default=True,
+                help='Used for testing.'
 )
 @click.option('-l', '--logfile',
                     type=click.Path(exists=False),
@@ -35,7 +44,8 @@ from loqusdb.plugins import MongoAdapter
 @click.option('-v', '--verbose', count=True, default=1)
 @click.version_option(__version__)
 @click.pass_context
-def cli(ctx, database, username, password, port, host, verbose, logfile, backend):
+def cli(ctx, conn_host, database, username, password, port, host, verbose, 
+        logfile, backend):
     """loqusdb: manage a local variant count database."""
     # configure root logger to print to STDERR
     loglevel = LEVELS.get(min(verbose,1), "INFO")
@@ -49,7 +59,9 @@ def cli(ctx, database, username, password, port, host, verbose, logfile, backend
     #mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database][?options]]
     uri = None
     if username and password:
-        uri = "mongodb://{0}:{1}@{2}:{3}/{4}".format(username, password, host, port, database)
+        uri = "{0}{1}:{2}@{3}:{4}/{5}".format(
+              conn_host, username, password, host, port, database
+              )
     adapter = MongoAdapter()
     adapter.connect(
         host=host, 
