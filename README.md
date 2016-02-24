@@ -6,6 +6,18 @@ Right now **locusdb** uses [mongodb][mongodb] as backend for
 storing variants but there should not be a huge difference to use another
 database manager.
 
+## Installation ##
+
+`pip install loqusdb`
+
+or
+
+```
+$git clone https://github.com/moonso/loqusdb
+$cd loqusdb
+$pip install --editable .
+```
+
 ## Idea ##
 
 We want to keep track of the variants that have been seen in affected individuals.
@@ -26,6 +38,33 @@ When the variants are added:
 
 ## Command Line Interface ##
 
+```
+$ loqusdb
+Usage: loqusdb [OPTIONS] COMMAND [ARGS]...
+
+  loqusdb: manage a local variant count database.
+
+Options:
+  -db, --database TEXT   [default: loqusdb]
+  -u, --username TEXT
+  -p, --password TEXT
+  -port, --port INTEGER  Specify the port where to look for the mongo
+                         database.  [default: 27017]
+  -h, --host TEXT        Specify the host where to look for the mongo
+                         database.  [default: localhost]
+  -b, --backend [mongo]  Specify what backend to use.  [default: mongo]
+  -c, --conn_host TEXT   Used for testing.  [default: mongodb://]
+  -l, --logfile PATH     Path to log file. If none logging is printed to
+                         stderr.
+  -v, --verbose
+  --version              Show the version and exit.
+  --help                 Show this message and exit.
+
+Commands:
+  delete  Delete the variants of a case
+  load    Load the variants of a case The loading is...
+  wipe    Wipe the entire db
+```
 
 
 

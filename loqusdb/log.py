@@ -36,9 +36,8 @@ def init_log(logger, filename=None, loglevel=None):
         logger.addHandler(file_handler)
     # If no logfile is provided we print all log messages that the user has
     # defined to stderr
-    else:
-        if loglevel:
-            console.setLevel(getattr(logging, loglevel))
+    if loglevel:
+        console.setLevel(getattr(logging, loglevel))
 
     logger.addHandler(console)
 
