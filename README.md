@@ -1,8 +1,8 @@
-# locusdb #
+# loqusdb [![Build Status][travis-image]][travis-url] 
 
 Small tool to setup a local variant database.
 
-Right now **locusdb** uses [mongodb](https://www.mongodb.org) as backend for 
+Right now **locusdb** uses [mongodb][mongodb] as backend for 
 storing variants but there should not be a huge difference to use another
 database manager.
 
@@ -28,3 +28,8 @@ When the variants are added:
 
 
 
+
+
+[travis-url]: https://travis-ci.org/moonso/loqusdb?branch=master
+[travis-image]: https://img.shields.io/travis/moonso/loqusdb/master.svg?style=flat-square
+[mongodb]: https://www.mongodb.org

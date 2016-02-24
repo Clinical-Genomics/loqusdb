@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 )
 @click.pass_context
 def load(ctx, variant_file, family_file, family_type, bulk_insert):
-    """Load the variant frequency database
+    """Load the variants of a case
         
         The loading is based on if the variant is seen in a ny affected individual
         in the family.

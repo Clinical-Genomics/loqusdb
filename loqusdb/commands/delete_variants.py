@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 )
 @click.pass_context
 def delete(ctx, variant_file, family_file, family_type, family_id):
-    """Delete the variants of a case from the frequency database.
+    """Delete the variants of a case
     
     """
     if not family_file or family_id:
