@@ -7,11 +7,11 @@ python:
 install:
     # install dependencies
     - pip install pytest
-    - pip install .
+    - pip install --editable .
 
 script:
     # command to run tests and collect test coverage
-    - py.test tests/
+    - py.test -v tests/
 
 notifications:
     email: false
