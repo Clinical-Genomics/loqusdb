@@ -46,7 +46,7 @@ except (IOError, ImportError, RuntimeError):
 #     long_description = file.read()
 
 setup(name='loqusdb',
-    version='0.1',
+    version='0.1.1',
     description='Store frequencies of vcf variants in a mongodb',
     author = 'Mans Magnusson',
     author_email = 'mans.magnusson@scilifelab.se',
