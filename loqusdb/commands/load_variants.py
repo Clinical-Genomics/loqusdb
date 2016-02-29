@@ -63,8 +63,7 @@ def load(ctx, variant_file, family_file, family_type, bulk_insert):
     adapter = ctx.obj['adapter']
     try:
         load_variants(adapter, family.family_id, family.affected_individuals,
-                      variant_file, bulk_insert=bulk_insert,
-                      family_type=family_type)
+                      variant_file, bulk_insert=bulk_insert)
     except CaseError as error:
         logger.error(error.message)
         ctx.abort()

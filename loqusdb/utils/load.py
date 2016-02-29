@@ -11,8 +11,16 @@ logger = logging.getLogger(__name__)
 
 
 def load_variants(adapter, family_id, affected_individuals, variant_file,
-                  bulk_insert=False, family_type='ped'):
-    """Load variants for a family into the database."""
+                  bulk_insert=False):
+    """Load variants for a family into the database.
+
+    Args:
+        adapter (loqusdb.plugins.MongoAdapter): initialized plugin
+        family_id (str): unique family identifier
+        affected_inidividuals (List[str]): list to match individuals
+        variant_file (path): path to VCF or '-' for STDIN
+        bulk_insert (bool): whether to insert in bulk or one-by-one
+    """
     case = {'case_id': family_id, 'vcf_path': variant_file}
     adapter.add_case(case)
 
