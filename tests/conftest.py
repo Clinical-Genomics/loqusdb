@@ -1,8 +1,14 @@
+import logging
 import pytest
 from mongomock import MongoClient
 from pymongo import MongoClient as RealMongoClient
 
 from loqusdb.plugins import MongoAdapter
+from loqusdb.log import init_log
+
+logger = logging.getLogger('.')
+
+init_log(logger, loglevel='DEBUG')
 
 @pytest.fixture(scope='function')
 def mongo_client(request):

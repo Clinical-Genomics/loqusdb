@@ -62,6 +62,8 @@ def cli(ctx, conn_host, database, username, password, port, host, verbose,
         uri = "{0}{1}:{2}@{3}:{4}/{5}".format(
               conn_host, username, password, host, port, database
               )
+        logger.info('uri={0}'.format(uri))
+    
     adapter = MongoAdapter()
     adapter.connect(
         host=host, 
