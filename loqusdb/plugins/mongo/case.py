@@ -22,6 +22,15 @@ class CaseMixin(BaseCaseMixin):
             case.get('case_id')))
         case_id = case['case_id']
         return self.db.case.find_one({'case_id': case_id})
+
+    def cases(self):
+        """Get all cases from the database
+    
+            Returns:
+                cases (Iterable(Case)): A iterable with mongo cases
+        """
+        logger.debug("Getting all casess from database")
+        return self.db.case.find()
     
     def add_case(self, case):
         """Add a case to the case collection
@@ -68,3 +77,13 @@ class CaseMixin(BaseCaseMixin):
             ))
         return
     
+    def case_count(self):
+        """Retursn the total number of cases in the database
+        
+        returns:
+            nr_of_cases (int): Total number of cases in database
+        """
+        nr_of_cases = 0
+        for case in self.cases:
+            nr_of_cases += 1
+        return nr_of_cases

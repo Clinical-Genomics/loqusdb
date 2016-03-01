@@ -39,6 +39,11 @@ class MongoAdapter(VariantMixin, CaseMixin, Base):
         self.db_name = database
         self.db = client[database]
     
+    def init_app(self, app):
+        """Initialize via flask app"""
+        uri = app.config.get('LOQUSDB_URI')
+        self.connect(uri=uri)
+    
     def wipe_db(self):
         """Wipe the whole database"""
         logger.warning("Wiping the whole database")
