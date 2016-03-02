@@ -1,35 +1,26 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 import logging
-import sys
-
-from vcftoolbox import get_vcf_handle
 
 from loqusdb.vcf_tools import get_formated_variant
 
 logger = logging.getLogger(__name__)
 
 
-def load_variants(adapter, family_id, affected_individuals, variant_file,
-                  bulk_insert=False):
+def load_variants(adapter, family_id, affected_individuals, variant_stream,
+                  bulk_insert=False, vcf_path=None):
     """Load variants for a family into the database.
 
     Args:
         adapter (loqusdb.plugins.MongoAdapter): initialized plugin
         family_id (str): unique family identifier
         affected_inidividuals (List[str]): list to match individuals
-        variant_file (path): path to VCF or '-' for STDIN
+        variant_stream (sequence): stream of VCF lines
         bulk_insert (bool): whether to insert in bulk or one-by-one
+        vcf_path (path): for storing in database
     """
-    case = {'case_id': family_id, 'vcf_path': variant_file}
+    case = {'case_id': family_id, 'vcf_path': vcf_path}
     adapter.add_case(case)
-
-    if variant_file == '-':
-        logger.info("Parsing variants from stdin")
-        variant_file = get_vcf_handle(fsock=sys.stdin)
-    else:
-        logger.info("Start parsing variants from stdin")
-        variant_file = get_vcf_handle(infile=variant_file)
 
     # This is the header line with mandatory vcf fields
     header = []
@@ -40,7 +31,7 @@ def load_variants(adapter, family_id, affected_individuals, variant_file,
     start_ten_thousand = datetime.now()
 
     variants = []
-    for line in variant_file:
+    for line in variant_stream:
         line = line.rstrip()
         if line.startswith('#'):
             if not line.startswith('##'):

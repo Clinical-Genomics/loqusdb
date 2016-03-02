@@ -1,6 +1,7 @@
 import os
 import logging
 import click
+import sys
 
 from vcftoolbox import get_vcf_handle
 
@@ -45,8 +46,13 @@ def load(ctx, variant_file, family_file, family_type, bulk_insert):
         logger.error("Please provide a family file")
         ctx.abort()
 
-    if variant_file != '-':
-        variant_file = os.path.abspath(variant_file)
+    if variant_file == '-':
+        logger.info("Parsing variants from stdin")
+        variant_file = get_vcf_handle(fsock=sys.stdin)
+    else:
+        logger.info("Start parsing variants from stdin")
+        variant_path = os.path.abspath(variant_file)
+        variant_file = get_vcf_handle(infile=variant_file)
 
     try:
         family = get_family(family_lines=family_file, family_type=family_type)
@@ -63,7 +69,8 @@ def load(ctx, variant_file, family_file, family_type, bulk_insert):
     adapter = ctx.obj['adapter']
     try:
         load_variants(adapter, family.family_id, family.affected_individuals,
-                      variant_file, bulk_insert=bulk_insert)
+                      variant_file, bulk_insert=bulk_insert,
+                      vcf_path=variant_path)
     except CaseError as error:
         logger.error(error.message)
         ctx.abort()
