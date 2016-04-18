@@ -21,10 +21,10 @@ $pip install --editable .
 ## Idea ##
 
 We want to keep track of the variants that have been seen in affected individuals.
-This is not a tool for solving the problem with frequencies.
+This is **NOT** a tool to create a true frequency database.
 It will basically count the number if times we have seen a variant in affected individuals.
 Since we have a fairly large number of affected individuals we will be able to use this tool to ignore variants that have been seen many times.
-We will also keep track of the variants that have been seen in a homozygous state in affected individuals. 
+We will also keep track of the variants that have been seen in a homozygous state in affected individuals.
 
 Variants are stored by providing a vcf file and a family file or a family id.
 
@@ -64,9 +64,8 @@ Commands:
   delete  Delete the variants of a case
   load    Load the variants of a case The loading is...
   wipe    Wipe the entire db
+  export  Export the variants in a database
 ```
-
-
 
 
 [travis-url]: https://travis-ci.org/moonso/loqusdb?branch=master
