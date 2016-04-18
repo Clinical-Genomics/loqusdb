@@ -48,6 +48,14 @@ class VariantMixin(BaseVariantMixin):
         """
         return self.db.variant.find_one({'_id': variant.get('_id')})
 
+    def get_variants(self):
+        """Return all variants in the database
+    
+            Returns:
+                variants (Iterable(Variant))
+        """
+        return self.db.variant.find()
+
     def delete_variant(self, variant):
         """Remove variant from database
             

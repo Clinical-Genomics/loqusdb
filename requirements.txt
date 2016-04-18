@@ -8,4 +8,4 @@ ped_parser
 pymongo>=3.0
 pytest
 mongomock
-vcftoolbox
+vcftoolbox==1.5
