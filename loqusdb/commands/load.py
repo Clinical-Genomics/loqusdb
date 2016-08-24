@@ -12,11 +12,11 @@ logger = logging.getLogger(__name__)
 
 @base_command.command()
 @click.argument('variant_file',
-                    type=click.Path(),
+                    type=click.Path(exists=True),
                     metavar='<vcf_file>'
 )
 @click.option('-f', '--family_file',
-                    type=click.File('r'),
+                    type=click.Path(exists=True),
                     metavar='<ped_file>'
 )
 @click.option('-t' ,'--family_type', 

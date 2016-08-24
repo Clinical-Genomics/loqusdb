@@ -15,13 +15,11 @@ logger = logging.getLogger(__name__)
 
 @base_command.command()
 @click.argument('variant_file',
-                    nargs=1,
                     type=click.Path(exists=True),
-                    metavar='<vcf_file> or -'
+                    metavar='<vcf_file>'
 )
 @click.option('-f', '--family_file',
-                    nargs=1, 
-                    type=click.File('r'),
+                    type=click.Path(exists=True),
                     metavar='<ped_file>'
 )
 @click.option('-t' ,'--family_type', 
@@ -30,7 +28,6 @@ logger = logging.getLogger(__name__)
                 help='If the analysis use one of the known setups, please specify which one.'
 )
 @click.option('-i', '--family_id',
-                    nargs=1, 
                     type=str,
                     help='The id for the case to add'
 )
@@ -41,26 +38,12 @@ def delete(ctx, variant_file, family_file, family_type, family_id):
         logger.error("Please provide a family file or a case id")
         logger.info("Exiting")
         ctx.abort()
-
-    family = get_family(
-        family_lines=family_file,
-        family_type=family_type
-    )
-
-    family_id = family.family_id
-    affected_individuals = family.affected_individuals
+    
     adapter = ctx.obj['adapter']
-
-    if variant_file == '-':
-        logger.info("Start parsing variants from stdin")
-        variant_stream = get_vcf_handle(fsock=sys.stdin)
-    else:
-        logger.info("Start parsing variants from stdin")
-        variant_stream = get_vcf_handle(infile=variant_file)
 
     start_deleting = datetime.now()
     try:
-        count = delete_variants(adapter, variant_stream, family_id,
+        delete = delete_variants(adapter, variant_stream, family_id,
                                 affected_individuals)
     except CaseError as error:
         logger.warning(error.message)

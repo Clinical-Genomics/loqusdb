@@ -4,21 +4,20 @@ from vcftoolbox import (Genotype)
 
 logger = logging.getLogger(__name__)
 
-
 def get_formated_variant(variant, individuals, family_id, gq_treshold=20):
-    """Return a formatted variant line
+    """Return a formated variant line
     
-        Take a vcf formatted variant line and return a dictionary with the
+        Take a vcf formated variant line and return a dictionary with the
         relevant information.
         
         Args:
-            variant (cyvcf2.Variant): A vcf formatted variant line
+            variant (cyvcf2.Variant): A vcf formated variant line
             individuals (list[str]): A list with individual ids
         
         Return:
-            formatted_variant (dict): A variant dictionary
+            formated_variant (dict): A variant dictionary
     """
-    formatted_variant = {}
+    formated_variant = {}
     splitted_line = str(variant).rstrip().split('\t')
 
     chrom = variant.CHROM.rstrip('chr')
@@ -52,18 +51,18 @@ def get_formated_variant(variant, individuals, family_id, gq_treshold=20):
                 found_homozygote = True
 
     if found_variant:
-        formatted_variant['_id'] = '_'.join([chrom, str(pos), ref, alt])
-        formatted_variant['chrom'] = chrom
-        formatted_variant['pos'] = pos
-        formatted_variant['ref'] = ref
-        formatted_variant['alt'] = alt
+        formated_variant['_id'] = '_'.join([chrom, str(pos), ref, alt])
+        formated_variant['chrom'] = chrom
+        formated_variant['pos'] = pos
+        formated_variant['ref'] = ref
+        formated_variant['alt'] = alt
 
         if found_homozygote:
-            formatted_variant['homozygote'] = 1
+            formated_variant['homozygote'] = 1
         else:
-            formatted_variant['homozygote'] = 0
+            formated_variant['homozygote'] = 0
         
         if family_id:
-            formatted_variant['family_id'] = family_id
+            formated_variant['family_id'] = family_id
     
-    return formatted_variant
+    return formated_variant

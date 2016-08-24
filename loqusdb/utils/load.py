@@ -2,9 +2,7 @@
 from datetime import datetime
 import logging
 
-from cyvcf2 import VCF
-
-from loqusdb.vcf_tools import (get_formated_variant)
+from loqusdb.vcf_tools import (get_formated_variant, get_vcf)
 from loqusdb.utils import (get_family)
 from loqusdb.exceptions import CaseError
 
@@ -13,7 +11,7 @@ logger = logging.getLogger(__name__)
 def load_database(adapter, variant_file, family_file, family_type='ped', bulk_insert=False):
     """Load the database with a case and its variants"""
 
-    vcf = VCF(variant_file)
+    vcf = get_vcf(variant_file)
     
     with open(family_file, 'r') as family_lines:
         family = get_family(
