@@ -55,8 +55,6 @@ def load_variants(adapter, family_id, individuals, vcf, bulk_insert=False):
         vcf (cyvcf2.VCF): A cyvcf2 vcf object
         bulk_insert (bool): whether to insert in bulk or one-by-one
     """
-    # This is the header line with mandatory vcf fields
-    header = []
     nr_of_variants = 0
     nr_of_inserted = 0
 
@@ -66,7 +64,6 @@ def load_variants(adapter, family_id, individuals, vcf, bulk_insert=False):
     variants = []
     # Loop over the variants in the vcf
     for variant in vcf:
-        line = line.rstrip()
         nr_of_variants += 1
         #Creates a variant that is ready to insert into the database
         formated_variant = get_formated_variant(
@@ -111,5 +108,5 @@ def load_family(adapter, case_id, vcf_path):
             case_id (str)
             vcf_path (str)
     """
-    case = {'case_id': family_id, 'vcf_path': vcf_path}
+    case = {'case_id': case_id, 'vcf_path': vcf_path}
     adapter.add_case(case)
