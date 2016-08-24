@@ -1,13 +1,9 @@
 import os
 import logging
 import click
-import sys
-
-from cyvcf2 import VCF
 
 from loqusdb.exceptions import CaseError
-from loqusdb.vcf_tools import get_formated_variant
-from loqusdb.utils import (get_family, load_variants)
+from loqusdb.utils import load_database
 
 from . import base_command
 
@@ -40,53 +36,22 @@ def load(ctx, variant_file, family_file, family_type, bulk_insert):
     in the family.
     """
     if not family_file:
-        logger.error("Please provide a family file")
+        logger.warning("Please provide a family file")
         ctx.abort()
 
-    logger.info("Start parsing variants from: {0}".format(variant_file))
     variant_path = os.path.abspath(variant_file)
-    vcf = VCF(variant_file)
-        
-    try:
-        family = get_family(
-            family_lines=family_file, 
-            family_type=family_type
-        )
-    except SyntaxError as error:
-        logger.warning(error.message)
-        ctx.abort()
-
-    if not family.affected_individuals:
-        logger.warning("No affected individuals could be found in ped file")
-    
-    logger.info("Found affected individuals in ped file: {0}"
-                .format(', '.join(family.affected_individuals)))
-    
-    logger.debug("Check if individuals from ped file exists in vcf...")
-    if not set(vcf.samples).intersection(set(family.individuals)):
-        logger.warning("Individuals in ped file does not exist in variant file")
-        ctx.abort()
 
     adapter = ctx.obj['adapter']
     
     try:
-        load_case(
+        load_database(
             adapter=adapter,
-            case=family
+            variant_file=variant_path,
+            family_file=family_file,
+            family_type=family_type,
+            bulk_insert=bulk_insert
         )
-    except CaseError as error:
-        logger.error(error.message)
+    except SyntaxError, CaseError as error:
+        logger.warning(error.message)
         ctx.abort()
-
-    try:
-        load_variants(  
-            adapter=adapter, 
-            family_id=family.family_id, 
-            individuals=family.individuals,
-            vcf=vcf, 
-            bulk_insert=bulk_insert,
-            vcf_path=variant_path
-        )
-    except CaseError as error:
-        logger.error(error.message)
-        ctx.abort()
+        

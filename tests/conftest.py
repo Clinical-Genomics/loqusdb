@@ -99,7 +99,27 @@ def variant_line(chrom='1', pos='10', rs_id='.', ref='A', alt='T',
     variant_line += '\n'
     
     return variant_line
-    
+
+@pytest.fixture(scope='function')
+def case(request):
+    """Return ped formated case lines"""
+    case_lines = [
+        "#FamilyID\tSampleID\tFather\tMother\tSex\tPhenotype\n",
+        "recessive_trio\tproband\tfather\tmother\t1\t2\n",
+        "recessive_trio\tmother\t0\t0\t2\t1\n",
+        "recessive_trio\tfather\t0\t0\t1\t1\n"
+    ]
+    return case_lines
+
+@pytest.fixture(scope='function')
+def two_cases(request):
+    """Return ped formated case lines"""
+    case_lines = [
+        "#FamilyID\tSampleID\tFather\tMother\tSex\tPhenotype\n",
+        "1\tproband\t0\t0\t1\t2\n",
+        "2\tproband\t0\t0\t2\t1\n",
+    ]
+    return case_lines
 
 @pytest.fixture(scope='function')
 def cyvcf2_het_variant(request):

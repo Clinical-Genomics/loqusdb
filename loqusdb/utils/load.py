@@ -1,11 +1,49 @@
 # -*- coding: utf-8 -*-
-import sys
 from datetime import datetime
 import logging
 
-from loqusdb.vcf_tools import (get_formated_variant, get_variant)
+from cyvcf2 import VCF
+
+from loqusdb.vcf_tools import (get_formated_variant)
+from loqusdb.utils import (get_family)
 
 logger = logging.getLogger(__name__)
+
+def load_database(adapter, variant_file, family_file, family_type='ped', bulk_insert=False):
+    """Load the database with a case and its variants"""
+    
+    vcf = VCF(variant_file)
+        
+    family = get_family(
+        family_lines=family_file, 
+        family_type=family_type
+    )
+
+    if not family.affected_individuals:
+        logger.warning("No affected individuals could be found in ped file")
+    
+    logger.info("Found affected individuals in ped file: {0}"
+                .format(', '.join(family.affected_individuals)))
+    
+    logger.debug("Check if individuals from ped file exists in vcf...")
+    if not set(vcf.samples).intersection(set(family.individuals)):
+        logger.warning("Individuals in ped file does not exist in variant file")
+        ctx.abort()
+
+    load_family(
+        adapter=adapter,
+        case=family
+    )
+
+    load_variants(  
+        adapter=adapter, 
+        family_id=family.family_id, 
+        individuals=family.individuals,
+        vcf=vcf, 
+        bulk_insert=bulk_insert,
+        vcf_path=variant_path
+    )
+    
 
 def load_variants(adapter, family_id, individuals, vcf, bulk_insert=False):
     """Load variants for a family into the database.
@@ -62,3 +100,16 @@ def load_variants(adapter, family_id, individuals, vcf, bulk_insert=False):
     logger.info("Nr of variants inserted: {0}".format(nr_of_inserted))
     logger.info("Time to insert variants: {0}".format(datetime.now() -
                                                       start_inserting))
+
+def load_family(adapter, case_id, vcf_path):
+    """Load a case to the database
+    
+        The adapter will check if the case already exists before loading.
+    
+        Args:
+            adapter (loqusdb.plugins.Adapter): initialized plugin
+            case_id (str)
+            vcf_path (str)
+    """
+    case = {'case_id': family_id, 'vcf_path': vcf_path}
+    adapter.add_case(case)

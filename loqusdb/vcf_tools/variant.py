@@ -1,6 +1,6 @@
 import logging
 
-from vcftoolbox import (get_variant_dict, get_variant_id, Genotype)
+from vcftoolbox import (Genotype)
 
 logger = logging.getLogger(__name__)
 
