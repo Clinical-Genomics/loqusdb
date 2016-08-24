@@ -1,0 +1,4 @@
+#FamilyID	SampleID	Father	Mother	Sex	Phenotype
+funny_trio	funny	sunny	bunny	1	2
+funny_trio	bunny	0	0	2	1
+funny_trio	sunny	0	0	1	1

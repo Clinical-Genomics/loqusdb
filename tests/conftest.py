@@ -36,7 +36,6 @@ def mongo_adapter(request, mongo_client):
 
 @pytest.fixture(scope='function')
 def simplest_variant(request):
-    """Return a simple variant"""
     variant = {
         '_id': 'test',
     }
@@ -44,7 +43,6 @@ def simplest_variant(request):
 
 @pytest.fixture(scope='function')
 def homozygous_variant(request):
-    """Return a homozygous variant"""
     variant = {
         '_id': 'test',
         'homozygote': 1,
@@ -53,7 +51,6 @@ def homozygous_variant(request):
 
 @pytest.fixture(scope='function')
 def simple_case(request):
-    """Return a simple case"""
     case = {
         'case_id': 'test',
         'vcf_path': './test.vcf'
@@ -62,14 +59,17 @@ def simple_case(request):
 
 @pytest.fixture(scope='function')
 def vcf_path(request):
-    """Return the path to a test vcf"""
     file_path = 'tests/fixtures/test.vcf'
     return file_path
 
 @pytest.fixture(scope='function')
 def ped_path(request):
-    """Return the path to a test vcf"""
     file_path = 'tests/fixtures/recessive_trio.ped'
+    return file_path
+
+@pytest.fixture(scope='function')
+def funny_ped_path(request):
+    file_path = 'tests/fixtures/funny_trio.ped'
     return file_path
 
 class Cyvcf2Variant(object):

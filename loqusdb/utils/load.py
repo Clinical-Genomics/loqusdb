@@ -6,18 +6,22 @@ from cyvcf2 import VCF
 
 from loqusdb.vcf_tools import (get_formated_variant)
 from loqusdb.utils import (get_family)
+from loqusdb.exceptions import CaseError
 
 logger = logging.getLogger(__name__)
 
 def load_database(adapter, variant_file, family_file, family_type='ped', bulk_insert=False):
     """Load the database with a case and its variants"""
-    
+
     vcf = VCF(variant_file)
-        
-    family = get_family(
-        family_lines=family_file, 
-        family_type=family_type
-    )
+    
+    with open(family_file, 'r') as family_lines:
+        family = get_family(
+            family_lines=family_lines, 
+            family_type=family_type
+        )
+
+    family_id = family.family_id
 
     if not family.affected_individuals:
         logger.warning("No affected individuals could be found in ped file")
@@ -27,21 +31,20 @@ def load_database(adapter, variant_file, family_file, family_type='ped', bulk_in
     
     logger.debug("Check if individuals from ped file exists in vcf...")
     if not set(vcf.samples).intersection(set(family.individuals)):
-        logger.warning("Individuals in ped file does not exist in variant file")
-        ctx.abort()
+        raise CaseError("Individuals in ped file does not exist in variant file")
 
     load_family(
         adapter=adapter,
-        case=family
+        case_id=family_id,
+        vcf_path=variant_file
     )
 
     load_variants(  
         adapter=adapter, 
-        family_id=family.family_id, 
+        family_id=family_id, 
         individuals=family.individuals,
         vcf=vcf, 
         bulk_insert=bulk_insert,
-        vcf_path=variant_path
     )
     
 
