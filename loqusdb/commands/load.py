@@ -51,7 +51,7 @@ def load(ctx, variant_file, family_file, family_type, bulk_insert):
             family_type=family_type,
             bulk_insert=bulk_insert
         )
-    except SyntaxError, CaseError as error:
+    except (SyntaxError, CaseError, IOError) as error:
         logger.warning(error.message)
         ctx.abort()
         
