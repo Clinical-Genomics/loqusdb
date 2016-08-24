@@ -68,6 +68,34 @@ Commands:
 ```
 
 
+## Database ##
+
+### Mongo ###
+
+The collections looks like:
+
+**Case**
+
+```python
+{
+    'case_id': 'case_id',
+    'vcf_path': 'path_to_vcf'
+}
+```
+
+**Variant**
+
+```python
+{
+    '_id': 'variant_id',
+    'chrom': 'CHROM',
+    'pos': postition,
+    'homozygote': number_of_homozygotes,
+    'observations': number_of_observations,
+    'case_ids': ['case_id']
+}
+```
+
 [travis-url]: https://travis-ci.org/moonso/loqusdb?branch=master
 [travis-image]: https://img.shields.io/travis/moonso/loqusdb/master.svg?style=flat-square
 [mongodb]: https://www.mongodb.org

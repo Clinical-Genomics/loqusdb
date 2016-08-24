@@ -1,1 +1,1 @@
-from .format_variant import get_formated_variant
+from .variant import (get_formated_variant)

@@ -1,27 +1,22 @@
 # -*- coding: utf-8 -*-
+import sys
 from datetime import datetime
 import logging
 
-from loqusdb.vcf_tools import get_formated_variant
+from loqusdb.vcf_tools import (get_formated_variant, get_variant)
 
 logger = logging.getLogger(__name__)
 
-
-def load_variants(adapter, family_id, affected_individuals, variant_stream,
-                  bulk_insert=False, vcf_path=None):
+def load_variants(adapter, family_id, individuals, vcf, bulk_insert=False):
     """Load variants for a family into the database.
 
     Args:
-        adapter (loqusdb.plugins.MongoAdapter): initialized plugin
+        adapter (loqusdb.plugins.Adapter): initialized plugin
         family_id (str): unique family identifier
-        affected_inidividuals (List[str]): list to match individuals
-        variant_stream (sequence): stream of VCF lines
+        inidividuals (List[str]): list to match individuals
+        vcf (cyvcf2.VCF): A cyvcf2 vcf object
         bulk_insert (bool): whether to insert in bulk or one-by-one
-        vcf_path (path): for storing in database
     """
-    case = {'case_id': family_id, 'vcf_path': vcf_path}
-    adapter.add_case(case)
-
     # This is the header line with mandatory vcf fields
     header = []
     nr_of_variants = 0
@@ -31,24 +26,23 @@ def load_variants(adapter, family_id, affected_individuals, variant_stream,
     start_ten_thousand = datetime.now()
 
     variants = []
-    for line in variant_stream:
+    # Loop over the variants in the vcf
+    for variant in vcf:
         line = line.rstrip()
-        if line.startswith('#'):
-            if not line.startswith('##'):
-                header = line[1:].split()
-        else:
-            nr_of_variants += 1
-
-            formated_variant = get_formated_variant(
-                variant_line=line, header_line=header,
-                affected_individuals=affected_individuals)
-
-            if formated_variant:
-                nr_of_inserted += 1
-                if bulk_insert:
-                    variants.append(formated_variant)
-                else:
-                    adapter.add_variant(variant=formated_variant)
+        nr_of_variants += 1
+        #Creates a variant that is ready to insert into the database
+        formated_variant = get_formated_variant(
+                        variant=variant,
+                        individuals=individuals,
+                        family_id=family_id
+                    )
+            
+        if formated_variant:
+            nr_of_inserted += 1
+            if bulk_insert:
+                variants.append(formated_variant)
+            else:
+                adapter.add_variant(variant=formated_variant)
 
             if nr_of_variants % 10000 == 0:
                 logger.info("{0} of variants processed".format(nr_of_variants))

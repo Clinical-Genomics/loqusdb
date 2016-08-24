@@ -24,6 +24,12 @@ class VariantMixin(BaseVariantMixin):
                 '$inc': {
                     'homozygote': variant.get('homozygote', 0),
                     'observations': 1
+                },
+                '$push': {
+                    'families': {
+                        '$each': [variant.get('family_id')],
+                        '$slice': 20
+                    }
                 }
              }, 
              upsert=True
@@ -116,5 +122,3 @@ class VariantMixin(BaseVariantMixin):
             message.get('nUpserted')
         ))
         return
-    
-    

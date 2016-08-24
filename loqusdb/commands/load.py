@@ -3,12 +3,11 @@ import logging
 import click
 import sys
 
-from vcftoolbox import get_vcf_handle
+from cyvcf2 import VCF
 
 from loqusdb.exceptions import CaseError
 from loqusdb.vcf_tools import get_formated_variant
-from loqusdb.utils import get_family
-from loqusdb.utils import load_variants
+from loqusdb.utils import (get_family, load_variants)
 
 from . import base_command
 
@@ -17,12 +16,10 @@ logger = logging.getLogger(__name__)
 
 @base_command.command()
 @click.argument('variant_file',
-                    nargs=1,
                     type=click.Path(),
-                    metavar='<vcf_file> or -'
+                    metavar='<vcf_file>'
 )
 @click.option('-f', '--family_file',
-                    nargs=1, 
                     type=click.File('r'),
                     metavar='<ped_file>'
 )
@@ -46,31 +43,50 @@ def load(ctx, variant_file, family_file, family_type, bulk_insert):
         logger.error("Please provide a family file")
         ctx.abort()
 
-    if variant_file == '-':
-        logger.info("Parsing variants from stdin")
-        variant_file = get_vcf_handle(fsock=sys.stdin)
-    else:
-        logger.info("Start parsing variants from stdin")
-        variant_path = os.path.abspath(variant_file)
-        variant_file = get_vcf_handle(infile=variant_file)
-
+    logger.info("Start parsing variants from: {0}".format(variant_file))
+    variant_path = os.path.abspath(variant_file)
+    vcf = VCF(variant_file)
+        
     try:
-        family = get_family(family_lines=family_file, family_type=family_type)
+        family = get_family(
+            family_lines=family_file, 
+            family_type=family_type
+        )
     except SyntaxError as error:
         logger.warning(error.message)
         ctx.abort()
 
     if not family.affected_individuals:
-        logger.error("No affected individuals could be found in ped file")
-        ctx.abort()
+        logger.warning("No affected individuals could be found in ped file")
+    
     logger.info("Found affected individuals in ped file: {0}"
                 .format(', '.join(family.affected_individuals)))
+    
+    logger.debug("Check if individuals from ped file exists in vcf...")
+    if not set(vcf.samples).intersection(set(family.individuals)):
+        logger.warning("Individuals in ped file does not exist in variant file")
+        ctx.abort()
 
     adapter = ctx.obj['adapter']
+    
     try:
-        load_variants(adapter, family.family_id, family.affected_individuals,
-                      variant_file, bulk_insert=bulk_insert,
-                      vcf_path=variant_path)
+        load_case(
+            adapter=adapter,
+            case=family
+        )
+    except CaseError as error:
+        logger.error(error.message)
+        ctx.abort()
+
+    try:
+        load_variants(  
+            adapter=adapter, 
+            family_id=family.family_id, 
+            individuals=family.individuals,
+            vcf=vcf, 
+            bulk_insert=bulk_insert,
+            vcf_path=variant_path
+        )
     except CaseError as error:
         logger.error(error.message)
         ctx.abort()

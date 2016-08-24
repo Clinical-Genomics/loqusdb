@@ -31,4 +31,12 @@ class BaseVariantMixin(object):
                 variant (dict): A variant dictionary            
         """
         raise NotImplementedError
+
+    def add_bulk(self, variants):
+        """Add a bulk of variants to the database
+        
+        Args:
+            variants (Iterable(dict)): An iterable with variant dictionaries
+        """
+        raise NotImplementedError
     

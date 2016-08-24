@@ -32,3 +32,17 @@ def get_family(family_lines, family_type):
     
     return family
     
+def load_family(adapter, case_id, vcf_path):
+    """Load a case to the database
+    
+        The adapter will check if the case already exists before loading.
+    
+        Args:
+            adapter (loqusdb.plugins.Adapter): initialized plugin
+            case_id (str)
+            vcf_path (str)
+    """
+    case = {'case_id': family_id, 'vcf_path': vcf_path}
+    adapter.add_case(case)
+    
+    
