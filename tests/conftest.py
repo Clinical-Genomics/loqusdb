@@ -53,6 +53,7 @@ def homozygous_variant(request):
     variant = {
         '_id': 'test',
         'homozygote': 1,
+        'family_id': '1'
     }
     return variant
 

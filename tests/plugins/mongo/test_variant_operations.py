@@ -41,6 +41,7 @@ class TestInsertVariant:
         assert mongo_variant['_id'] == 'test'
         assert mongo_variant['observations'] == 1
         assert mongo_variant.get('homozygote', 0) == 1
+        assert mongo_variant['families'] == ['1']
 
     def test_insert_many(self, mongo_adapter, simplest_variant):
         """Test to insert a homozygote variant"""
@@ -164,18 +165,25 @@ class TestRemoveVariant:
     
         db = mongo_adapter.db
     
-        variant = {
+        insert_variant = {
             '_id': 'test',
+            'families':['1', '2'],
             'observations': 2
         }
     
-        db.variant.insert(variant)
-    
+        db.variant.insert(insert_variant)
+
+        variant = {
+            '_id': 'test',
+            'family_id':'1'
+        }
+        
         mongo_adapter.delete_variant(variant)
     
         mongo_variant = db.variant.find_one()
 
         assert mongo_variant['observations'] == 1
+        assert mongo_variant['families'] == ['2']
     
     def test_remove_non_existing(self, mongo_adapter, simplest_variant):
     
