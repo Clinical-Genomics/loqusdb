@@ -28,9 +28,9 @@ class VariantMixin(BaseVariantMixin):
                 '$push': {
                     'families': {
                         '$each': [variant.get('family_id')],
-                        '$slice': 20
+                        '$slice': -20
+                        }
                     }
-                }
              }, 
              upsert=True
         )
