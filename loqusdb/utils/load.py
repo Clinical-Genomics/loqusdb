@@ -91,7 +91,7 @@ def load_variants(adapter, family_id, individuals, vcf, bulk_insert=False):
                     adapter.add_bulk(variants)
                     variants = []
 
-    if bulk_insert:
+    if bulk_insert and variants:
         adapter.add_bulk(variants)
 
     logger.info("Nr of variants in vcf: {0}".format(nr_of_variants))
