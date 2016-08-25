@@ -1,1 +1,2 @@
-from .format_variant import get_formated_variant
+from .vcf import get_vcf
+from .variant import (get_formated_variant)

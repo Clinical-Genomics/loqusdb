@@ -48,7 +48,7 @@ def cli(ctx, conn_host, database, username, password, port, host, verbose,
         logfile, backend):
     """loqusdb: manage a local variant count database."""
     # configure root logger to print to STDERR
-    loglevel = LEVELS.get(min(verbose,1), "INFO")
+    loglevel = LEVELS.get(max(verbose,1), "INFO")
     init_log(
         logger = logger, 
         filename = logfile, 

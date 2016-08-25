@@ -2,9 +2,11 @@ import logging
 
 from ped_parser import FamilyParser
 
+from loqusdb.exceptions import CaseError
+
 logger = logging.getLogger(__name__)
 
-def get_family(family_lines, family_type):
+def get_family(family_lines, family_type='ped'):
     """Return the families found in  a family file
     
         Args:
@@ -23,12 +25,8 @@ def get_family(family_lines, family_type):
     logger.info("Found families {0}".format(', '.join(families)))
     
     if len(families) > 1:
-        logger.error("Only one family per load can be used")
-        logger.info("Please update ped file")
-        ##TODO raise proper exception here
-        raise SyntaxError
+        raise CaseError("Only one family per load can be used")
     
     family = family_parser.families[families[0]]
     
     return family
-    

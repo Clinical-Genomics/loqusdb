@@ -20,13 +20,12 @@ $pip install --editable .
 
 ## Idea ##
 
-We want to keep track of the variants that have been seen in affected individuals.
+Tool to keep track of what variants that have been seen and in what families they have been observed.
 This is **NOT** a tool to create a true frequency database.
-It will basically count the number if times we have seen a variant in affected individuals.
-Since we have a fairly large number of affected individuals we will be able to use this tool to ignore variants that have been seen many times.
-We will also keep track of the variants that have been seen in a homozygous state in affected individuals.
+It will basically count the number if times we have seen a variant in any individual.
+We will also keep track of the variants that have been seen in a homozygous state.
 
-Variants are stored by providing a vcf file and a family file or a family id.
+Variants are stored by providing a vcf file and a (ped or ped like)family file.
 
 The tool will select one affected individual per family and insert counts for the variants of this individual.
 
@@ -67,6 +66,34 @@ Commands:
   export  Export the variants in a database
 ```
 
+
+## Database ##
+
+### Mongo ###
+
+The collections looks like:
+
+**Case**
+
+```python
+{
+    'case_id': 'case_id',
+    'vcf_path': 'path_to_vcf'
+}
+```
+
+**Variant**
+
+```python
+{
+    '_id': 'variant_id',
+    'chrom': 'CHROM',
+    'pos': postition,
+    'homozygote': number_of_homozygotes,
+    'observations': number_of_observations,
+    'families': ['family_id', ...]
+}
+```
 
 [travis-url]: https://travis-ci.org/moonso/loqusdb?branch=master
 [travis-image]: https://img.shields.io/travis/moonso/loqusdb/master.svg?style=flat-square
