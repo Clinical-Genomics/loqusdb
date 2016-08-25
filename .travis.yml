@@ -4,8 +4,8 @@ language: python
 python:
     - "2.7"
 
-services:
-    - mongodb
+# services:
+#     - mongodb
 
 install:
     # update periodically - saves downloading if version is the same
@@ -23,7 +23,7 @@ install:
     - conda info -a
 
     # create a new conda env
-    - conda create -q -n test-environment --file requirements/conda.txt python=$TRAVIS_PYTHON_VERSION pytest coverage numpy cython
+    - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pytest coverage numpy cython
     - source activate test-environment
     # install dependencies
     - pip install pytest
