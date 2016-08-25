@@ -90,7 +90,10 @@ class VariantMixin(BaseVariantMixin):
                     },{
                         '$inc': {
                             'observations': -1,
-                            'homozygote': -(variant.get('homozygote', 0))
+                            'homozygote': - (variant.get('homozygote', 0))
+                        },
+                        '$pull': {
+                            'families': variant.get('family_id')
                         }
                     }, upsert=False)
         return
