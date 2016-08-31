@@ -17,23 +17,36 @@ class VariantMixin(BaseVariantMixin):
         
         """
         logger.debug("Upserting variant: {0}".format(variant.get('_id')))
-    
-        message = self.db.variant.update(
-            {'_id': variant['_id']},
-            {
-                '$inc': {
-                    'homozygote': variant.get('homozygote', 0),
-                    'observations': 1
-                },
-                '$push': {
-                    'families': {
-                        '$each': [variant.get('family_id')],
-                        '$slice': -20
+        
+        if variant.get('family_id'):
+            message = self.db.variant.update(
+                {'_id': variant['_id']},
+                {
+                    '$inc': {
+                        'homozygote': variant.get('homozygote', 0),
+                        'observations': 1
+                    },
+                    '$push': {
+                        'families': {
+                            '$each': [variant.get('family_id')],
+                            '$slice': -20
+                            }
                         }
+                 }, 
+                 upsert=True
+            )
+        else:
+            message = self.db.variant.update(
+                {'_id': variant['_id']},
+                {
+                    '$inc': {
+                        'homozygote': variant.get('homozygote', 0),
+                        'observations': 1
                     }
-             }, 
-             upsert=True
-        )
+                 }, 
+                 upsert=True
+            )
+            
     
         if message.get('updatedExisting'):
             logger.debug("Variant {0} was updated".format(message.get("upserted")))

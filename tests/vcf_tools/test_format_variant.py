@@ -25,6 +25,16 @@ def test_format_variant_no_gq(cyvcf2_variant_no_gq):
         )
     assert formated_variant == {}
 
+def test_format_variant_no_family_id(cyvcf2_het_variant):
+    formated_variant = get_formated_variant(
+        variant=cyvcf2_het_variant,
+        individuals=[],
+        family_id=None
+        )
+    assert formated_variant
+    assert formated_variant.get('family_id') == None
+
+
 def test_format_homozygote_variant(cyvcf2_hom_variant):
     formated_variant = get_formated_variant(
         variant=cyvcf2_hom_variant,
