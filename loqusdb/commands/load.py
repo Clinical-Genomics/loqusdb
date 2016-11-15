@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 )
 @click.option('-s' ,'--skip_case_id', 
                 is_flag=True, 
-                help='Insert bulks of variants for better performance'
+                help='Do not store which cases that have a variant'
 )
 @click.pass_context
 def load(ctx, variant_file, family_file, family_type, bulk_insert, skip_case_id):
