@@ -46,6 +46,29 @@ def test_load_two_variants(mongo_adapter, cyvcf2_het_variant):
     
     assert mongo_variant['observations'] == 2
 
+def test_load_variants_skip_case_id(mongo_adapter, cyvcf2_het_variant):
+    """docstring for test_load_variants"""
+    db = mongo_adapter.db
+    
+    vcf = []
+    vcf.append(cyvcf2_het_variant)
+    
+    family_id = '1'
+    individuals=['proband']
+    
+    load_variants(
+        adapter=mongo_adapter,
+        family_id=family_id, 
+        individuals=individuals, 
+        vcf=vcf, 
+        bulk_insert=False,
+        skip_case_id=True
+    )
+    
+    mongo_variant = db.variant.find_one()
+    
+    assert mongo_variant.get('families') == None
+
 def test_load_same_variant_different_case(mongo_adapter, cyvcf2_het_variant):
     """docstring for test_load_variants"""
     db = mongo_adapter.db

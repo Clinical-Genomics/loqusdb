@@ -13,6 +13,7 @@ def get_formated_variant(variant, individuals, family_id, gq_treshold=20):
         Args:
             variant (cyvcf2.Variant): A vcf formated variant line
             individuals (list[str]): A list with individual ids
+            family_id (str): The family id
         
         Return:
             formated_variant (dict): A variant dictionary

@@ -17,23 +17,36 @@ class VariantMixin(BaseVariantMixin):
         
         """
         logger.debug("Upserting variant: {0}".format(variant.get('_id')))
-    
-        message = self.db.variant.update(
-            {'_id': variant['_id']},
-            {
-                '$inc': {
-                    'homozygote': variant.get('homozygote', 0),
-                    'observations': 1
-                },
-                '$push': {
-                    'families': {
-                        '$each': [variant.get('family_id')],
-                        '$slice': -20
+        
+        if variant.get('family_id'):
+            message = self.db.variant.update(
+                {'_id': variant['_id']},
+                {
+                    '$inc': {
+                        'homozygote': variant.get('homozygote', 0),
+                        'observations': 1
+                    },
+                    '$push': {
+                        'families': {
+                            '$each': [variant.get('family_id')],
+                            '$slice': -20
+                            }
                         }
+                 }, 
+                 upsert=True
+            )
+        else:
+            message = self.db.variant.update(
+                {'_id': variant['_id']},
+                {
+                    '$inc': {
+                        'homozygote': variant.get('homozygote', 0),
+                        'observations': 1
                     }
-             }, 
-             upsert=True
-        )
+                 }, 
+                 upsert=True
+            )
+            
     
         if message.get('updatedExisting'):
             logger.debug("Variant {0} was updated".format(message.get("upserted")))
@@ -96,32 +109,4 @@ class VariantMixin(BaseVariantMixin):
                             'families': variant.get('family_id')
                         }
                     }, upsert=False)
-        return
-        
-    def add_bulk(self, variants):
-        """Insert a bulk of variants
-        
-            Args:
-                variants(Iterable(dict)) : A iterable with variants
-        
-        """
-        
-        bulk = self.db.variant.initialize_ordered_bulk_op()
-        for variant in variants:
-            if variant:
-                bulk.find({'_id': variant['_id']}).upsert().update(
-                    {
-                        '$inc': {
-                            'homozygote': variant.get('homozygote', 0),
-                            'observations': 1
-                        }
-                     }
-                )
-        message = bulk.execute()
-        logger.debug("Number of variants inserted: {0}".format(
-            message.get('nInserted')
-        ))
-        logger.debug("Number of variants upserted: {0}".format(
-            message.get('nUpserted')
-        ))
         return

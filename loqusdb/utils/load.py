@@ -8,7 +8,8 @@ from loqusdb.exceptions import CaseError
 
 logger = logging.getLogger(__name__)
 
-def load_database(adapter, variant_file, family_file, family_type='ped', bulk_insert=False):
+def load_database(adapter, variant_file, family_file, family_type='ped',
+                  bulk_insert=False, skip_case_id=False):
     """Load the database with a case and its variants"""
 
     vcf = get_vcf(variant_file)
@@ -43,10 +44,12 @@ def load_database(adapter, variant_file, family_file, family_type='ped', bulk_in
         individuals=family.individuals,
         vcf=vcf, 
         bulk_insert=bulk_insert,
+        skip_case_id=skip_case_id
     )
     
 
-def load_variants(adapter, family_id, individuals, vcf, bulk_insert=False):
+def load_variants(adapter, family_id, individuals, vcf, bulk_insert=False, 
+                  skip_case_id=False):
     """Load variants for a family into the database.
 
     Args:
@@ -55,6 +58,8 @@ def load_variants(adapter, family_id, individuals, vcf, bulk_insert=False):
         inidividuals (List[str]): list to match individuals
         vcf (cyvcf2.VCF): A cyvcf2 vcf object
         bulk_insert (bool): whether to insert in bulk or one-by-one
+        skip_case_id (bool): whether to include the case id on variant level 
+                             or not
     """
     nr_of_variants = 0
     nr_of_inserted = 0
@@ -66,11 +71,13 @@ def load_variants(adapter, family_id, individuals, vcf, bulk_insert=False):
     # Loop over the variants in the vcf
     for variant in vcf:
         nr_of_variants += 1
+        if skip_case_id:
+            family_id = None
         #Creates a variant that is ready to insert into the database
         formated_variant = get_formated_variant(
                         variant=variant,
                         individuals=individuals,
-                        family_id=family_id
+                        family_id=family_id,
                     )
             
         if formated_variant:
