@@ -11,7 +11,6 @@ def test_load_database(vcf_path, ped_path, mongo_adapter):
         variant_file=vcf_path, 
         family_file=ped_path, 
         family_type='ped', 
-        bulk_insert=False
     )
     
     mongo_case = db.case.find_one()
@@ -27,6 +26,5 @@ def test_load_database_wrong_ped(vcf_path, funny_ped_path, mongo_adapter):
             variant_file=vcf_path, 
             family_file=funny_ped_path, 
             family_type='ped', 
-            bulk_insert=False
         )
     

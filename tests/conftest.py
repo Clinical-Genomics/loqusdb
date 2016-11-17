@@ -71,6 +71,11 @@ def vcf_path(request):
     return file_path
 
 @pytest.fixture(scope='function')
+def zipped_vcf_path(request):
+    file_path = 'tests/fixtures/test.vcf.gz'
+    return file_path
+
+@pytest.fixture(scope='function')
 def ped_path(request):
     file_path = 'tests/fixtures/recessive_trio.ped'
     return file_path
@@ -80,22 +85,21 @@ def funny_ped_path(request):
     file_path = 'tests/fixtures/funny_trio.ped'
     return file_path
 
-class Cyvcf2Variant(object):
-    """Class to mock cyvcf2 variants"""
-    def __init__(self, variant_line):
-        super(Cyvcf2Variant, self).__init__()
-        self.variant_line = variant_line
-        splitted_line = variant_line.rstrip().split('\t')
-        self.CHROM = splitted_line[0]
-        self.POS = int(splitted_line[1])
-        self.REF = splitted_line[3]
-        self.ALT = [splitted_line[4]]
+def get_variant(variant_line, header):
+    """docstring for get_variant"""
+    return dict(zip(header, variant_line.split('\t')))
+
+def get_header(inds=['proband']):
+    """docstring for header"""
+    header = ['CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 
+              'FORMAT']
+    for ind in inds:
+        header.append(ind)
     
-    def __str__(self):
-        return self.variant_line
+    return header
 
 def variant_line(chrom='1', pos='10', rs_id='.', ref='A', alt='T', 
-    qual='100', filt='INFO', info='.', form='GT:GQ', genotypes=['0/1:60']):
+    qual='100', filt='PASS', info='.', form='GT:GQ', genotypes=['0/1:60']):
     """Return a vcf formated variant line"""
     variant_line = "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}".format(
         chrom, pos, rs_id, ref, alt, qual, filt, info, form
@@ -130,25 +134,36 @@ def two_cases(request):
     return case_lines
 
 @pytest.fixture(scope='function')
-def cyvcf2_het_variant(request):
+def family_variant(request):
+    variant = variant_line(genotypes=['1/1:60','0/1:60','0/1:60',])
+    header = get_header(inds=['proband', 'mother', 'father'])
+    variant_object = get_variant(variant, header)
+    return variant_object
+
+@pytest.fixture(scope='function')
+def het_variant(request):
     variant = variant_line()
-    variant_object = Cyvcf2Variant(variant)
+    header = get_header()
+    variant_object = get_variant(variant, header)
     return variant_object
 
 @pytest.fixture(scope='function')
-def cyvcf2_variant_no_gq(request):
+def variant_no_gq(request):
     variant = variant_line(form='GT', genotypes=['0/1'])
-    variant_object = Cyvcf2Variant(variant)
+    header = get_header()
+    variant_object = get_variant(variant, header)
     return variant_object
 
 @pytest.fixture(scope='function')
-def cyvcf2_hom_variant(request):
+def hom_variant(request):
     variant = variant_line(genotypes=['1/1:60'])
-    variant_object = Cyvcf2Variant(variant)
+    header = get_header()
+    variant_object = get_variant(variant, header)
     return variant_object
 
 @pytest.fixture(scope='function')
-def cyvcf2_variant_no_call(request):
-    variant = variant_line(genotypes=['./.'])
-    variant_object = Cyvcf2Variant(variant)
+def variant_no_call(request):
+    variant = variant_line(genotypes=['./.'], form='GT')
+    header = get_header()
+    variant_object = get_variant(variant, header)
     return variant_object
