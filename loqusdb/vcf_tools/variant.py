@@ -2,6 +2,8 @@ import logging
 
 from vcftoolbox import (Genotype)
 
+from loqusdb.exceptions import CaseError
+
 logger = logging.getLogger(__name__)
 
 def get_formated_variant(variant, individuals, family_id, gq_treshold=20):
@@ -11,38 +13,43 @@ def get_formated_variant(variant, individuals, family_id, gq_treshold=20):
         relevant information.
         
         Args:
-            variant (cyvcf2.Variant): A vcf formated variant line
+            variant (dict): A variant dictionary
             individuals (list[str]): A list with individual ids
             family_id (str): The family id
         
         Return:
             formated_variant (dict): A variant dictionary
     """
+
+    chrom = variant['CHROM'].rstrip('chr')
+    pos = int(variant['POS'])
+    ref = variant['REF']
+    alt = variant['ALT']
+
     formated_variant = {}
-    splitted_line = str(variant).rstrip().split('\t')
-
-    chrom = variant.CHROM.rstrip('chr')
-    pos = variant.POS
-    ref = variant.REF
-    alt = variant.ALT[0]
-
-    if len(splitted_line) > 7:
-        format_field = splitted_line[8].split(':')
 
     if ',' in alt:
         raise Exception("Multi allele calls are not allowed.")
 
+    format_field = variant['FORMAT'].split(':')
+
     found_variant = False
     found_homozygote = False
 
-    for index, raw_gt_call in enumerate(splitted_line[9:]):
+    for ind in individuals:
+        if ind in variant:
+            raw_gt_call = variant[ind]
+        else:
+            raise CaseError("Individual {0} from ped does not exist in vcf".format(ind))
+        
+        
         gt_call = dict(zip(
                 format_field,
                 raw_gt_call.split(':'))
                 )
 
         genotype = Genotype(**gt_call)
-        
+        print(genotype)
         if genotype.genotype_quality >= gq_treshold:
             if genotype.has_variant:
                 logger.debug("Found variant in affected")
