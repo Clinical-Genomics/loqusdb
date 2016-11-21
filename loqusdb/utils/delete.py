@@ -43,7 +43,7 @@ def delete_variants(adapter, vcf, family_id, individuals):
     
         Args:
             adapter (loqusdb.plugins.Adapter)
-            vcf (cyvcf2.VCF)
+            vcf (iterable(dict))
             family_id (str)
         
         Returns:
