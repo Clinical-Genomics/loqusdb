@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
                 show_default=True,
                 help='Do not store which cases that have a variant'
 )
-@click.option('--gq-treshold'
+@click.option('--gq-treshold',
     default=20,
     show_default=True,
     help='Treshold to consider variant'
