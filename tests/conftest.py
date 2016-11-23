@@ -3,6 +3,8 @@ import pytest
 from mongomock import MongoClient
 from pymongo import MongoClient as RealMongoClient
 
+from ped_parser import FamilyParser
+
 from loqusdb.plugins import MongoAdapter
 from loqusdb.log import init_log
 
@@ -89,7 +91,7 @@ def get_variant(variant_line, header):
     """docstring for get_variant"""
     return dict(zip(header, variant_line.split('\t')))
 
-def get_header(inds=['proband']):
+def get_header(inds=['proband', 'mother', 'father']):
     """docstring for header"""
     header = ['CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 
               'FORMAT']
@@ -99,7 +101,8 @@ def get_header(inds=['proband']):
     return header
 
 def variant_line(chrom='1', pos='10', rs_id='.', ref='A', alt='T', 
-    qual='100', filt='PASS', info='.', form='GT:GQ', genotypes=['0/1:60']):
+                 qual='100', filt='PASS', info='.', form='GT:GQ', 
+                 genotypes=['0/1:60','0/1:60','0/0:60']):
     """Return a vcf formated variant line"""
     variant_line = "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}".format(
         chrom, pos, rs_id, ref, alt, qual, filt, info, form
@@ -108,20 +111,47 @@ def variant_line(chrom='1', pos='10', rs_id='.', ref='A', alt='T',
     for gt_call in genotypes:
         variant_line += '\t{0}'.format(gt_call)
     
-    variant_line += '\n'
-    
     return variant_line
 
 @pytest.fixture(scope='function')
-def case(request):
+def case_lines(request, ped_path):
     """Return ped formated case lines"""
-    case_lines = [
-        "#FamilyID\tSampleID\tFather\tMother\tSex\tPhenotype\n",
-        "recessive_trio\tproband\tfather\tmother\t1\t2\n",
-        "recessive_trio\tmother\t0\t0\t2\t1\n",
-        "recessive_trio\tfather\t0\t0\t1\t1\n"
-    ]
-    return case_lines
+    case = []
+    with open(ped_path, 'r') as f:
+        for line in f:
+            case.append(line) 
+    
+    return case
+
+@pytest.fixture(scope='function')
+def case_obj(request, case_lines):
+    """Return a case obj"""
+    family_parser = FamilyParser(case_lines, family_type='ped')
+    
+    families = list(family_parser.families.keys())
+    
+    family = family_parser.families[families[0]]
+
+    return family
+
+@pytest.fixture(scope='function')
+def case_id(request, case_lines):
+    """Return a case obj"""
+    family_parser = FamilyParser(case_lines, family_type='ped')
+    
+    families = list(family_parser.families.keys())
+    
+    family = family_parser.families[families[0]]
+    
+    family_id = family.family_id
+
+    return family_id
+
+@pytest.fixture(scope='function')
+def individuals(request, case_obj):
+    """Return a case obj"""
+    
+    return case_obj.individuals
 
 @pytest.fixture(scope='function')
 def two_cases(request):
@@ -134,9 +164,16 @@ def two_cases(request):
     return case_lines
 
 @pytest.fixture(scope='function')
-def family_variant(request):
-    variant = variant_line(genotypes=['1/1:60','0/1:60','0/1:60',])
-    header = get_header(inds=['proband', 'mother', 'father'])
+def hem_variant(request):
+    variant = variant_line(chrom='X', pos='60000')
+    header = get_header()
+    variant_object = get_variant(variant, header)
+    return variant_object
+
+@pytest.fixture(scope='function')
+def par_variant(request):
+    variant = variant_line(chrom='X', pos='60001')
+    header = get_header()
     variant_object = get_variant(variant, header)
     return variant_object
 
@@ -149,21 +186,21 @@ def het_variant(request):
 
 @pytest.fixture(scope='function')
 def variant_no_gq(request):
-    variant = variant_line(form='GT', genotypes=['0/1'])
+    variant = variant_line(form='GT', genotypes=['0/1','0/1','0/1'])
     header = get_header()
     variant_object = get_variant(variant, header)
     return variant_object
 
 @pytest.fixture(scope='function')
 def hom_variant(request):
-    variant = variant_line(genotypes=['1/1:60'])
+    variant = variant_line(genotypes=['1/1:60','0/1:60','0/1:60'])
     header = get_header()
     variant_object = get_variant(variant, header)
     return variant_object
 
 @pytest.fixture(scope='function')
 def variant_no_call(request):
-    variant = variant_line(genotypes=['./.'], form='GT')
+    variant = variant_line(genotypes=['./.', './.', './.'], form='GT')
     header = get_header()
     variant_object = get_variant(variant, header)
     return variant_object

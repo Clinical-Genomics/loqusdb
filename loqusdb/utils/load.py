@@ -9,7 +9,7 @@ from loqusdb.exceptions import CaseError
 logger = logging.getLogger(__name__)
 
 def load_database(adapter, variant_file, family_file, family_type='ped',
-                  skip_case_id=False):
+                  skip_case_id=False, gq_treshold=None):
     """Load the database with a case and its variants
             
             Args:
@@ -48,11 +48,12 @@ def load_database(adapter, variant_file, family_file, family_type='ped',
         family_id=family_id, 
         individuals=family.individuals,
         vcf=vcf, 
-        skip_case_id=skip_case_id
+        skip_case_id=skip_case_id,
+        gq_treshold=gq_treshold,
     )
     
 
-def load_variants(adapter, family_id, individuals, vcf, skip_case_id=False):
+def load_variants(adapter, family_id, individuals, vcf, skip_case_id=False, gq_treshold=None):
     """Load variants for a family into the database.
 
     Args:
@@ -63,6 +64,7 @@ def load_variants(adapter, family_id, individuals, vcf, skip_case_id=False):
         skip_case_id (bool): whether to include the case id on variant level 
                              or not
     """
+    gq_treshold = gq_treshold or 20
     nr_of_variants = 0
     nr_of_inserted = 0
 
@@ -82,8 +84,11 @@ def load_variants(adapter, family_id, individuals, vcf, skip_case_id=False):
                         variant=variant,
                         individuals=individuals,
                         family_id=family_id,
+                        gq_treshold=gq_treshold,
                     )
-            
+        
+        print(formated_variant)
+        
         if formated_variant:
             nr_of_inserted += 1
             adapter.add_variant(variant=formated_variant)

@@ -3,7 +3,7 @@ import pytest
 from loqusdb.utils import load_database
 from loqusdb.exceptions import CaseError
 
-def test_load_database(vcf_path, ped_path, mongo_adapter):
+def test_load_database(vcf_path, ped_path, mongo_adapter, case_id):
     db = mongo_adapter.db
     
     load_database(
@@ -15,7 +15,7 @@ def test_load_database(vcf_path, ped_path, mongo_adapter):
     
     mongo_case = db.case.find_one()
     
-    assert mongo_case['case_id'] == 'recessive_trio'
+    assert mongo_case['case_id'] == case_id
 
 def test_load_database_wrong_ped(vcf_path, funny_ped_path, mongo_adapter):
     db = mongo_adapter.db
