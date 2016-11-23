@@ -69,7 +69,9 @@ def load_variants(adapter, family_id, individuals, vcf, skip_case_id=False, gq_t
     nr_of_inserted = 0
 
     start_inserting = datetime.now()
-    start_ten_thousand = datetime.now()
+    chrom_time = datetime.now()
+    current_chrom = None
+    new_chrom = None
 
     if skip_case_id:
         family_id = None
@@ -86,19 +88,24 @@ def load_variants(adapter, family_id, individuals, vcf, skip_case_id=False, gq_t
                         family_id=family_id,
                         gq_treshold=gq_treshold,
                     )
-        
-        print(formated_variant)
-        
+
         if formated_variant:
             nr_of_inserted += 1
             adapter.add_variant(variant=formated_variant)
-        
-            if nr_of_variants % 10000 == 0:
-                logger.info("{0} of variants processed".format(nr_of_variants))
-                logger.info("Time to insert last 10000: {0}".format(
-                    datetime.now()-start_ten_thousand))
-                start_ten_thousand = datetime.now()
+            
+            new_chrom = formated_variant.get('chrom')
 
+            if new_chrom != current_chrom:
+                if current_chrom:
+                    logger.info("Chromosome {0} done".format(current_chrom))
+                    logger.info("Time to load chromosome {0}: {1}".format(
+                        current_chrom, datetime.now()-chrom_time))
+                    logger.info("Start parsing chromosome {0}".format(new_chrom))
+                else:
+                    logger.info("Start parsing chromosome {}".format(new_chrom))
+            
+                current_chrom = new_chrom
+                chrom_time = datetime.now()
 
     logger.info("Nr of variants in vcf: {0}".format(nr_of_variants))
     logger.info("Nr of variants inserted: {0}".format(nr_of_inserted))
