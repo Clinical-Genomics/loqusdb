@@ -24,12 +24,13 @@ class VariantMixin(BaseVariantMixin):
                 {
                     '$inc': {
                         'homozygote': variant.get('homozygote', 0),
+                        'hemizygote': variant.get('hemizygote', 0),
                         'observations': 1
                     },
                     '$push': {
                         'families': {
                             '$each': [variant.get('family_id')],
-                            '$slice': -20
+                            '$slice': -50
                             }
                         }
                  }, 
@@ -41,7 +42,8 @@ class VariantMixin(BaseVariantMixin):
                 {
                     '$inc': {
                         'homozygote': variant.get('homozygote', 0),
-                        'observations': 1
+                        'hemizygote': variant.get('hemizygote', 0),
+                        'observations': 1,
                     }
                  }, 
                  upsert=True
@@ -103,7 +105,8 @@ class VariantMixin(BaseVariantMixin):
                     },{
                         '$inc': {
                             'observations': -1,
-                            'homozygote': - (variant.get('homozygote', 0))
+                            'homozygote': - (variant.get('homozygote', 0)),
+                            'hemizygote': - (variant.get('hemizygote', 0)),
                         },
                         '$pull': {
                             'families': variant.get('family_id')

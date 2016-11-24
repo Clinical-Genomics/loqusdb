@@ -9,6 +9,10 @@ class TestDeleteCase:
     
         db = mongo_adapter.db
     
+        mongo_case = db.case.find_one()
+        
+        assert mongo_case == None
+        
         db.case.insert(simple_case)
     
         mongo_case = db.case.find_one()
@@ -72,3 +76,24 @@ class TestGetCase:
         mongo_case = mongo_adapter.case(simple_case)
     
         assert mongo_case == None
+    
+    def test_get_multiple_cases(self, mongo_adapter):
+        """Test to get non existing case"""
+    
+        db = mongo_adapter.db
+        case_1 = {
+            'case_id': 'test',
+            'vcf_path': 'test.vcf'
+        }
+
+        case_2 = {
+            'case_id': 'test2',
+            'vcf_path': 'test2.vcf'
+        }
+        
+        db.case.insert(case_1)
+        db.case.insert(case_2)
+
+        mongo_cases = mongo_adapter.cases()
+
+        assert mongo_cases.count() == 2
