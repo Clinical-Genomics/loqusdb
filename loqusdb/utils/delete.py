@@ -8,7 +8,7 @@ from loqusdb.utils import (get_family)
 logger = logging.getLogger(__name__)
 
 
-def delete(adapter, variant_file, family_file, family_type='ped'):
+def delete(adapter, variant_file, family_file, family_type='ped', case_id=None):
     """Delete a case and all of it's variants from the database"""
     
     vcf = get_vcf(variant_file)
@@ -20,6 +20,9 @@ def delete(adapter, variant_file, family_file, family_type='ped'):
         )
     
     family_id = family.family_id
+    if case_id:
+        family_id = case_id
+
     individuals = family.individuals
     
     delete_family(
