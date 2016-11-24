@@ -9,7 +9,7 @@ from loqusdb.exceptions import CaseError
 logger = logging.getLogger(__name__)
 
 def load_database(adapter, variant_file, family_file, family_type='ped',
-                  skip_case_id=False, gq_treshold=None):
+                  skip_case_id=False, gq_treshold=None, case_id=None):
     """Load the database with a case and its variants
             
             Args:
@@ -30,6 +30,9 @@ def load_database(adapter, variant_file, family_file, family_type='ped',
         )
 
     family_id = family.family_id
+    
+    if case_id:
+        family_id = case_id
 
     if not family.affected_individuals:
         logger.warning("No affected individuals could be found in ped file")
