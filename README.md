@@ -90,6 +90,7 @@ The collections looks like:
     'chrom': 'CHROM',
     'pos': postition,
     'homozygote': number_of_homozygotes,
+    'hemizygote': number_of_hemizygotes,
     'observations': number_of_observations,
     'families': ['family_id', ...]
 }
