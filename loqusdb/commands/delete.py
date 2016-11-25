@@ -46,7 +46,7 @@ def delete(ctx, variant_file, family_file, family_type, case_id):
             case_id=case_id
         )
     except (CaseError, IOError) as error:
-        logger.warning(error.message)
+        logger.warning(error)
         ctx.abort()
 
     logger.info("Time to delete variants: {0}"

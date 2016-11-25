@@ -65,6 +65,6 @@ def load(ctx, variant_file, family_file, family_type, skip_case_id, gq_treshold,
             gq_treshold=gq_treshold,
         )
     except (SyntaxError, CaseError, IOError) as error:
-        logger.warning(error.message)
+        logger.warning(error)
         ctx.abort()
         
