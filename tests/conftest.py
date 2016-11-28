@@ -73,6 +73,16 @@ def vcf_path(request):
     return file_path
 
 @pytest.fixture(scope='function')
+def double_vcf_path(request):
+    file_path = 'tests/fixtures/double_variant.vcf'
+    return file_path
+
+@pytest.fixture(scope='function')
+def unsorted_vcf_path(request):
+    file_path = 'tests/fixtures/unsorted.vcf'
+    return file_path
+
+@pytest.fixture(scope='function')
 def zipped_vcf_path(request):
     file_path = 'tests/fixtures/test.vcf.gz'
     return file_path
