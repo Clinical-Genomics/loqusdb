@@ -22,12 +22,14 @@ $pip install --editable .
 
 Tool to keep track of what variants that have been seen and in what families they have been observed.
 This is **NOT** a tool to create a true frequency database.
-It will basically count the number if times we have seen a variant in any individual.
-We will also keep track of the variants that have been seen in a homozygous state.
+It will basically count the number of times we have seen a variant in any individual.
+We will also keep track of the variants that have been seen in a homozygous or hemizygous state.
 
 Variants are stored by providing a vcf file and a (ped or ped like)family file.
 
-The tool will select one affected individual per family and insert counts for the variants of this individual.
+Loqusdb will first check if the vcf file looks ok.
+
+The tool will then check all variants if they have been observed in any of the individuals in the family.
 
 When the variants are added:
 
