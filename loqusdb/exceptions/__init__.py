@@ -1,1 +1,2 @@
-from .case_exceptions import CaseError
+from .case import CaseError
+from .vcf import VcfError
