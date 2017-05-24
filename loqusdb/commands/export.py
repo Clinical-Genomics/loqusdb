@@ -34,7 +34,7 @@ def export(ctx, outfile):
     logger.info("Found {0} cases in database".format(nr_cases))
     
     head = HeaderParser()
-    head.add_fileformat("##fileformat=VCFv4.1")
+    head.add_fileformat("VCFv4.1")
     head.add_meta_line("NrCases", nr_cases)
     head.add_info("Obs", '1', 'Integer', "The number of observations for the variant")
     head.add_info("Hom", '1', 'Integer', "The number of observed homozygotes")
