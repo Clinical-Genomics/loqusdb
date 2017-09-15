@@ -10,3 +10,4 @@ pytest
 mongomock
 vcftoolbox==1.5
 cyvcf2
+coloredlogs
