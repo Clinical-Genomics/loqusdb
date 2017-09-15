@@ -9,3 +9,4 @@ pymongo>=3.0
 pytest
 mongomock
 vcftoolbox==1.5
+cyvcf2

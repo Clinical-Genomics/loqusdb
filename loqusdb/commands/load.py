@@ -52,7 +52,7 @@ def load(ctx, variant_file, family_file, family_type, skip_case_id, gq_treshold,
     if not family_file:
         logger.warning("Please provide a family file")
         ctx.abort()
-
+    
     variant_path = os.path.abspath(variant_file)
 
     adapter = ctx.obj['adapter']
@@ -63,10 +63,9 @@ def load(ctx, variant_file, family_file, family_type, skip_case_id, gq_treshold,
     except VcfError as error:
         logger.warning(error)
         ctx.abort()
-    
+
     logger.info("Vcf file looks fine")
     logger.info("Nr of variants in vcf: {0}".format(nr_variants))
-    
     start_inserting = datetime.now()
     
     try:
