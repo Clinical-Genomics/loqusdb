@@ -12,6 +12,25 @@ logger = logging.getLogger('.')
 
 init_log(logger, loglevel='DEBUG')
 
+
+class Variant(object):
+    """Mock a cyvcf variant
+    
+    Default is to return a variant with three individuals high genotype 
+    quality.
+    """
+    def __init__(self, chrom='1', pos=80000, ref='A', alt='C', end=None, 
+                 gt_quals=[60, 60, 60], gt_types=[1, 1, 0]):
+        super(Variant, self).__init__()
+        self.CHROM = chrom
+        self.POS = pos
+        self.REF = ref
+        self.ALT = [alt]
+        self.end = end or pos
+        self.gt_quals = gt_quals
+        self.gt_types = gt_types
+        
+
 @pytest.fixture(scope='function')
 def mongo_client(request):
     """Return a mongomock client"""
@@ -97,31 +116,9 @@ def funny_ped_path(request):
     file_path = 'tests/fixtures/funny_trio.ped'
     return file_path
 
-def get_variant(variant_line, header):
-    """docstring for get_variant"""
-    return dict(zip(header, variant_line.split('\t')))
-
-def get_header(inds=['proband', 'mother', 'father']):
-    """docstring for header"""
-    header = ['CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 
-              'FORMAT']
-    for ind in inds:
-        header.append(ind)
-    
-    return header
-
-def variant_line(chrom='1', pos='10', rs_id='.', ref='A', alt='T', 
-                 qual='100', filt='PASS', info='.', form='GT:GQ', 
-                 genotypes=['0/1:60','0/1:60','0/0:60']):
-    """Return a vcf formated variant line"""
-    variant_line = "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}".format(
-        chrom, pos, rs_id, ref, alt, qual, filt, info, form
-    )
-    
-    for gt_call in genotypes:
-        variant_line += '\t{0}'.format(gt_call)
-    
-    return variant_line
+@pytest.fixture(scope='function')
+def ind_positions(request):
+    return {'proband': 0, 'mother':1, 'father':2}
 
 @pytest.fixture(scope='function')
 def case_lines(request, ped_path):
@@ -137,22 +134,16 @@ def case_lines(request, ped_path):
 def case_obj(request, case_lines):
     """Return a case obj"""
     family_parser = FamilyParser(case_lines, family_type='ped')
-    
     families = list(family_parser.families.keys())
-    
     family = family_parser.families[families[0]]
-
     return family
 
 @pytest.fixture(scope='function')
 def case_id(request, case_lines):
     """Return a case obj"""
     family_parser = FamilyParser(case_lines, family_type='ped')
-    
     families = list(family_parser.families.keys())
-    
     family = family_parser.families[families[0]]
-    
     family_id = family.family_id
 
     return family_id
@@ -175,42 +166,35 @@ def two_cases(request):
 
 @pytest.fixture(scope='function')
 def hem_variant(request):
-    variant = variant_line(chrom='X', pos='60000')
-    header = get_header()
-    variant_object = get_variant(variant, header)
+    variant_object = Variant(chrom='X', pos=60000)
+    return variant_object
+
+@pytest.fixture(scope='function')
+def variant_chr(request):
+    variant_object = Variant(chrom='chrX', pos=60000)
     return variant_object
 
 @pytest.fixture(scope='function')
 def par_variant(request):
-    variant = variant_line(chrom='X', pos='60001')
-    header = get_header()
-    variant_object = get_variant(variant, header)
+    variant_object = Variant(chrom='X', pos=60001)
     return variant_object
 
 @pytest.fixture(scope='function')
 def het_variant(request):
-    variant = variant_line()
-    header = get_header()
-    variant_object = get_variant(variant, header)
+    variant_object = Variant()
     return variant_object
 
 @pytest.fixture(scope='function')
 def variant_no_gq(request):
-    variant = variant_line(form='GT', genotypes=['0/1','0/1','0/1'])
-    header = get_header()
-    variant_object = get_variant(variant, header)
+    variant_object = Variant(gt_quals=[-1,-1,-1])
     return variant_object
 
 @pytest.fixture(scope='function')
 def hom_variant(request):
-    variant = variant_line(genotypes=['1/1:60','0/1:60','0/1:60'])
-    header = get_header()
-    variant_object = get_variant(variant, header)
+    variant_object = Variant(gt_types=[3,1,1])
     return variant_object
 
 @pytest.fixture(scope='function')
 def variant_no_call(request):
-    variant = variant_line(genotypes=['./.', './.', './.'], form='GT')
-    header = get_header()
-    variant_object = get_variant(variant, header)
+    variant_object = Variant(gt_types=[2, 2, 2])
     return variant_object

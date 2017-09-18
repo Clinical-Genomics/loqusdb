@@ -63,8 +63,11 @@ def get_formated_variant(variant, individuals, family_id, ind_positions,
         Return:
             formated_variant (dict): A variant dictionary
     """
-    chrom = variant.CHROM.lstrip('chr')
+    chrom = variant.CHROM
+    if chrom.startswith(('chr', 'CHR', 'Chr')):
+        chrom = chrom[3:]
     pos = int(variant.POS)
+    end = int(variant.end)
     ref = variant.REF
     alt = variant.ALT[0]
 
@@ -108,6 +111,7 @@ def get_formated_variant(variant, individuals, family_id, ind_positions,
         formated_variant['_id'] = get_variant_id(variant)
         formated_variant['chrom'] = chrom
         formated_variant['pos'] = pos
+        formated_variant['end'] = end
         formated_variant['ref'] = ref
         formated_variant['alt'] = alt
         formated_variant['homozygote'] = found_homozygote

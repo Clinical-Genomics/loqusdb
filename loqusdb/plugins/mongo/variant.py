@@ -20,7 +20,7 @@ class VariantMixin(BaseVariantMixin):
         
         if variant.get('family_id'):
             message = self.db.variant.update(
-                {'_id': variant['_id']},
+                {'_id': variant['_id'],},
                 {
                     '$inc': {
                         'homozygote': variant.get('homozygote', 0),
@@ -32,7 +32,14 @@ class VariantMixin(BaseVariantMixin):
                             '$each': [variant.get('family_id')],
                             '$slice': -50
                             }
-                        }
+                    },
+                    '$set': {
+                        'chrom': variant['chrom'],
+                        'start': variant['pos'],
+                        'end': variant['end'],
+                        'ref': variant['ref'],
+                        'alt': variant['alt'],
+                    }
                  }, 
                  upsert=True
             )
@@ -48,10 +55,9 @@ class VariantMixin(BaseVariantMixin):
                  }, 
                  upsert=True
             )
-            
-    
+
         if message.get('updatedExisting'):
-            logger.debug("Variant {0} was updated".format(message.get("upserted")))
+            logger.debug("Variant %s was updated", message.get("upserted"))
         else:
             logger.debug("Variant was added to database for first time")
         return
