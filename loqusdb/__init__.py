@@ -8,11 +8,18 @@ logger = logging.getLogger(__name__)
 __version__ = get_distribution("loqusdb").version
 
 INDEXES = {
-    'variant' : [IndexModel([
+    'variant' : [
+        IndexModel([
         ('chrom', ASCENDING),
         ('pos', ASCENDING),
         ('end', ASCENDING),
         ], name="coordinates"),
+        
+        IndexModel([
+        ('chrom', ASCENDING),
+        ('end', ASCENDING),
+        ], name="end"),
+        
     ],
 }
 
