@@ -34,11 +34,11 @@ class VariantMixin(BaseVariantMixin):
                             }
                     },
                     '$set': {
-                        'chrom': variant['chrom'],
-                        'start': variant['pos'],
-                        'end': variant['end'],
-                        'ref': variant['ref'],
-                        'alt': variant['alt'],
+                        'chrom': variant.get('chrom'),
+                        'start': variant.get('pos'),
+                        'end': variant.get('end'),
+                        'ref': variant.get('ref'),
+                        'alt': variant.get('alt'),
                     }
                  }, 
                  upsert=True

@@ -1,7 +1,7 @@
 from loqusdb.utils import (delete_variants, load_variants)
 
 
-def test_delete_variants(mongo_adapter, het_variant, case_obj):
+def test_delete_variants(mongo_adapter, het_variant, case_obj, ind_positions):
     """docstring for test_load_variants"""
     db = mongo_adapter.db
     
@@ -14,7 +14,8 @@ def test_delete_variants(mongo_adapter, het_variant, case_obj):
     load_variants(
         adapter=mongo_adapter,
         family_id=family_id, 
-        individuals=individuals, 
+        individuals=individuals,
+        ind_positions=ind_positions,
         vcf=vcf,
         gq_treshold=20,
     )
@@ -26,6 +27,7 @@ def test_delete_variants(mongo_adapter, het_variant, case_obj):
     delete_variants(
         adapter=mongo_adapter,
         family_id=family_id, 
+        ind_positions=ind_positions,
         individuals=individuals, 
         vcf=vcf
     )
@@ -34,7 +36,7 @@ def test_delete_variants(mongo_adapter, het_variant, case_obj):
 
     assert mongo_variant == None
 
-def test_delete_variant(mongo_adapter, het_variant, case_obj):
+def test_delete_variant(mongo_adapter, het_variant, case_obj, ind_positions):
     """docstring for test_load_variants"""
     db = mongo_adapter.db
 
@@ -48,6 +50,7 @@ def test_delete_variant(mongo_adapter, het_variant, case_obj):
         adapter=mongo_adapter,
         family_id=family_id_1,
         individuals=individuals,
+        ind_positions=ind_positions,
         vcf=vcf,
         gq_treshold=20,
     )
@@ -62,6 +65,7 @@ def test_delete_variant(mongo_adapter, het_variant, case_obj):
         adapter=mongo_adapter,
         family_id=family_id_2,
         individuals=individuals,
+        ind_positions=ind_positions,
         vcf=vcf,
         gq_treshold=20,
     )
@@ -74,6 +78,7 @@ def test_delete_variant(mongo_adapter, het_variant, case_obj):
     delete_variants(
         adapter=mongo_adapter,
         family_id=family_id_2,
+        ind_positions=ind_positions,
         individuals=individuals,
         vcf=vcf
     )
@@ -83,7 +88,7 @@ def test_delete_variant(mongo_adapter, het_variant, case_obj):
     assert mongo_variant['families'] == [family_id_1]
     assert mongo_variant['observations'] == 1
 
-def test_delete_non_existing_variant(mongo_adapter, het_variant, case_obj):
+def test_delete_non_existing_variant(mongo_adapter, het_variant, case_obj, ind_positions):
     """docstring for test_load_variants"""
     db = mongo_adapter.db
 
@@ -96,6 +101,7 @@ def test_delete_non_existing_variant(mongo_adapter, het_variant, case_obj):
         adapter=mongo_adapter,
         family_id=family_id,
         individuals=individuals,
+        ind_positions=ind_positions,
         vcf=vcf
     )
 

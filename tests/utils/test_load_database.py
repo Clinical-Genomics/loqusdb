@@ -35,8 +35,9 @@ def test_load_database_alternative_ped(vcf_path, ped_path, mongo_adapter, case_i
     assert mongo_variant['families'] == ['alternative']
 
 def test_load_database_wrong_ped(vcf_path, funny_ped_path, mongo_adapter):
-    db = mongo_adapter.db
-    
+    ## GIVEN a vcf and ped file with wrong individuals
+    ## WHEN loading the information
+    ## THEN Error should be raised since individuals is not in vcf
     with pytest.raises(CaseError):
         load_database(
             adapter=mongo_adapter, 

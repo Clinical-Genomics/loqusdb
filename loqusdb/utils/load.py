@@ -52,6 +52,10 @@ def load_database(adapter, variant_file, family_file, nr_variants=None,
     ind_positions = {}
     for i, ind_id in enumerate(vcf_individuals):
         ind_positions[ind_id] = i
+        
+    for ind_id in family.individuals:
+        if ind_id not in ind_positions:
+            raise CaseError("Ind {0} in ped file does not exist in VCF".format(ind_id))
 
     load_family(
         adapter=adapter,
