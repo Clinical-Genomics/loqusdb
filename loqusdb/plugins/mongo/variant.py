@@ -2,6 +2,8 @@ import logging
 
 from loqusdb.plugins import BaseVariantMixin
 
+from pymongo import ASCENDING
+
 logger = logging.getLogger(__name__)
 
 class VariantMixin(BaseVariantMixin):
@@ -75,13 +77,20 @@ class VariantMixin(BaseVariantMixin):
         """
         return self.db.variant.find_one({'_id': variant.get('_id')})
 
-    def get_variants(self):
+    def get_variants(self, chromosome=None, start=None, end=None):
         """Return all variants in the database
     
             Returns:
                 variants (Iterable(Variant))
         """
-        return self.db.variant.find()
+        query = {}
+        if chromosome:
+            query['chrom'] = chromosome
+        if start:
+            query['start'] = {'$lte': end}
+            query['end'] = {'$gte': start}
+        logger.info("Find all variants {}".format(query))
+        return self.db.variant.find(query).sort([('start', ASCENDING)])
 
     def delete_variant(self, variant):
         """Remove variant from database
