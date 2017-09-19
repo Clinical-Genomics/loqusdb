@@ -24,7 +24,11 @@ def delete(adapter, variant_file, family_file, family_type='ped', case_id=None):
         family_id = case_id
 
     individuals = family.individuals
-    
+    vcf_individuals = vcf.samples
+    ind_positions = {}
+    for i, ind_id in enumerate(vcf_individuals):
+        ind_positions[ind_id] = i
+
     delete_family(
         adapter=adapter,
         family_id=family_id
@@ -33,6 +37,7 @@ def delete(adapter, variant_file, family_file, family_type='ped', case_id=None):
     delete_variants(
         adapter=adapter,
         vcf=vcf,
+        ind_positions=ind_positions,
         family_id=family_id,
         individuals=individuals
     )
@@ -42,16 +47,17 @@ def delete_family(adapter, family_id):
     case = {'case_id': family_id}
     adapter.delete_case(case)
 
-def delete_variants(adapter, vcf, family_id, individuals):
+def delete_variants(adapter, vcf, ind_positions, family_id, individuals):
     """Delete variants for a case in the database
     
-        Args:
-            adapter (loqusdb.plugins.Adapter)
-            vcf (iterable(dict))
-            family_id (str)
-        
-        Returns:
-            nr_of_deleted (int): Number of deleted variants
+    Args:
+        adapter (loqusdb.plugins.Adapter)
+        vcf (iterable(dict))
+        ind_positions(dict)
+        family_id (str)
+    
+    Returns:
+        nr_of_deleted (int): Number of deleted variants
     """
     nr_of_deleted = 0
     start_deleting = datetime.now()
@@ -62,6 +68,7 @@ def delete_variants(adapter, vcf, family_id, individuals):
     for variant in vcf:
         formated_variant = get_formated_variant(
             variant=variant,
+            ind_positions=ind_positions,
             individuals=individuals,
             family_id=family_id
         )

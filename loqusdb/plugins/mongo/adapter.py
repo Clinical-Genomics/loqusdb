@@ -30,7 +30,6 @@ class MongoAdapter(VariantMixin, CaseMixin, Base):
         ))
         if not client:
             if uri:
-                logger.info("Connecting with uri {0}".format(uri))
                 client=MongoClient(uri)
             else:
                 client = MongoClient(host, port)
