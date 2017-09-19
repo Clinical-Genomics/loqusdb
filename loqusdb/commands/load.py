@@ -85,5 +85,5 @@ def load(ctx, variant_file, family_file, family_type, skip_case_id, gq_treshold,
     
     logger.info("Time to insert variants: {0}".format(
                 datetime.now() - start_inserting))
-    
+    adapter.check_indexes()
         

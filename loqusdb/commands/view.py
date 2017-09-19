@@ -34,11 +34,26 @@ def cases(ctx, case_id):
 @click.option('--variant-id', 
                 help='Search for a variant'
 )
+@click.option('-c', '--chromosome', 
+                help='Search for all variants in a chromosome'
+)
+@click.option('-s', '--start',
+                help='Start of region',
+                type=int
+)
+@click.option('-e', '--end', 
+                help='End of region',
+                type=int
+)
 @click.pass_context
-def variants(ctx, variant_id):
+def variants(ctx, variant_id, chromosome, start, end):
     """Display variants in the database."""
     
     adapter = ctx.obj['adapter']
+    if (start or end):
+        if not (chromosome and start and end):
+            logger.warning("Regions must be specified with chromosome, start and end")
+            ctx.abort()
     
     if variant_id:
         variant = adapter.get_variant({'_id':variant_id})
@@ -48,8 +63,20 @@ def variants(ctx, variant_id):
             logger.info("Variant {0} does not exist in database".format(variant_id))
     else:
         i = 0
-        for variant in adapter.get_variants():
+        result = adapter.get_variants(
+            chromosome=chromosome, 
+            start=start, 
+            end=end
+        )
+        for variant in result:
             i += 1
             click.echo(variant)
         if i == 0:
             logger.info("No variants found in database")
+
+@base_command.command()
+@click.pass_context
+def index(ctx):
+    """Index the database."""
+    adapter = ctx.obj['adapter']
+    adapter.ensure_indexes()

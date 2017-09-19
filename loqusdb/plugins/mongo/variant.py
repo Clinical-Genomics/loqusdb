@@ -2,6 +2,8 @@ import logging
 
 from loqusdb.plugins import BaseVariantMixin
 
+from pymongo import (ASCENDING, DESCENDING)
+
 logger = logging.getLogger(__name__)
 
 class VariantMixin(BaseVariantMixin):
@@ -75,13 +77,26 @@ class VariantMixin(BaseVariantMixin):
         """
         return self.db.variant.find_one({'_id': variant.get('_id')})
 
-    def get_variants(self):
+    def get_variants(self, chromosome=None, start=None, end=None):
         """Return all variants in the database
+
+        Args:
+            chromosome (str)
+            start (int)
+            end (int)
+        
     
-            Returns:
-                variants (Iterable(Variant))
+        Returns:
+            variants (Iterable(Variant))
         """
-        return self.db.variant.find()
+        query = {}
+        if chromosome:
+            query['chrom'] = chromosome
+        if start:
+            query['start'] = {'$lte': end}
+            query['end'] = {'$gte': start}
+        logger.debug("Find all variants {}".format(query))
+        return self.db.variant.find(query).sort([('start', ASCENDING)])
 
     def delete_variant(self, variant):
         """Remove variant from database
@@ -119,3 +134,17 @@ class VariantMixin(BaseVariantMixin):
                         }
                     }, upsert=False)
         return
+
+
+    def get_chromosomes(self):
+        """Return a list of all chromosomes found in database"""
+        res = self.db.variant.distinct('chrom')
+        return res
+    
+    def get_max_position(self, chrom):
+        """Get the last position observed on a chromosome in the database"""
+        res = self.db.variant.find({'chrom':chrom}, {'_id':0, 'end':1}).sort([('end', DESCENDING)]).limit(1)
+        end = 0
+        for variant in res:
+            end = variant['end']
+        return end
