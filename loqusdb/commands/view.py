@@ -53,3 +53,10 @@ def variants(ctx, variant_id):
             click.echo(variant)
         if i == 0:
             logger.info("No variants found in database")
+
+@base_command.command()
+@click.pass_context
+def index(ctx):
+    """Index the database."""
+    adapter = ctx.obj['adapter']
+    adapter.ensure_indexes()
