@@ -33,7 +33,7 @@ def migrate_database(adapter):
             # Calculate end
             end = start + (max(len(ref), len(alt)) - 1)
             
-            adapter.variant.find_one_and_update(
+            adapter.db.variant.find_one_and_update(
                 {'_id': variant['_id']},
                 {
                     '$set': {
