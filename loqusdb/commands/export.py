@@ -12,7 +12,7 @@ from . import base_command
 
 logger = logging.getLogger(__name__)
 
-@base_command.command()
+@base_command.command('export', short_help="Export variants to VCF format")
 @click.option('-o', '--outfile',
     type=click.File('w'),
     help='Specify the path to a file where results should be stored.'

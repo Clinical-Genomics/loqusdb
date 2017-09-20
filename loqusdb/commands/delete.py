@@ -9,7 +9,7 @@ from . import base_command
 
 logger = logging.getLogger(__name__)
 
-@base_command.command()
+@base_command.command('delete', short_help="Delete the variants of a family")
 @click.argument('variant-file',
                     type=click.Path(exists=True),
                     metavar='<vcf_file>'

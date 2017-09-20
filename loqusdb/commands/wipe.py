@@ -10,7 +10,7 @@ def abort_if_false(ctx, param, value):
         ctx.abort()
 
 
-@base_command.command()
+@base_command.command('wipe', short_help="Wipe a loqusdb instance")
 @click.option('--yes',
     is_flag=True,
     callback=abort_if_false,

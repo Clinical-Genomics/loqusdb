@@ -7,3 +7,4 @@ from .export import export as export_command
 from .view import cases as cases_command
 from .view import variants as variants_command
 from .view import index as index_command
+from .migrate import migrate as migration_command
