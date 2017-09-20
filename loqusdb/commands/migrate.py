@@ -9,7 +9,7 @@ from . import base_command
 logger = logging.getLogger(__name__)
 
 
-@base_command.command()
+@base_command.command('migrate', short_help="Migrate an old loqusdb instance")
 @click.pass_context
 def migrate(ctx,):
     """Migrate an old loqusdb instance to 1.0

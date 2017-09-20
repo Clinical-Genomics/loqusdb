@@ -62,10 +62,14 @@ Options:
   --help                 Show this message and exit.
 
 Commands:
-  delete  Delete the variants of a case
-  load    Load the variants of a case The loading is...
-  wipe    Wipe the entire db
-  export  Export the variants in a database
+  cases     Display cases in database
+  delete    Delete the variants of a family
+  export    Export variants to VCF format
+  index     Add indexes to database
+  load      Load the variants of a family
+  migrate   Migrate an old loqusdb instance
+  variants  Display variants in database
+  wipe      Wipe a loqusdb instance
 ```
 
 
@@ -90,7 +94,10 @@ The collections looks like:
 {
     '_id': 'variant_id',
     'chrom': 'CHROM',
-    'pos': postition,
+    'start': postition,
+    'end': end postition,
+	'ref': reference base(s),
+	'alt': alternative base(s),
     'homozygote': number_of_homozygotes,
     'hemizygote': number_of_hemizygotes,
     'observations': number_of_observations,

@@ -6,7 +6,7 @@ from . import base_command
 
 logger = logging.getLogger(__name__)
 
-@base_command.command()
+@base_command.command('cases', short_help="Display cases in database")
 @click.option('-c' ,'--case-id', 
                 help='Search for case'
 )
@@ -30,7 +30,7 @@ def cases(ctx, case_id):
         if i == 0:
             logger.info("No cases found in database")
 
-@base_command.command()
+@base_command.command('variants', short_help="Display variants in database")
 @click.option('--variant-id', 
                 help='Search for a variant'
 )
@@ -74,7 +74,7 @@ def variants(ctx, variant_id, chromosome, start, end):
         if i == 0:
             logger.info("No variants found in database")
 
-@base_command.command()
+@base_command.command('index', short_help="Add indexes to database")
 @click.pass_context
 def index(ctx):
     """Index the database."""
