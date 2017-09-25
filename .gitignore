@@ -57,8 +57,9 @@ dev/
 output/*.html
 output/*/index.html
 
-# Sphinx docs
+# docs
 docs/_build
+_book
 
 # Node.js
 node_modules/
