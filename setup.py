@@ -39,14 +39,14 @@ try:
     import pypandoc
     long_description = pypandoc.convert('README.md', 'rst')
 except (IOError, ImportError, RuntimeError):
-    long_description = 'Tool for annotating patterns of genetic inheritance in Variant Call Format (VCF) files.'
+    long_description = 'Tool to store observations of genetic variants.'
 
 
 # with open('README.txt') as file:
 #     long_description = file.read()
 
 setup(name='loqusdb',
-    version='0.5.1',
+    version='1.0',
     description='Store frequencies of vcf variants in a mongodb',
     author = 'Mans Magnusson',
     author_email = 'mans.magnusson@scilifelab.se',
