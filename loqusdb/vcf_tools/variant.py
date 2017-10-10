@@ -1,5 +1,7 @@
 import logging
 
+from pprint import pprint as pp
+
 from vcftoolbox import (Genotype)
 
 from loqusdb.exceptions import CaseError
@@ -120,4 +122,80 @@ def get_formated_variant(variant, individuals, family_id, ind_positions,
         if family_id:
             formated_variant['family_id'] = family_id
     
+    return formated_variant
+
+def get_formated_svvariant(variant, individuals, family_id, ind_positions,
+                           gq_treshold=None):
+    """Return a formated structural variant
+    
+        Take a cyvcf2 variant and return a dictionary with the
+        relevant information.
+    
+        If criterias are not fullfilled, eg. variant have no gt call or quality
+        is below gq treshold then an empty dictionary is returned.
+        
+        A sv variant looks like
+        
+        {
+            'start_chrom': str,
+            'pos': str,
+            'end_chrom': str,
+            'end': str,
+            'svtype': str,
+        }
+        
+        Args:
+            variant (cyvcf2.Variant)
+            individuals (list[str]): A list with individual ids
+            ind_positions (dict)
+            family_id (str): The family id
+        
+        Return:
+            formated_variant (dict): A sv variant dictionary
+    """
+    start_chrom = variant.CHROM
+
+    if start_chrom.startswith(('chr', 'CHR', 'Chr')):
+        start_chrom = start_chrom[3:]
+
+    pos = int(variant.POS)
+    end = int(variant.INFO.get('END', variant.POS))
+    
+
+    ref = variant.REF
+    alt = variant.ALT[0]
+
+    end_chrom = start_chrom
+    
+    sv_type = variant.INFO['SVTYPE']
+    sv_len = end - pos
+    
+    if sv_type == 'BND':
+        other_coordinates = alt.strip('ACGTN[]').split(':')
+        end_chrom = other_coordinates[0]
+        if end_chrom.startswith(('chr', 'CHR', 'Chr')):
+            end_chrom = end_chrom[3:]
+
+        end = int(other_coordinates[1])
+
+        #Set 'infinity' to length if translocation
+        sv_len = float('inf')
+        sv_type = 'BND'
+
+    # Insertions often have length 0 in VCF
+    if (sv_len == 0 and alt != '<INS>'):
+        sv_len = len(alt)
+
+    formated_variant = {}
+
+    formated_variant['chrom'] = start_chrom
+    formated_variant['pos'] = pos
+    formated_variant['end'] = end
+    formated_variant['end_chrom'] = end_chrom
+    formated_variant['sv_type'] = sv_type
+    formated_variant['sv_len'] = sv_len
+
+    if family_id:
+        formated_variant['family_id'] = family_id
+
     return formated_variant

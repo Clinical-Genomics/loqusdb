@@ -2,6 +2,8 @@ import os
 import logging
 import click
 
+from pprint import pprint as pp
+
 from datetime import datetime
 
 from loqusdb.exceptions import (CaseError, VcfError)

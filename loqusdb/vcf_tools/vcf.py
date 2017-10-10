@@ -33,11 +33,11 @@ def get_file_handle(file_path):
 def get_vcf(file_path):
     """Yield variants from a vcf file
     
-        Args:
-            file_path(str)
-        
-        Yields:
-            vcf_obj(cyvcf2.VCF): An iterable with cyvcf2.Variant
+    Args:
+        file_path(str)
+    
+    Yields:
+        vcf_obj(cyvcf2.VCF): An iterable with cyvcf2.Variant
 
     """
 
@@ -47,12 +47,12 @@ def get_vcf(file_path):
 
 def check_vcf(variants):
     """Check if there are any problems with the vcf file
-    
-        Args:
-            variants(iterable(cyvcf2.Variant))
-        
-        Returns:
-            nr_variants(int)
+
+    Args:
+        variants(iterable(cyvcf2.Variant))
+
+    Returns:
+        nr_variants(int)
     """
     logger.info("Check if vcf is on correct format...")
     nr_variants = 0
@@ -62,36 +62,46 @@ def check_vcf(variants):
     posititon_variants = set()
     
     for variant in variants:
+        if variant.var_type == 'sv':
+            variant_type = 'sv'
+        else:
+            variant_type = 'snv'
+        
         nr_variants += 1
         
         current_chrom = variant.CHROM
         current_pos = variant.POS
         
-        variant_id = get_variant_id(variant)
+        # We start with a simple id that can be used by SV:s
+        variant_id = "{0}_{1}".format(current_chrom, current_pos)
+        if variant_type == 'snv':
+            variant_id = get_variant_id(variant)
         
-        if previous_chrom:
-            if current_chrom != previous_chrom:
-                previous_chrom = current_chrom
-                previous_pos = current_pos
-                posititon_variants = set([variant_id])
-            else:
-                if current_pos == previous_pos:
-                    if variant_id in posititon_variants:
-                        raise VcfError("Variant {0} occurs several times"\
-                                       " in vcf".format(variant_id))
-                    else:
-                        posititon_variants.add(variant_id)
-                else:
-                    if not current_pos > previous_pos:
-                        raise VcfError("Vcf if not sorted in a correct way")
-                    previous_pos = current_pos
-                    posititon_variants = set([variant_id])
-        else:
+        if not previous_chrom:
+            # Set the variables for first time
             previous_chrom = current_chrom
             previous_pos = current_pos
             posititon_variants = set([variant_id])
 
-    return nr_variants
+            continue
+            
+        if current_chrom != previous_chrom:
+            previous_chrom = current_chrom
+            previous_pos = current_pos
+            posititon_variants = set([variant_id])
+            continue
+        
+        
+        if (current_pos == previous_pos and variant_type == 'snv'):
+            if variant_id in posititon_variants:
+                raise VcfError("Variant {0} occurs several times"\
+                               " in vcf".format(variant_id))
+            else:
+                posititon_variants.add(variant_id)
+        else:
+            if not current_pos >= previous_pos:
+                raise VcfError("Vcf if not sorted in a correct way")
+            previous_pos = current_pos
+            posititon_variants = set([variant_id])
 
-    
-    
+    return nr_variants

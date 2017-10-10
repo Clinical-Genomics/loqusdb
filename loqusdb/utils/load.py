@@ -5,7 +5,8 @@ import click
 
 from pprint import pprint as pp
 
-from loqusdb.vcf_tools import (get_formated_variant, get_vcf)
+from loqusdb.vcf_tools import (get_formated_variant, get_formated_svvariant,
+                               get_vcf)
 from loqusdb.utils import (get_family)
 from loqusdb.exceptions import CaseError
 
@@ -57,11 +58,11 @@ def load_database(adapter, variant_file, family_file, nr_variants=None,
         if ind_id not in ind_positions:
             raise CaseError("Ind {0} in ped file does not exist in VCF".format(ind_id))
 
-    load_family(
-        adapter=adapter,
-        case_id=family_id,
-        vcf_path=variant_file
-    )
+    # load_family(
+    #     adapter=adapter,
+    #     case_id=family_id,
+    #     vcf_path=variant_file
+    # )
 
     try:
         load_variants(  
@@ -76,7 +77,13 @@ def load_database(adapter, variant_file, family_file, nr_variants=None,
         )
     except Exception as err:
         logger.warning(err)
-        ##TODO Delete inserted information here
+        # delete_all(
+        #     adapter=adapter,
+        #     variant_file=variant_file,
+        #     family_file=family_file,
+        #     family_type=family_type,
+        #     case_id=case_id
+        # )
         raise err
 
     
@@ -103,17 +110,31 @@ def load_variants(adapter, family_id, individuals, vcf, ind_positions,
     with click.progressbar(vcf, label="Inserting variants",length=nr_variants) as bar:
         for variant in bar:
             #Creates a variant that is ready to insert into the database
-            formated_variant = get_formated_variant(
-                            variant=variant,
-                            individuals=individuals,
-                            ind_positions=ind_positions,
-                            family_id=family_id,
-                            gq_treshold=gq_treshold,
-                        )
-
-            if formated_variant:
+            variant_type = variant.var_type
+            if variant_type == 'sv':
+                formated_variant = get_formated_svvariant(
+                    variant=variant,
+                    individuals=individuals,
+                    ind_positions=ind_positions,
+                    family_id=family_id,
+                    gq_treshold=gq_treshold,
+                )
+            else:
+                formated_variant = get_formated_variant(
+                                variant=variant,
+                                individuals=individuals,
+                                ind_positions=ind_positions,
+                                family_id=family_id,
+                                gq_treshold=gq_treshold,
+                            )
+            # We need to check if there was any information returned
+            # The variant could be excluded based on low gq or no calls in family
+            if not formated_variant:
+                continue
+            if variant_type == 'sv':
+                adapter.add_structural_variant(variant=formated_variant)
+            else:
                 adapter.add_variant(variant=formated_variant)
-    
 
 def load_family(adapter, case_id, vcf_path):
     """Load a case to the database
