@@ -4,7 +4,7 @@ import logging
 from cyvcf2 import VCF
 
 from loqusdb.exceptions import VcfError
-from loqusdb.vcf_tools.variant import get_variant_id
+from loqusdb.build_models.variant import get_variant_id
 
 logger = logging.getLogger(__name__)
 VALID_ENDINGS = ['.vcf', '.gz']

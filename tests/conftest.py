@@ -10,6 +10,8 @@ from loqusdb.log import init_log
 
 from loqusdb.models import Case
 
+from loqusdb.build_models import build_variant
+
 logger = logging.getLogger('.')
 
 init_log(logger, loglevel='DEBUG')
@@ -178,6 +180,21 @@ def two_cases(request):
 # var_type='snv',
 # info_dict={}
 
+### Variant objects
+
+@pytest.fixture(scope='function')
+def variant_obj(request, het_variant, ind_positions, individuals):
+    _variant_obj = build_variant(
+        variant=het_variant, 
+        individuals = individuals, 
+        ind_positions = ind_positions, 
+        case_id='test', 
+        gq_treshold=None
+    )
+    return _variant_obj
+
+
+### CYVCF2 variants
 ### SNVs:
 @pytest.fixture(scope='function')
 def hem_variant(request):

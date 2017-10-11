@@ -11,6 +11,7 @@ class Variant(DotDict):
     def __init__(self, chrom, pos, end, ref, alt, variant_id=None, end_chrom=None, sv_type=None,
                  sv_len=None, case_id=None, homozygote=0, hemizygote=0, is_sv=False):
         super(Variant, self).__init__(
+            _id=variant_id,
             variant_id=variant_id, 
             chrom=chrom, 
             pos=pos, 
