@@ -1,6 +1,6 @@
 import pytest
 
-from loqusdb.vcf_tools.vcf import (check_vcf, get_vcf)
+from loqusdb.utils.vcf import (check_vcf, get_vcf)
 from loqusdb.exceptions import VcfError
 
 def test_check_vcf_correct(vcf_path):

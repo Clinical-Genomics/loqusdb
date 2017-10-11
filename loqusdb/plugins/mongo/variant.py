@@ -150,20 +150,23 @@ class VariantMixin(BaseVariantMixin):
             Returns:
                 variant (dict): A variant dictionary
         """
-        # res = self.db.structural_variant.find({
-        #     'chrom': variant['chrom'],
-        #     'end_chrom': variant['end_chrom'],
-        #     'sv_type': variant['sv_type'],
-        #     'pos_left': {'$gte': variant['pos']},
-        #     'pos_right': {'$lte': variant['pos']},
-        #     'end_left': {'$gte': variant['end']},
-        #     'end_right': {'$lte': variant['end']},
-        # })
-        # nr_hits = res.count()
-        # if nr_hits == 0:
-        #     return None
-        # for hit in res:
-        #     distance = abs()
+        res = self.db.structural_variant.find({
+            'chrom': variant['chrom'],
+            'end_chrom': variant['end_chrom'],
+            'sv_type': variant['sv_type'],
+            'pos_left': {'$gte': variant['pos']},
+            'pos_right': {'$lte': variant['pos']},
+            'end_left': {'$gte': variant['end']},
+            'end_right': {'$lte': variant['end']},
+        })
+        nr_hits = res.count()
+        if nr_hits == 0:
+            LOG.debug("Multiple SV hits")
+            return None
+        # We count the distance to mean on both ends to see which variant is closest
+        for hit in res:
+            distance = (abs(variant['pos'] - (pos_left+pos_right)/2) + 
+                        abs(variant['end'] - (end_left+end_right)/2))
         return None
 
     def get_variants(self, chromosome=None, start=None, end=None):

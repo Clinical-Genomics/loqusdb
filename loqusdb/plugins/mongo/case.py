@@ -47,10 +47,10 @@ class CaseMixin(BaseCaseMixin):
         ))
         if self.case(case):
             raise CaseError("Case {0} already exists in database."\
-            " Can not add case twice.".format(
-                case.get('case_id')
-            ))
-    
+                            " Can not add case twice.".format(
+                                case.get('case_id')
+                            ))
+        
         mongo_case_id = self.db.case.insert_one(case).inserted_id
     
         return mongo_case_id
@@ -66,24 +66,24 @@ class CaseMixin(BaseCaseMixin):
         """
         mongo_case = self.case(case)
     
-        if mongo_case:
-            logger.info("Removing case {0} from database".format(
-                mongo_case.get('case_id')
-            ))
-            self.db.case.remove({'_id': mongo_case['_id']})
-        else:
+        if not mongo_case:
             raise CaseError("Tried to delete case {0} but could not find case".format(
                 case.get('case_id')
             ))
+        logger.info("Removing case {0} from database".format(
+            mongo_case.get('case_id')
+        ))
+        self.db.case.remove({'_id': mongo_case['_id']})
+        
         return
     
     def case_count(self):
-        """Retursn the total number of cases in the database
+        """Returns the total number of cases in the database
         
         returns:
             nr_of_cases (int): Total number of cases in database
         """
         nr_of_cases = 0
-        for case in self.cases:
-            nr_of_cases += 1
-        return nr_of_cases
+        res = self.cases
+        
+        return res.count()

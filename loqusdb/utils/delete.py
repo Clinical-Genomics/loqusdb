@@ -2,8 +2,8 @@
 import logging
 from datetime import datetime
 
-from loqusdb.vcf_tools import (get_formated_variant, get_vcf)
-from loqusdb.utils import (get_family)
+from loqusdb.utils import (get_case, get_vcf)
+from loqusdb.build_models import (build_case, build_variant)
 
 logger = logging.getLogger(__name__)
 
@@ -14,38 +14,32 @@ def delete(adapter, variant_file, family_file, family_type='ped', case_id=None):
     vcf = get_vcf(variant_file)
 
     with open(family_file, 'r') as family_lines:
-        family = get_family(
+        family = get_case(
             family_lines=family_lines, 
             family_type=family_type
         )
     
-    family_id = family.family_id
-    if case_id:
-        family_id = case_id
+    case_id = case_id or family.family_id
+    
+    case_obj = build_case(
+        case=family, 
+        case_id=case_id
+        )
 
-    individuals = family.individuals
     vcf_individuals = vcf.samples
     ind_positions = {}
     for i, ind_id in enumerate(vcf_individuals):
         ind_positions[ind_id] = i
 
-    delete_family(
-        adapter=adapter,
-        family_id=family_id
-    )
+    adapter.delete_case(case_obj)
     
     delete_variants(
         adapter=adapter,
         vcf=vcf,
         ind_positions=ind_positions,
         family_id=family_id,
-        individuals=individuals
+        individuals=[ind['ind_id'] for ind in case_obj['individuals']]
     )
-
-def delete_family(adapter, family_id):
-    """Delete a case object from the database"""
-    case = {'case_id': family_id}
-    adapter.delete_case(case)
 
 def delete_variants(adapter, vcf, ind_positions, family_id, individuals):
     """Delete variants for a case in the database

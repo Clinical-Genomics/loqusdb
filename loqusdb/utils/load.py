@@ -5,9 +5,8 @@ import click
 
 from pprint import pprint as pp
 
-from loqusdb.vcf_tools import (get_formated_variant, get_formated_svvariant,
-                               get_vcf)
-from loqusdb.utils import (get_family)
+from loqusdb.utils import (get_case, get_vcf)
+from loqusdb.build_models import (build_case, build_variant)
 from loqusdb.exceptions import CaseError
 
 logger = logging.getLogger(__name__)
@@ -31,45 +30,38 @@ def load_database(adapter, variant_file, family_file, nr_variants=None,
         if not vcf.contains('GQ'):
             logger.warning('Set gq-treshold to 0 or add info to vcf')
             raise SyntaxError('GQ is not defined in vcf header')
+
+    vcf_individuals = vcf.samples
     
     with open(family_file, 'r') as family_lines:
-        family = get_family(
+        family = get_case(
             family_lines=family_lines, 
             family_type=family_type
         )
-
-    family_id = family.family_id
     
-    if case_id:
-        family_id = case_id
-
-    if not family.affected_individuals:
-        logger.warning("No affected individuals could be found in ped file")
+    case_obj = build_case(
+        family=family, 
+        case_id=case_id,
+        vcf_path=variant_file,
+    )
     
-    logger.debug("Found affected individuals in ped file: {0}"
-                .format(', '.join(family.affected_individuals)))
-
-    vcf_individuals = vcf.samples
     ind_positions = {}
     for i, ind_id in enumerate(vcf_individuals):
         ind_positions[ind_id] = i
         
-    for ind_id in family.individuals:
+    for ind in case_obj:
+        ind_id = ind.ind_id
         if ind_id not in ind_positions:
             raise CaseError("Ind {0} in ped file does not exist in VCF".format(ind_id))
 
-    # load_family(
-    #     adapter=adapter,
-    #     case_id=family_id,
-    #     vcf_path=variant_file
-    # )
+    adapter.add_case(case_obj)
 
     try:
         load_variants(  
             adapter=adapter, 
-            family_id=family_id, 
-            individuals=family.individuals,
-            vcf=vcf,
+            case_id=case_obj['case_id'], 
+            individuals=[ind['ind_id'] for ind in case_obj['individuals']],
+            vcf_obj=vcf,
             ind_positions=ind_positions,
             nr_variants=nr_variants,
             skip_case_id=skip_case_id,
@@ -88,13 +80,13 @@ def load_database(adapter, variant_file, family_file, nr_variants=None,
 
     
 
-def load_variants(adapter, family_id, individuals, vcf, ind_positions, 
+def load_variants(adapter, case_id, individuals, vcf_obj, ind_positions, 
                   nr_variants=None, skip_case_id=False, gq_treshold=None):
     """Load variants for a family into the database.
 
     Args:
         adapter (loqusdb.plugins.Adapter): initialized plugin
-        family_id (str): unique family identifier
+        case_id (str): unique family identifier
         inidividuals (List[str]): list to match individuals
         vcf (cyvcf2.VCF): An iterable with cyvcf2.Variants
         ind_positions(dict): dict with {<ind_id>: <pos>} in vcf
@@ -104,29 +96,18 @@ def load_variants(adapter, family_id, individuals, vcf, ind_positions,
         gq_treshold(int)
     """
     if skip_case_id:
-        family_id = None
-
+        case_id = None
     # Loop over the variants in the vcf
-    with click.progressbar(vcf, label="Inserting variants",length=nr_variants) as bar:
+    with click.progressbar(vcf_obj, label="Inserting variants",length=nr_variants) as bar:
         for variant in bar:
             #Creates a variant that is ready to insert into the database
-            variant_type = variant.var_type
-            if variant_type == 'sv':
-                formated_variant = get_formated_svvariant(
+            formated_variant = build_case(
                     variant=variant,
                     individuals=individuals,
                     ind_positions=ind_positions,
-                    family_id=family_id,
+                    case_id=case_id,
                     gq_treshold=gq_treshold,
                 )
-            else:
-                formated_variant = get_formated_variant(
-                                variant=variant,
-                                individuals=individuals,
-                                ind_positions=ind_positions,
-                                family_id=family_id,
-                                gq_treshold=gq_treshold,
-                            )
             # We need to check if there was any information returned
             # The variant could be excluded based on low gq or no calls in family
             if not formated_variant:
@@ -136,15 +117,3 @@ def load_variants(adapter, family_id, individuals, vcf, ind_positions,
             else:
                 adapter.add_variant(variant=formated_variant)
 
-def load_family(adapter, case_id, vcf_path):
-    """Load a case to the database
-    
-        The adapter will check if the case already exists before loading.
-    
-        Args:
-            adapter (loqusdb.plugins.Adapter): initialized plugin
-            case_id (str)
-            vcf_path (str)
-    """
-    case = {'case_id': case_id, 'vcf_path': vcf_path}
-    adapter.add_case(case)

@@ -1,39 +1,36 @@
 import pytest
-from loqusdb.utils import (delete_family, load_family)
+from loqusdb.models import Case
 from loqusdb.exceptions import CaseError
 
+
 def test_delete_family(mongo_adapter):
+    ## GIVEN a mongo adapter with a case
     db = mongo_adapter.db
-    
     case = {
         'case_id': '1',
         'vcf_path': 'path_to_vcf'
     }
     
-    load_family(
-        adapter=mongo_adapter,
-        case_id=case['case_id'],
-        vcf_path=case['vcf_path']
-        )
-    
+    db.case.insert_one(case)
     mongo_case = db.case.find_one()
-    
     assert mongo_case['case_id'] == case['case_id']
     
-    delete_family(
-        adapter=mongo_adapter,
-        family_id='1',
-    )
+    ## WHEN deleting the case
+    mongo_adapter.delete_case(case)
     
+    ## THEN assert that the case was deleted
     mongo_case = db.case.find_one()
     
     assert mongo_case == None
 
 def test_delete_non_existing_family(mongo_adapter):
-    db = mongo_adapter.db
+    ## GIVEN a mongo adapter and a empty database
+    case = {
+        'case_id': '1',
+        'vcf_path': 'path_to_vcf'
+    }
     
+    ## WHEN deleting a non existing case
     with pytest.raises(CaseError):
-        delete_family(
-            adapter=mongo_adapter,
-            family_id='1',
-        )
+    ## THEN assert a CaseError is raised
+        mongo_adapter.delete_case(case)

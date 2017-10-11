@@ -6,8 +6,8 @@ from loqusdb.exceptions import CaseError
 
 logger = logging.getLogger(__name__)
 
-def get_family(family_lines, family_type='ped'):
-    """Return the families found in  a family file
+def get_case(family_lines, family_type='ped'):
+    """Return case from a family file
     
         Args:
             family_lines (iterator): The family lines

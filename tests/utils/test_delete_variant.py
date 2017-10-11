@@ -8,12 +8,12 @@ def test_delete_variants(mongo_adapter, het_variant, case_obj, ind_positions):
     vcf = []
     vcf.append(het_variant)
     
-    family_id = case_obj.family_id
+    case_id = case_obj.case_id
     individuals = case_obj.individuals
     
     load_variants(
         adapter=mongo_adapter,
-        family_id=family_id, 
+        case_id=case_id, 
         individuals=individuals,
         ind_positions=ind_positions,
         vcf=vcf,
