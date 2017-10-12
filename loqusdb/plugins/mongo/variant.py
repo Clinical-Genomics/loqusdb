@@ -17,22 +17,13 @@ class VariantMixin(BaseVariantMixin):
                 variant (dict): A variant dictionary
         
         """
-        LOG.debug("Upserting variant: {0}".format(variant.get('variant_id')))
+        LOG.debug("Upserting variant: {0}".format(variant.get('_id')))
         
-        # If no family_id is used the list will be populated with None
-        message = self.db.variant.update(
-            {'_id': variant['variant_id'],},
-            {
+        update = {
                 '$inc': {
                     'homozygote': variant.get('homozygote', 0),
                     'hemizygote': variant.get('hemizygote', 0),
                     'observations': 1
-                },
-                '$push': {
-                    'families': {
-                        '$each': [variant.get('case_id')],
-                        '$slice': -50
-                        }
                 },
                 '$set': {
                     'chrom': variant.get('chrom'),
@@ -41,7 +32,18 @@ class VariantMixin(BaseVariantMixin):
                     'ref': variant.get('ref'),
                     'alt': variant.get('alt'),
                 }
-             }, 
+             }
+        if variant.get('case_id'):
+            update['$push'] = {
+                                'families': {
+                                '$each': [variant.get('case_id')],
+                                '$slice': -50
+                                }
+                            }
+
+        message = self.db.variant.update(
+            {'_id': variant['_id'],},
+            update,
              upsert=True
         )
 

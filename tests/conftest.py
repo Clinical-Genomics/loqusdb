@@ -1,16 +1,16 @@
 import logging
 import pytest
+
+import cyvcf2
+
 from mongomock import MongoClient
 from pymongo import MongoClient as RealMongoClient
-
 from ped_parser import FamilyParser
 
 from loqusdb.plugins import MongoAdapter
 from loqusdb.log import init_log
-
 from loqusdb.models import Case
-
-from loqusdb.build_models import build_variant
+from loqusdb.build_models import build_variant, build_case
 
 logger = logging.getLogger('.')
 
@@ -80,7 +80,7 @@ def homozygous_variant(request):
     variant = {
         '_id': 'test',
         'homozygote': 1,
-        'family_id': '1'
+        'case_id': '1'
     }
     return variant
 
@@ -135,7 +135,23 @@ def case_lines(request, ped_path):
     return case
 
 @pytest.fixture(scope='function')
-def case_obj(request, case_lines):
+def vcf_obj(request, vcf_path):
+    """return a cyvcf2.VCF obj"""
+    return cyvcf2.VCF(vcf_path)
+
+@pytest.fixture(scope='function')
+def case_obj(request, case_lines, vcf_obj, vcf_path):
+    """Return a case obj"""
+    family_parser = FamilyParser(case_lines, family_type='ped')
+    families = list(family_parser.families.keys())
+    family = family_parser.families[families[0]]
+    vcf_individuals = vcf_obj.samples
+    _case_obj = build_case(family, vcf_individuals, vcf_path=vcf_path)
+    return _case_obj
+
+
+@pytest.fixture(scope='function')
+def family_obj(request, case_lines):
     """Return a case obj"""
     family_parser = FamilyParser(case_lines, family_type='ped')
     families = list(family_parser.families.keys())

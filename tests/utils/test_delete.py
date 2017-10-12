@@ -1,4 +1,5 @@
-from loqusdb.utils import (load_database, delete)
+from loqusdb.utils.delete import delete
+from loqusdb.utils.load import load_database
 
 def test_delete_case(mongo_adapter, simple_case):
     ## GIVEN a mongoadapter with a inserted case

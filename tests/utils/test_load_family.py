@@ -1,45 +1,27 @@
 import pytest
 
-from loqusdb.utils import load_family
 from loqusdb.exceptions import CaseError
 
-def test_load_family(mongo_adapter):
+def test_load_family(mongo_adapter, simple_case):
+    ## GIVEN a adapter to an empty database
     db = mongo_adapter.db
     
-    case = {
-        'case_id': '1',
-        'vcf_path': 'path_to_vcf'
-    }
+    ## WHEN loading a family to the database
+    mongo_adapter.add_family(simple_casem)
     
-    load_family(
-        adapter=mongo_adapter,
-        case_id=case['case_id'],
-        vcf_path=case['vcf_path']
-        )
-    
+    ## THEN assert that the case was loaded
     mongo_case = db.case.find_one()
-    
-    assert mongo_case['case_id'] == case['case_id']
+    assert mongo_case['case_id'] == simple_case['case_id']
 
 
-def test_load_same_family_twice(mongo_adapter):
+def test_load_same_family_twice(mongo_adapter, simple_case):
+    ## GIVEN a adapter to an empty database
     db = mongo_adapter.db
 
-    case = {
-        'case_id': '1',
-        'vcf_path': 'path_to_vcf'
-    }
+    ## WHEN loading a family to the database twice
+    mongo_adapter.add_family(simple_case)
     
-    load_family(
-        adapter=mongo_adapter,
-        case_id=case['case_id'],
-        vcf_path=case['vcf_path']
-        )
-    
+    ## THEN assert that a CaseError is raised
     with pytest.raises(CaseError):
-        load_family(
-            adapter=mongo_adapter,
-            case_id=case['case_id'],
-            vcf_path=case['vcf_path']
-            )
+        mongo_adapter.add_family(simple_case)
         

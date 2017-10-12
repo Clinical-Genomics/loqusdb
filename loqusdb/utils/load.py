@@ -46,26 +46,16 @@ def load_database(adapter, variant_file, family_file, nr_variants=None,
 
     case_id = case_id or family.family_id
     
-    # Convert infromation to a loqusdb Case object
-    case_obj = build_case(
-        family=family, 
-        case_id=case_id,
-        vcf_path=variant_file,
-    )
-    
 
     # Get the indivuduals that are present in vcf file
     vcf_individuals = vcf.samples
-    # Save the positions of the indivuduals in vcf file
-    ind_positions = {}
-    for i, ind_id in enumerate(vcf_individuals):
-        ind_positions[ind_id] = i
-    
-    # Check that all individuals in family file is present in vcf
-    for ind in case_obj:
-        ind_id = ind.ind_id
-        if ind_id not in ind_positions:
-            raise CaseError("Ind %s in ped file does not exist in VCF", ind_id)
+    # Convert infromation to a loqusdb Case object
+    case_obj = build_case(
+        case=family, 
+        case_id=case_id,
+        vcf_path=variant_file,
+        vcf_individuals=vcf_individuals
+    )
 
     # Add the case to database
     try:
@@ -77,10 +67,8 @@ def load_database(adapter, variant_file, family_file, nr_variants=None,
     try:
         load_variants(  
             adapter=adapter, 
-            case_id=case_obj['case_id'], 
-            individuals=[ind['ind_id'] for ind in case_obj['individuals']],
+            case_obj=case_obj, 
             vcf_obj=vcf,
-            ind_positions=ind_positions,
             nr_variants=nr_variants,
             skip_case_id=skip_case_id,
             gq_treshold=gq_treshold,
@@ -97,23 +85,20 @@ def load_database(adapter, variant_file, family_file, nr_variants=None,
         )
         raise err
 
-    
-
-def load_variants(adapter, case_id, individuals, vcf_obj, ind_positions, 
-                  nr_variants=None, skip_case_id=False, gq_treshold=None):
+def load_variants(adapter, vcf_obj, case_obj, nr_variants=None, skip_case_id=False, 
+                  gq_treshold=None):
     """Load variants for a family into the database.
 
     Args:
         adapter (loqusdb.plugins.Adapter): initialized plugin
-        case_id (str): unique family identifier
-        inidividuals (List[str]): list to match individuals
         vcf_obj (cyvcf2.VCF): An iterable with cyvcf2.Variants
-        ind_positions(dict): dict with {<ind_id>: <pos>} in vcf
+        case_obj(Case): dict with case information
         nr_variants(int)
         skip_case_id (bool): whether to include the case id on variant level 
                              or not
         gq_treshold(int)
     """
+    case_id = case_obj['case_id']
     if skip_case_id:
         case_id = None
     # Loop over the variants in the vcf
@@ -122,8 +107,7 @@ def load_variants(adapter, case_id, individuals, vcf_obj, ind_positions,
             #Creates a variant that is ready to insert into the database
             formated_variant = build_variant(
                     variant=variant,
-                    individuals=individuals,
-                    ind_positions=ind_positions,
+                    case_obj=case_obj,
                     case_id=case_id,
                     gq_treshold=gq_treshold,
                 )

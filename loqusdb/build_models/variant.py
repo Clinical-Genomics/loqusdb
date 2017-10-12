@@ -5,7 +5,7 @@ from pprint import pprint as pp
 from loqusdb.models import Variant 
 from loqusdb.exceptions import CaseError
 
-logger = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 # These are coordinate for the pseudo autosomal regions in GRCh37
 PAR = {
@@ -45,7 +45,7 @@ def get_variant_id(variant):
     )
     return variant_id
 
-def build_variant(variant, individuals, ind_positions, case_id=None, gq_treshold=None):
+def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
     """Return a Variant object
     
         Take a cyvcf2 formated variant line and return a Variant.
@@ -54,14 +54,13 @@ def build_variant(variant, individuals, ind_positions, case_id=None, gq_treshold
         is below gq treshold then None.
         
         Args:
-            variant (cyvcf2.Variant)
-            individuals (list[str]): A list with individual ids
-            ind_positions (dict)
-            case_id (str): The case id
-            gq_treshold (int): Gq treshold
+            variant(cyvcf2.Variant)
+            case_obj(Case)
+            case_id(str): The case id
+            gq_treshold(int): Gq treshold
         
         Return:
-            formated_variant (dict): A variant dictionary
+            formated_variant(dict): A variant dictionary
     """
     sv=False
     if variant.var_type == 'sv':
@@ -117,10 +116,10 @@ def build_variant(variant, individuals, ind_positions, case_id=None, gq_treshold
         found_variant = True
     else:
         found_variant = False
-        for ind_id in individuals:
-            ind_obj = individuals[ind_id]
-            
-            ind_pos = ind_positions[ind_id]
+        for ind_obj in case_obj['individuals']:
+            ind_id = ind_obj['ind_id']
+            # Get the index position for the individual in the VCF
+            ind_pos = ind_obj['ind_index']
             gq = int(variant.gt_quals[ind_pos])
             if (gq_treshold and gq < gq_treshold):
                 continue
@@ -128,18 +127,18 @@ def build_variant(variant, individuals, ind_positions, case_id=None, gq_treshold
             genotype = GENOTYPE_MAP[variant.gt_types[ind_pos]]
             
             if genotype in ['het', 'hom_alt']:
-                logger.debug("Found variant")
+                LOG.debug("Found variant")
                 found_variant = True
             
                 # If variant in X or Y and individual is male,
                 # we need to check hemizygosity
                 if chrom in ['X','Y'] and ind_obj.sex == 1:
                     if not check_par(chrom, pos):
-                        logger.debug("Found hemizygous variant")
+                        LOG.debug("Found hemizygous variant")
                         found_hemizygote = 1
                 
                 if genotype == 'hom_alt':
-                    logger.debug("Found homozygote alternative variant")
+                    LOG.debug("Found homozygote alternative variant")
                     found_homozygote = 1
 
     if not found_variant:

@@ -51,7 +51,10 @@ class CaseMixin(BaseCaseMixin):
                                 case.get('case_id')
                             ))
         
-        mongo_case_id = self.db.case.insert_one(case).inserted_id
+        mongo_case_id = self.db.case.insert_one({
+            'case_id': case['case_id'],
+            'vcf_path': case['vcf_path'],
+        }).inserted_id
     
         return mongo_case_id
         

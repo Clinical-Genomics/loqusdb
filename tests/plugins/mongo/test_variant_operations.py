@@ -38,6 +38,8 @@ class TestInsertVariant:
         db = mongo_adapter.db
     
         mongo_variant = db.variant.find_one()
+        print(mongo_variant)
+        print(homozygous_variant)
         assert mongo_variant['_id'] == 'test'
         assert mongo_variant['observations'] == 1
         assert mongo_variant.get('homozygote', 0) == 1
@@ -175,7 +177,7 @@ class TestRemoveVariant:
 
         variant = {
             '_id': 'test',
-            'family_id':'1'
+            'case_id':'1'
         }
         
         mongo_adapter.delete_variant(variant)

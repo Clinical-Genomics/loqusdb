@@ -1,6 +1,6 @@
 import pytest
 
-from loqusdb.utils import load_database
+from loqusdb.utils.load import load_database
 from loqusdb.exceptions import CaseError
 
 def test_load_database(vcf_path, ped_path, mongo_adapter, case_id):

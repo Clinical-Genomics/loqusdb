@@ -36,26 +36,21 @@ def delete(adapter, variant_file, family_file, family_type='ped', case_id=None):
     case_id = case_id or family.family_id
 
     case_obj = build_case(
-        case=family, 
-        case_id=case_id
-        )
-
-    vcf_individuals = vcf_obj.samples
-    ind_positions = {}
-    for i, ind_id in enumerate(vcf_individuals):
-        ind_positions[ind_id] = i
+        case=family,
+        vcf_individuals=vcf_obj.samples,
+        case_id=case_id,
+    )
 
     adapter.delete_case(case_obj)
     
     delete_variants(
         adapter=adapter,
         vcf_obj=vcf_obj,
-        ind_positions=ind_positions,
+        case_obj=case_obj,
         case_id=case_id,
-        individuals=[ind['ind_id'] for ind in case_obj['individuals']]
     )
 
-def delete_variants(adapter, vcf_obj, ind_positions, case_id, individuals):
+def delete_variants(adapter, vcf_obj, case_obj, case_id):
     """Delete variants for a case in the database
     
     Args:
@@ -76,8 +71,7 @@ def delete_variants(adapter, vcf_obj, ind_positions, case_id, individuals):
     for variant in vcf_obj:
         formated_variant = build_variant(
             variant=variant,
-            ind_positions=ind_positions,
-            individuals=individuals,
+            case_obj=case_obj,
             case_id=case_id,
         )
         
