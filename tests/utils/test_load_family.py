@@ -7,7 +7,7 @@ def test_load_family(mongo_adapter, simple_case):
     db = mongo_adapter.db
     
     ## WHEN loading a family to the database
-    mongo_adapter.add_family(simple_casem)
+    mongo_adapter.add_case(simple_case)
     
     ## THEN assert that the case was loaded
     mongo_case = db.case.find_one()
@@ -19,9 +19,9 @@ def test_load_same_family_twice(mongo_adapter, simple_case):
     db = mongo_adapter.db
 
     ## WHEN loading a family to the database twice
-    mongo_adapter.add_family(simple_case)
+    mongo_adapter.add_case(simple_case)
     
     ## THEN assert that a CaseError is raised
     with pytest.raises(CaseError):
-        mongo_adapter.add_family(simple_case)
+        mongo_adapter.add_case(simple_case)
         

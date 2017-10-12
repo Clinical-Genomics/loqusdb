@@ -50,7 +50,7 @@ def delete(adapter, variant_file, family_file, family_type='ped', case_id=None):
         case_id=case_id,
     )
 
-def delete_variants(adapter, vcf_obj, case_obj, case_id):
+def delete_variants(adapter, vcf_obj, case_obj, case_id=None):
     """Delete variants for a case in the database
     
     Args:
@@ -62,6 +62,7 @@ def delete_variants(adapter, vcf_obj, case_obj, case_id):
     Returns:
         nr_of_deleted (int): Number of deleted variants
     """
+    case_id = case_id or case_obj['case_id']
     nr_of_deleted = 0
     start_deleting = datetime.now()
     chrom_time = datetime.now()
