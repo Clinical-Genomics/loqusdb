@@ -6,11 +6,11 @@ from datetime import datetime
 
 from vcftoolbox import (HeaderParser, print_headers, print_variant)
 
-from loqusdb import __version__, CHROMOSOME_ORDER
+from loqusdb import CHROMOSOME_ORDER
 
 from . import base_command
 
-logger = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 @base_command.command('export', short_help="Export variants to VCF format")
 @click.option('-o', '--outfile',
@@ -24,8 +24,9 @@ def export(ctx, outfile):
         The variants are exported to a vcf file
     """
     adapter = ctx.obj['adapter']
+    version = ctx.obj['version']
     
-    logger.info("Export the variants from {0}".format(adapter))
+    LOG.info("Export the variants from {0}".format(adapter))
     nr_cases = 0
     
     existing_chromosomes = set(adapter.get_chromosomes())
@@ -39,7 +40,7 @@ def export(ctx, outfile):
         ordered_chromosomes.append(chrom)
     
     nr_cases = adapter.cases().count()
-    logger.info("Found {0} cases in database".format(nr_cases))
+    LOG.info("Found {0} cases in database".format(nr_cases))
 
     head = HeaderParser()
     head.add_fileformat("VCFv4.3")
@@ -47,7 +48,7 @@ def export(ctx, outfile):
     head.add_info("Obs", '1', 'Integer', "The number of observations for the variant")
     head.add_info("Hom", '1', 'Integer', "The number of observed homozygotes")
     head.add_info("Hem", '1', 'Integer', "The number of observed hemizygotes")
-    head.add_version_tracking("loqusdb", __version__, datetime.now().strftime("%Y-%m-%d %H:%M"))
+    head.add_version_tracking("loqusdb", version, datetime.now().strftime("%Y-%m-%d %H:%M"))
     for chrom in ordered_chromosomes:
         length = adapter.get_max_position(chrom)
         head.add_contig(contig_id=chrom, length=str(length))

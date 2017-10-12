@@ -7,12 +7,12 @@ from pprint import pprint as pp
 from datetime import datetime
 
 from loqusdb.exceptions import (CaseError, VcfError)
-from loqusdb.utils import load_database
-from loqusdb.vcf_tools.vcf import (get_file_handle, check_vcf)
+from loqusdb.utils.load import load_database
+from loqusdb.utils.vcf import (get_file_handle, check_vcf)
 
 from . import base_command
 
-logger = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 @base_command.command('load', short_help="Load the variants of a family")
@@ -52,7 +52,7 @@ def load(ctx, variant_file, family_file, family_type, skip_case_id, gq_treshold,
     in the family.
     """
     if not family_file:
-        logger.warning("Please provide a family file")
+        LOG.warning("Please provide a family file")
         ctx.abort()
     
     variant_path = os.path.abspath(variant_file)
@@ -63,11 +63,11 @@ def load(ctx, variant_file, family_file, family_type, skip_case_id, gq_treshold,
         variant_handle = get_file_handle(variant_path)
         nr_variants = check_vcf(variant_handle)
     except VcfError as error:
-        logger.warning(error)
+        LOG.warning(error)
         ctx.abort()
 
-    logger.info("Vcf file looks fine")
-    logger.info("Nr of variants in vcf: {0}".format(nr_variants))
+    LOG.info("Vcf file looks fine")
+    LOG.info("Nr of variants in vcf: {0}".format(nr_variants))
     start_inserting = datetime.now()
     
     try:
@@ -82,10 +82,10 @@ def load(ctx, variant_file, family_file, family_type, skip_case_id, gq_treshold,
             nr_variants=nr_variants,
         )
     except (SyntaxError, CaseError, IOError) as error:
-        logger.warning(error)
+        LOG.warning(error)
         ctx.abort()
     
-    logger.info("Time to insert variants: {0}".format(
+    LOG.info("Time to insert variants: {0}".format(
                 datetime.now() - start_inserting))
     adapter.check_indexes()
         

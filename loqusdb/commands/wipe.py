@@ -3,7 +3,7 @@ import click
 
 from . import base_command
 
-logger = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 def abort_if_false(ctx, param, value):
     if not value:

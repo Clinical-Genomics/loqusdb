@@ -3,12 +3,12 @@ import click
 import coloredlogs
 
 from loqusdb.log import LEVELS, init_log
-from loqusdb import logger, __version__
+from loqusdb import __version__
 from loqusdb.plugins import MongoAdapter
 
 LOG_LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
 
-logger = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 @click.group()
 @click.option('-db', '--database',
@@ -62,7 +62,7 @@ def cli(ctx, conn_host, database, username, password, port, host, verbose):
             pwd = '******'
         else:
             pwd = None
-        logger.info('uri={0}{1}:{2}@{3}:{4}/{5}'.format(
+        LOG.info('uri={0}{1}:{2}@{3}:{4}/{5}'.format(
             conn_host, username, pwd, host, port, database
         ))
     
@@ -81,3 +81,4 @@ def cli(ctx, conn_host, database, username, password, port, host, verbose):
     ctx.obj['port'] = port
     ctx.obj['host'] = host
     ctx.obj['adapter'] = adapter
+    ctx.obj['version'] = __version__
