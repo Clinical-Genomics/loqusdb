@@ -2,6 +2,8 @@ import logging
 import click
 import coloredlogs
 
+from mongomock import MongoClient
+
 from loqusdb.log import LEVELS, init_log
 from loqusdb import __version__
 from loqusdb.plugins import MongoAdapter
@@ -37,19 +39,22 @@ LOG = logging.getLogger(__name__)
 #                 type=click.Choice(['mongo',]),
 #                 help='Specify what backend to use.'
 # )
-@click.option('-c', '--conn_host',
-                default='mongodb://',
-                show_default=True,
+@click.option('-t', '--test',
+                is_flag=True,
                 help='Used for testing.'
 )
 @click.option('-v', '--verbose', count=True, default=1)
 @click.version_option(__version__)
 @click.pass_context
-def cli(ctx, conn_host, database, username, password, port, host, verbose):
+def cli(ctx, database, username, password, port, host, verbose, test):
     """loqusdb: manage a local variant count database."""
     # configure root logger to print to STDERR
     loglevel = LEVELS.get(max(verbose,1), "INFO")
     coloredlogs.install(level=loglevel)
+    conn_host = 'mongodb://'
+    client = None
+    if test:
+        client = MongoClient()
     
     # mongo uri looks like:
     #mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database][?options]]
@@ -71,7 +76,8 @@ def cli(ctx, conn_host, database, username, password, port, host, verbose):
         host=host, 
         port=port, 
         database=database,
-        uri=uri
+        uri=uri,
+        client=client
     )
     
     ctx.obj = {}
