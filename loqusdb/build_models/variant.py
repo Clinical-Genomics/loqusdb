@@ -62,7 +62,7 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
         Return:
             formated_variant(dict): A variant dictionary
     """
-    sv=False
+    sv = False
     if variant.var_type == 'sv':
         sv = True
 
@@ -90,7 +90,7 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
         sv_len = abs(length)
     else:
         sv_len = end - pos
-
+    
     if sv_type == 'BND':
         other_coordinates = alt.strip('ACGTN[]').split(':')
         end_chrom = other_coordinates[0]
@@ -107,6 +107,9 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
     if (sv_len == 0 and alt != '<INS>'):
         sv_len = len(alt)
 
+    if (pos == end) and (sv_len > 0):
+        end = pos + sv_len
+    
     # These are integers that will be used when uploading
     found_homozygote = 0
     found_hemizygote = 0
@@ -132,7 +135,7 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
             
                 # If variant in X or Y and individual is male,
                 # we need to check hemizygosity
-                if chrom in ['X','Y'] and ind_obj.sex == 1:
+                if chrom in ['X','Y'] and ind_obj['sex'] == 1:
                     if not check_par(chrom, pos):
                         LOG.debug("Found hemizygous variant")
                         found_hemizygote = 1

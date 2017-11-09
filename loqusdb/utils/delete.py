@@ -27,13 +27,17 @@ def delete(adapter, variant_file, family_file, family_type='ped', case_id=None):
     vcf_obj = get_vcf(variant_file)
 
     # Parse the family file infromation
-    with open(family_file, 'r') as family_lines:
-        family = get_case(
-            family_lines=family_lines, 
-            family_type=family_type
-        )
+    family = None
+    family_id = None
+    if family_file:
+        with open(family_file, 'r') as family_lines:
+            family = get_case(
+                family_lines=family_lines, 
+                family_type=family_type
+            )
+            family_id = family.family_id
 
-    case_id = case_id or family.family_id
+    case_id = case_id or family_id
 
     case_obj = build_case(
         case=family,
@@ -94,6 +98,7 @@ def delete_variants(adapter, vcf_obj, case_obj, case_id=None):
             LOG.info("Time to delete chromosome {0}: {1}".format(
                 current_chrom, datetime.now()-chrom_time))
             LOG.info("Start deleting chromosome {0}".format(new_chrom))
+            current_chrom = new_chrom
 
 
     return nr_of_deleted

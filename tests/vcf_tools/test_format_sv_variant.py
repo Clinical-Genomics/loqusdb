@@ -1,3 +1,4 @@
+from pprint import pprint as pp
 from loqusdb.build_models import build_variant
 
 def test_format_indel(del_variant, case_obj):
@@ -49,9 +50,8 @@ def test_format_small_ins(small_insert_variant, case_obj):
     assert formated_variant['chrom'] == variant.CHROM
     assert formated_variant['end_chrom'] == variant.CHROM
     assert formated_variant['pos'] == variant.POS
-    assert formated_variant['end'] == variant.INFO['END']
+    assert formated_variant['end'] == variant.POS + abs(variant.INFO['SVLEN'])
     assert formated_variant['sv_len'] == abs(variant.INFO['SVLEN'])
-    
     
     assert formated_variant['ref'] == variant.REF
     assert formated_variant['alt'] == variant.ALT[0]

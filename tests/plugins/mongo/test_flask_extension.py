@@ -1,14 +1,24 @@
 from loqusdb.plugins import MongoAdapter
+from mongomock import MongoClient
 
-class FlaskApp(object):
-    """Mock a flask app"""
-    def __init__(self):
-        super(FlaskApp, self).__init__()
+class MockFlaskApp(object):
+    """Mock a Flask App"""
+    def __init__(self, host='localhost', port=27017, db_name='test'):
+        client = MongoClient()
+        
         self.config = {}
+        self.extensions = {'pymongo': {}}
+        
+
+        self.config['MONGO_DBNAME'] = db_name
+        self.config['MONGO_PORT'] = port
+        self.config['MONGO_HOST'] = host
+        
+        # This is how flaskpymongo sets it up:
+        self.extensions['pymongo']['MONGO'] = [client, client[db_name]]
 
 def test_init_app(mongo_client):
-    app = FlaskApp()
-    app.config['LOQUSDB_URI'] = "mongodb://localhost"
+    app = MockFlaskApp()
     adapter = MongoAdapter()
     adapter.init_app(app)
-    assert True
+    assert adapter.db_name == app.config['MONGO_DBNAME']

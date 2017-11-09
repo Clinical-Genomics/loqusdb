@@ -30,7 +30,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def delete(ctx, variant_file, family_file, family_type, case_id):
     """Delete the variants of a case."""
-    if not family_file:
+    if not (family_file or case_id):
         LOG.error("Please provide a family file")
         ctx.abort()
     

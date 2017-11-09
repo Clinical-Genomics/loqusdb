@@ -43,29 +43,12 @@ def mongo_client(request):
     client = MongoClient()
     return client
 
-# @pytest.fixture(scope='function')
-# def real_mongo_client(request):
-#     """Return a mongo client"""
-#     client = RealMongoClient()
-#
-#     def teardown():
-#         client.drop_database('test')
-#
-#     request.addfinalizer(teardown)
-#     return client
-#
-# @pytest.fixture(scope='function')
-# def real_mongo_adapter(request, real_mongo_client):
-#     """Return a mongo adapter"""
-#     adapter = MongoAdapter()
-#     adapter.connect(database='test', client=real_mongo_client)
-#     return adapter
-
 @pytest.fixture(scope='function')
 def mongo_adapter(request, mongo_client):
     """Return a mongo adapter"""
-    adapter = MongoAdapter()
-    adapter.connect(database='test', client=mongo_client)
+    db_name = 'test'
+    adapter = MongoAdapter(mongo_client, db_name)
+
     return adapter
 
 @pytest.fixture(scope='function')

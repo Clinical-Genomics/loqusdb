@@ -1,4 +1,7 @@
 import logging
+
+from pprint import pprint as pp
+
 from loqusdb.plugins import BaseVariantMixin
 
 from pymongo import (ASCENDING, DESCENDING)
@@ -86,8 +89,8 @@ class VariantMixin(BaseVariantMixin):
         
         nr_events = cluster['nr_events']
         
-        pos_mean = (cluster['pos_sum'] + variant['pos']) // (nr_events + 1)
-        end_mean = (cluster['end_sum'] + variant['end'])// (nr_events + 1)
+        pos_mean = int((cluster['pos_sum'] + variant['pos']) // (nr_events + 1))
+        end_mean = int((cluster['end_sum'] + variant['end'])// (nr_events + 1))
         
         # We need to calculate the new cluster length
         if cluster['sv_type'] != 'BND':
@@ -100,7 +103,7 @@ class VariantMixin(BaseVariantMixin):
         # Otherwise the interval size is closest whole 100 number
         
         # The max size of a interval is 2000
-        interval_size = min(round(cluster_len/10, -2), 2000)
+        interval_size = int(min(round(cluster_len/10, -2), 2000))
         
         message = self.db.structural_variant.update(
             {'_id': cluster['_id'],},
@@ -112,7 +115,7 @@ class VariantMixin(BaseVariantMixin):
                 },
                 '$push': {
                     'families': {
-                        '$each': [variant.get('family_id')],
+                        '$each': [variant.get('case_id')],
                         '$slice': -50,
                         }
                 },
@@ -156,20 +159,29 @@ class VariantMixin(BaseVariantMixin):
             'chrom': variant['chrom'],
             'end_chrom': variant['end_chrom'],
             'sv_type': variant['sv_type'],
-            'pos_left': {'$gte': variant['pos']},
-            'pos_right': {'$lte': variant['pos']},
-            'end_left': {'$gte': variant['end']},
-            'end_right': {'$lte': variant['end']},
+            'pos_left': {'$lte': variant['pos']},
+            'pos_right': {'$gte': variant['pos']},
+            'end_left': {'$lte': variant['end']},
+            'end_right': {'$gte': variant['end']},
         })
-        nr_hits = res.count()
-        if nr_hits == 0:
-            LOG.debug("Multiple SV hits")
-            return None
+
+        match = None
+        distance = None
+        closest_hit = None
         # We count the distance to mean on both ends to see which variant is closest
         for hit in res:
-            distance = (abs(variant['pos'] - (pos_left+pos_right)/2) + 
-                        abs(variant['end'] - (end_left+end_right)/2))
-        return None
+            distance = (abs(variant['pos'] - (hit['pos_left'] + hit['pos_right'])/2) + 
+                        abs(variant['end'] - (hit['end_left'] + hit['end_right'])/2))
+
+            if closest_hit is None:
+                match = hit
+                closest_hit = distance
+                continue
+            
+            if distance < closest_hit:
+                match = hit
+            
+        return match
 
     def get_variants(self, chromosome=None, start=None, end=None):
         """Return all variants in the database

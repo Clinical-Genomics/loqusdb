@@ -31,21 +31,25 @@ def load_database(adapter, variant_file, family_file, nr_variants=None,
     """
     # Get a cyvcf2.VCF object
     vcf = get_vcf(variant_file)
-    
+
     if gq_treshold:
         if not vcf.contains('GQ'):
             LOG.warning('Set gq-treshold to 0 or add info to vcf')
             raise SyntaxError('GQ is not defined in vcf header')
 
     # Get a ped_parser.Family object from family file
-    with open(family_file, 'r') as family_lines:
-        family = get_case(
-            family_lines=family_lines, 
-            family_type=family_type
-        )
-
-    case_id = case_id or family.family_id
+    family = None
+    family_id = None
+    if family_file:
+        with open(family_file, 'r') as family_lines:
+            family = get_case(
+                family_lines=family_lines, 
+                family_type=family_type
+            )
+            family_id = family.family_id
     
+    # There has to be a case_id or a family at this stage.
+    case_id = case_id or family_id 
 
     # Get the indivuduals that are present in vcf file
     vcf_individuals = vcf.samples
@@ -112,7 +116,8 @@ def load_variants(adapter, vcf_obj, case_obj, nr_variants=None, skip_case_id=Fal
                     gq_treshold=gq_treshold,
                 )
             # We need to check if there was any information returned
-            # The variant could be excluded based on low gq or no calls in family
+            # The variant could be excluded based on low gq or if no individiual was called 
+            # in the particular case
             if not formated_variant:
                 continue
             if formated_variant['is_sv']:

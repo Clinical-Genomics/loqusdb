@@ -18,10 +18,13 @@ def build_case(case, vcf_individuals, case_id=None, vcf_path=None, sv_individual
     for i, ind in enumerate(vcf_individuals):
         individual_positions[ind] = i
 
-    if not case.affected_individuals:
-        LOG.warning("No affected individuals could be found in ped file")
+    family_id = None
+    if case:
+        if not case.affected_individuals:
+            LOG.warning("No affected individuals could be found in ped file")
+        family_id = case.family_id
 
-    case_id = case_id or case.family_id
+    case_id = case_id or family_id
 
     case_obj = Case(
         case_id=case_id, 
@@ -30,20 +33,30 @@ def build_case(case, vcf_individuals, case_id=None, vcf_path=None, sv_individual
         nr_variants=nr_variants
     )
 
-    for ind_id in case.individuals:
-        individual = case.individuals[ind_id]
-        try:
+    ind_objs = []
+    if case:
+        for ind_id in case.individuals:
+            individual = case.individuals[ind_id]
+            try:
+                ind_obj = Individual(
+                    ind_id=ind_id,
+                    case_id=case_id,
+                    ind_index=individual_positions[ind_id],
+                    sex=individual.sex,
+                )
+                ind_objs.append(ind_obj)
+            except KeyError:
+                raise CaseError("Ind %s in ped file does not exist in VCF", ind_id)
+    else:
+        for ind_id in individual_positions:
             ind_obj = Individual(
-                ind_id=ind_id,
-                case_id=case_id,
-                mother=individual.mother,
-                father=individual.father,
-                sex=individual.sex,
-                phenotype=individual.phenotype,
+                ind_id = ind_id,
+                case_id = case_id,
                 ind_index=individual_positions[ind_id],
             )
-            case_obj.add_individual(ind_obj)
-        except KeyError:
-            raise CaseError("Ind %s in ped file does not exist in VCF", ind_id)
+            ind_objs.append(ind_obj)
+    
+    for ind_obj in ind_objs:
+        case_obj.add_individual(ind_obj)
 
     return case_obj

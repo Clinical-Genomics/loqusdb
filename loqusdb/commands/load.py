@@ -49,10 +49,11 @@ def load(ctx, variant_file, family_file, family_type, skip_case_id, gq_treshold,
     """Load the variants of a case
 
     The loading is based on if the variant is seen in a ny affected individual
-    in the family.
+    in the family. If no family file is provided all individuals in vcf file will 
+    be considered.
     """
-    if not family_file:
-        LOG.warning("Please provide a family file")
+    if not (family_file or case_id):
+        LOG.warning("Please provide a family file or a case id")
         ctx.abort()
     
     variant_path = os.path.abspath(variant_file)

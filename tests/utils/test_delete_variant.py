@@ -6,7 +6,7 @@ from loqusdb.build_models.variant import get_variant_id
 def test_delete_variants(mongo_adapter, het_variant, case_obj):
     ## GIVEN a database with one variant
     db = mongo_adapter.db
-    case_id = case_obj.case_id
+    case_id = case_obj['case_id']
     
     db.variant.insert_one({
         '_id': get_variant_id(het_variant),
@@ -32,7 +32,7 @@ def test_delete_variants(mongo_adapter, het_variant, case_obj):
 def test_delete_variant(mongo_adapter, het_variant, case_obj):
     ## GIVEN a database with one variant that is observed twice
     db = mongo_adapter.db
-    case_id = case_obj.case_id
+    case_id = case_obj['case_id']
     
     db.variant.insert_one({
         '_id': get_variant_id(het_variant),
@@ -62,7 +62,7 @@ def test_delete_non_existing_variant(mongo_adapter, het_variant, case_obj):
     """docstring for test_load_variants"""
     ## GIVEN a mongo adapter to an empty database
     db = mongo_adapter.db
-    case_id = case_obj.case_id
+    case_id = case_obj['case_id']
 
     ## WHEN deleting the variants
     delete_variants(

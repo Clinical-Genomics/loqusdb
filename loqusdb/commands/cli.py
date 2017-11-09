@@ -2,7 +2,10 @@ import logging
 import click
 import coloredlogs
 
-from mongomock import MongoClient
+from mongomock import MongoClient as MockClient
+
+from mongo_adapter import get_client
+from mongo_adapter.exceptions import Error as DB_Error
 
 from loqusdb.log import LEVELS, init_log
 from loqusdb import __version__
@@ -51,34 +54,32 @@ def cli(ctx, database, username, password, port, host, verbose, test):
     # configure root logger to print to STDERR
     loglevel = LEVELS.get(max(verbose,1), "INFO")
     coloredlogs.install(level=loglevel)
-    conn_host = 'mongodb://'
-    client = None
     if test:
-        client = MongoClient()
-    
+        client = MockClient()
+    else:
+        try:
+            client = get_client(
+                host=host, 
+                port=port, 
+                username=username,
+                password=password,
+            )
+        except DB_Error as err:
+            logger.warning(err)
+            ctx.abort()
+
     # mongo uri looks like:
-    #mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database][?options]]
-    uri = None
-    if username and password:
-        uri = "{0}{1}:{2}@{3}:{4}/{5}".format(
-              conn_host, username, password, host, port, database
-              )
-        if password:
-            pwd = '******'
-        else:
-            pwd = None
-        LOG.info('uri={0}{1}:{2}@{3}:{4}/{5}'.format(
-            conn_host, username, pwd, host, port, database
-        ))
-    
-    adapter = MongoAdapter()
-    adapter.connect(
-        host=host, 
-        port=port, 
-        database=database,
-        uri=uri,
-        client=client
-    )
+    # mongodb://[username:password@]host1[:port1][,host2[:port2],...
+    # [,hostN[:portN]]][/[database][?options]]
+    if password:
+        pwd = '******'
+    else:
+        pwd = None
+    LOG.info('uri=mongodb//:{0}:{1}@{2}:{3}/{4}'.format(
+        username, pwd, host, port, database
+    ))
+
+    adapter = MongoAdapter(client, db_name = database)
     
     ctx.obj = {}
     ctx.obj['db'] = database

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-from .dotdict import DotDict
 
-
-class Case(DotDict):
+class Case(dict):
     """Represent a Case."""
     def __init__(self, case_id, vcf_path, vcfsv_path=None, nr_variants=None):
         super(Case, self).__init__(
@@ -12,24 +10,35 @@ class Case(DotDict):
             nr_variants=nr_variants,
         )
         self['individuals'] = []
-        self._inds = {}
+        self['sv_individuals'] = []
+        self['_inds'] = {}
+        self['_sv_inds'] = {}
     
-    def add_individual(self, individual):
+    def add_individual(self, individual, ind_type='snv'):
         """Add a individual to the case
         
         Args:
             individual(Individual)
+            ind_type(str): 'snv' or 'sv'
         """
-        self['individuals'].append(individual)
-        self._inds[individual['ind_id']] = individual
+        if ind_type == 'snv':
+            self['individuals'].append(individual)
+            self['_inds'][individual['ind_id']] = individual
+        else:
+            self['sv_individuals'].append(individual)
+            self['_sv_inds'][individual['ind_id']] = individual
+            
     
-    def get_individual(self, ind_id):
+    def get_individual(self, ind_id, ind_type='snv'):
         """Return a individual object"""
-        return self._inds.get(ind_id)
+        if ind_type == 'snv':
+            return self['_inds'].get(ind_id)
+        else:
+            return self['_sv_inds'].get(ind_id)
     
 
 
-class Individual(DotDict):
+class Individual(dict):
     """Individual representation."""
     def __init__(self, ind_id, case_id=None, mother=None,
                  father=None, sex=None, phenotype=None, ind_index=None):
@@ -48,9 +57,6 @@ class Individual(DotDict):
             ind_id=ind_id,
             name=ind_id,
             case_id=case_id,
-            mother=mother,
-            father=father,
-            sex=sex,
-            phenotype=phenotype,
             ind_index=ind_index,
+            sex=sex,
         )
