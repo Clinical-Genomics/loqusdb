@@ -41,7 +41,7 @@ def test_load_same_insertion_twice(small_insert_variant, mongo_adapter, case_obj
     ## THEN assert the object returned is correct
     variant_cluster = adapter.db.structural_variant.find_one()
     
-    assert variant_cluster['families'] == [case_id, '2']
+    assert set(variant_cluster['families']) == set([case_id, '2'])
 
 def test_load_translocation(translocation_variant, case_obj, mongo_adapter):
     adapter = mongo_adapter
@@ -84,4 +84,4 @@ def test_load_same_translocation_twice(translocation_variant, case_obj, mongo_ad
     ## THEN assert the object returned is correct
     variant_cluster = adapter.db.structural_variant.find_one()
     
-    assert variant_cluster['families'] == [case_id, '2']
+    assert set(variant_cluster['families']) == set([case_id, '2'])

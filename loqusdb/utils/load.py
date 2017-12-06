@@ -15,7 +15,7 @@ LOG = logging.getLogger(__name__)
 
 def load_database(adapter, variant_file, family_file, nr_variants=None, 
                   family_type='ped', skip_case_id=False, gq_treshold=None, 
-                  case_id=None, variant_type='snv'):
+                  case_id=None, variant_type='snv', max_window = 3000):
     """Load the database with a case and its variants
             
     Args:
@@ -27,6 +27,8 @@ def load_database(adapter, variant_file, family_file, nr_variants=None,
           skip_case_id(bool): If no case information should be added to variants
           gq_treshold(int): If only quality variants should be considered
           case_id(str): If different case id than the one in family file should be used
+          variant_type(str): Specify the variant type
+          max_window(int): Specify the max size for sv windows
  
     """
     # Get a cyvcf2.VCF object
@@ -76,6 +78,7 @@ def load_database(adapter, variant_file, family_file, nr_variants=None,
             nr_variants=nr_variants,
             skip_case_id=skip_case_id,
             gq_treshold=gq_treshold,
+            max_window=max_window,
         )
     except Exception as err:
         # If something went wrong do a rollback
@@ -90,7 +93,7 @@ def load_database(adapter, variant_file, family_file, nr_variants=None,
         raise err
 
 def load_variants(adapter, vcf_obj, case_obj, nr_variants=None, skip_case_id=False, 
-                  gq_treshold=None):
+                  gq_treshold=None, max_window=3000):
     """Load variants for a family into the database.
 
     Args:
@@ -101,6 +104,7 @@ def load_variants(adapter, vcf_obj, case_obj, nr_variants=None, skip_case_id=Fal
         skip_case_id (bool): whether to include the case id on variant level 
                              or not
         gq_treshold(int)
+        max_window(int): Specify the max size for sv windows
     """
     case_id = case_obj['case_id']
     if skip_case_id:
@@ -121,7 +125,7 @@ def load_variants(adapter, vcf_obj, case_obj, nr_variants=None, skip_case_id=Fal
             if not formated_variant:
                 continue
             if formated_variant['is_sv']:
-                adapter.add_structural_variant(variant=formated_variant)
+                adapter.add_structural_variant(variant=formated_variant, max_window=max_window)
             else:
                 adapter.add_variant(variant=formated_variant)
 

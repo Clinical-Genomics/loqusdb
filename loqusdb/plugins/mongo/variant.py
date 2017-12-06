@@ -56,7 +56,7 @@ class VariantMixin(BaseVariantMixin):
             LOG.debug("Variant was added to database for first time")
         return
 
-    def add_structural_variant(self, variant):
+    def add_structural_variant(self, variant, max_window = 3000):
         """Add a variant to the structural variants collection
         
         The process of adding an SV variant differs quite a bit from the 
@@ -67,7 +67,7 @@ class VariantMixin(BaseVariantMixin):
         
         Args:
             variant (dict): A variant dictionary
-        
+            max_window(int): Specify the maximum window size for large svs
         
         
                                         -
@@ -77,8 +77,9 @@ class VariantMixin(BaseVariantMixin):
                                 -               -
                               -                   -
                            |-----|              |-----|
-        
-        
+                          /\                         /\
+                          |                          |
+                pos - interval_size             end + interval_size
         """
         # This will return the cluster most similar to variant or None
         cluster = self.get_structural_variant(variant)
@@ -132,13 +133,12 @@ class VariantMixin(BaseVariantMixin):
         # We need to calculate the new cluster length
         if cluster['sv_type'] != 'BND':
             cluster_len = end_mean - pos_mean
-            # The max size of a interval is 2000
-            interval_size = int(min(round(cluster_len/10, -2), 3000))
+            interval_size = int(min(round(cluster_len/10, -2), max_window))
         else:
             # Set length to a huge number that mongodb can handle, float('inf') would not work.
             cluster_len = 10e10
             # This number seems large, if compared with SV size it is fairly small.
-            interval_size = 6000
+            interval_size = max_window * 2
         
         # If the length of SV is shorter than 500 the variant 
         # is considered precise

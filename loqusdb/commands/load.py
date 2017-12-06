@@ -48,8 +48,14 @@ LOG = logging.getLogger(__name__)
     show_default=True,
     help='Treshold to consider variant'
 )
+@click.option('--max-window', '-m',
+    default=2000,
+    show_default=True,
+    help='Specify the maximum window size for svs'
+)
 @click.pass_context
-def load(ctx, variant_file, family_file, family_type, skip_case_id, gq_treshold, case_id, ensure_index):
+def load(ctx, variant_file, family_file, family_type, skip_case_id, gq_treshold, case_id, 
+         ensure_index, max_window):
     """Load the variants of a case
 
     The loading is based on if the variant is seen in a ny affected individual
@@ -89,6 +95,7 @@ def load(ctx, variant_file, family_file, family_type, skip_case_id, gq_treshold,
             gq_treshold=gq_treshold,
             nr_variants=nr_variants,
             variant_type=variant_type,
+            max_window=max_window,
         )
     except (SyntaxError, CaseError, IOError) as error:
         LOG.warning(error)
