@@ -39,13 +39,17 @@ LOG = logging.getLogger(__name__)
                 show_default=True,
                 help='Do not store which cases that have a variant'
 )
+@click.option('--ensure-index', 
+                is_flag=True, 
+                help='Make sure that the indexes are in place'
+)
 @click.option('--gq-treshold',
     default=20,
     show_default=True,
     help='Treshold to consider variant'
 )
 @click.pass_context
-def load(ctx, variant_file, family_file, family_type, skip_case_id, gq_treshold, case_id):
+def load(ctx, variant_file, family_file, family_type, skip_case_id, gq_treshold, case_id, ensure_index):
     """Load the variants of a case
 
     The loading is based on if the variant is seen in a ny affected individual
@@ -62,13 +66,16 @@ def load(ctx, variant_file, family_file, family_type, skip_case_id, gq_treshold,
     
     try:
         variant_handle = get_file_handle(variant_path)
-        nr_variants = check_vcf(variant_handle)
+        vcf_info = check_vcf(variant_handle)
+        nr_variants = vcf_info['nr_variants']
+        variant_type = vcf_info['variant_type']
     except VcfError as error:
         LOG.warning(error)
         ctx.abort()
 
     LOG.info("Vcf file looks fine")
     LOG.info("Nr of variants in vcf: {0}".format(nr_variants))
+    LOG.info("Type of variants in vcf: {0}".format(variant_type))
     start_inserting = datetime.now()
     
     try:
@@ -81,6 +88,7 @@ def load(ctx, variant_file, family_file, family_type, skip_case_id, gq_treshold,
             case_id=case_id,
             gq_treshold=gq_treshold,
             nr_variants=nr_variants,
+            variant_type=variant_type,
         )
     except (SyntaxError, CaseError, IOError) as error:
         LOG.warning(error)
@@ -88,5 +96,10 @@ def load(ctx, variant_file, family_file, family_type, skip_case_id, gq_treshold,
     
     LOG.info("Time to insert variants: {0}".format(
                 datetime.now() - start_inserting))
-    adapter.check_indexes()
+    if ensure_index:
+        adapter.ensure_indexes()
+    else:
+        adapter.check_indexes()
+    
+        
         

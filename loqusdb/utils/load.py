@@ -15,7 +15,7 @@ LOG = logging.getLogger(__name__)
 
 def load_database(adapter, variant_file, family_file, nr_variants=None, 
                   family_type='ped', skip_case_id=False, gq_treshold=None, 
-                  case_id=None):
+                  case_id=None, variant_type='snv'):
     """Load the database with a case and its variants
             
     Args:
@@ -60,13 +60,13 @@ def load_database(adapter, variant_file, family_file, nr_variants=None,
         vcf_path=variant_file,
         vcf_individuals=vcf_individuals
     )
-
+    
     # Add the case to database
     try:
         adapter.add_case(case_obj)
     except CaseError as err:
         raise err
-
+    
     # If case was succesfully added we can store the variants
     try:
         load_variants(  

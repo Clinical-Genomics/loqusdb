@@ -62,23 +62,26 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
         Return:
             formated_variant(dict): A variant dictionary
     """
+    variant_obj = None
+
     sv = False
     if variant.var_type == 'sv':
         sv = True
 
-    variant_id = get_variant_id(variant)
-    
     chrom = variant.CHROM
     if chrom.startswith(('chr', 'CHR', 'Chr')):
         chrom = chrom[3:]
     
     pos = int(variant.POS)
     end_pos = variant.INFO.get('END')
+
     if end_pos:
         end = int(end_pos)
     else:
         end = int(variant.end)
-    
+
+    variant_id = get_variant_id(variant)
+
     ref = variant.REF
     alt = variant.ALT[0]
 
@@ -90,7 +93,7 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
         sv_len = abs(length)
     else:
         sv_len = end - pos
-    
+
     if sv_type == 'BND':
         other_coordinates = alt.strip('ACGTN[]').split(':')
         end_chrom = other_coordinates[0]
@@ -109,11 +112,11 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
 
     if (pos == end) and (sv_len > 0):
         end = pos + sv_len
-    
+
     # These are integers that will be used when uploading
     found_homozygote = 0
     found_hemizygote = 0
-    
+
     # Only look at genotypes for the present individuals
     if sv:
         found_variant = True
@@ -126,41 +129,39 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
             gq = int(variant.gt_quals[ind_pos])
             if (gq_treshold and gq < gq_treshold):
                 continue
-            
+
             genotype = GENOTYPE_MAP[variant.gt_types[ind_pos]]
-            
+
             if genotype in ['het', 'hom_alt']:
                 LOG.debug("Found variant")
                 found_variant = True
-            
+
                 # If variant in X or Y and individual is male,
                 # we need to check hemizygosity
                 if chrom in ['X','Y'] and ind_obj['sex'] == 1:
                     if not check_par(chrom, pos):
                         LOG.debug("Found hemizygous variant")
                         found_hemizygote = 1
-                
+
                 if genotype == 'hom_alt':
                     LOG.debug("Found homozygote alternative variant")
                     found_homozygote = 1
 
-    if not found_variant:
-        return None
-
-    variant_obj = Variant(
-        variant_id=variant_id,
-        chrom=chrom,
-        pos=pos,
-        end=end,
-        ref=ref,
-        alt=alt,
-        end_chrom=end_chrom,
-        sv_type = sv_type,
-        sv_len = sv_len,
-        case_id = case_id,
-        homozygote = found_homozygote,
-        hemizygote = found_hemizygote,
-        is_sv = sv,
-    )
+    if found_variant:
+        variant_obj = Variant(
+            variant_id=variant_id,
+            chrom=chrom,
+            pos=pos,
+            end=end,
+            ref=ref,
+            alt=alt,
+            end_chrom=end_chrom,
+            sv_type = sv_type,
+            sv_len = sv_len,
+            case_id = case_id,
+            homozygote = found_homozygote,
+            hemizygote = found_hemizygote,
+            is_sv = sv,
+        )
 
     return variant_obj

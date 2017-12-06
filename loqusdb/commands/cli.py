@@ -65,7 +65,7 @@ def cli(ctx, database, username, password, port, host, verbose, test):
                 password=password,
             )
         except DB_Error as err:
-            logger.warning(err)
+            LOG.warning(err)
             ctx.abort()
 
     # mongo uri looks like:

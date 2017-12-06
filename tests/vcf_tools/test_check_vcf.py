@@ -12,9 +12,10 @@ def test_check_vcf_correct(vcf_path):
                 true_nr += 1
     
     vcf_obj = get_vcf(vcf_path)
-    nr_variants = check_vcf(vcf_obj)
+    vcf_info = check_vcf(vcf_obj)
     
-    assert nr_variants == true_nr
+    assert vcf_info['nr_variants'] == true_nr
+    assert vcf_info['variant_type'] == 'snv'
 
 def test_check_vcf_double_variant(double_vcf_path):
     vcf_obj = get_vcf(double_vcf_path)

@@ -6,7 +6,7 @@ from cyvcf2 import VCF
 from loqusdb.exceptions import VcfError
 from loqusdb.build_models.variant import get_variant_id
 
-logger = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 VALID_ENDINGS = ['.vcf', '.gz']
 
 def get_file_handle(file_path):
@@ -18,7 +18,7 @@ def get_file_handle(file_path):
     Returns:
         vcf_obj(cyvcf2.VCF)
     """
-    logger.debug("Check if file end is correct")
+    LOG.debug("Check if file end is correct")
     
     if not os.path.exists(file_path):
         raise IOError("No such file:{0}".format(file_path))
@@ -52,21 +52,30 @@ def check_vcf(variants):
         variants(iterable(cyvcf2.Variant))
 
     Returns:
-        nr_variants(int)
+        vcf_info(dict): dict like {'nr_variants':<INT>, 'variant_type': <STR>}
+                        'variant_type' in ['snv', 'sv']
     """
-    logger.info("Check if vcf is on correct format...")
+    LOG.info("Check if vcf is on correct format...")
+    
     nr_variants = 0
+    variant_type = None
+    
     previous_pos = None
     previous_chrom = None
     
     posititon_variants = set()
     
     for variant in variants:
-        if variant.var_type == 'sv':
-            variant_type = 'sv'
-        else:
-            variant_type = 'snv'
-        
+
+        # Check the type of variant
+        current_type = 'sv' if variant.var_type == 'sv' else 'snv'
+        if not variant_type:
+            variant_type = current_type
+
+        # Vcf can not include both snvs and svs
+        if variant_type != current_type:
+            raise VcfError("Vcf includes a mix of snvs and svs")
+
         nr_variants += 1
         
         current_chrom = variant.CHROM
@@ -76,32 +85,39 @@ def check_vcf(variants):
         variant_id = "{0}_{1}".format(current_chrom, current_pos)
         if variant_type == 'snv':
             variant_id = get_variant_id(variant)
-        
+
+        # Initiate variables
         if not previous_chrom:
-            # Set the variables for first time
             previous_chrom = current_chrom
             previous_pos = current_pos
             posititon_variants = set([variant_id])
 
             continue
-            
+
+        # Update variables if new chromosome
         if current_chrom != previous_chrom:
             previous_chrom = current_chrom
             previous_pos = current_pos
             posititon_variants = set([variant_id])
             continue
         
-        
+        # Check if variant is unique
         if (current_pos == previous_pos and variant_type == 'snv'):
             if variant_id in posititon_variants:
                 raise VcfError("Variant {0} occurs several times"\
                                " in vcf".format(variant_id))
             else:
                 posititon_variants.add(variant_id)
+        # Check if vcf is sorted
         else:
             if not current_pos >= previous_pos:
                 raise VcfError("Vcf if not sorted in a correct way")
             previous_pos = current_pos
             posititon_variants = set([variant_id])
+    
+    vcf_info = {
+        'nr_variants': nr_variants,
+        'variant_type': variant_type
+    }
 
-    return nr_variants
+    return vcf_info

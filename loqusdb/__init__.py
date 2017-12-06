@@ -21,6 +21,29 @@ INDEXES = {
         ], name="end"),
         
     ],
+    'structural_variant' : [
+        IndexModel([
+        ('chrom', ASCENDING),
+        ('end_chrom', ASCENDING),
+        ('sv_type', ASCENDING),
+        ('pos_left', ASCENDING),
+        ('pos_right', ASCENDING),
+        ('end_left', ASCENDING),
+        ('end_right', ASCENDING),
+        ], name="coordinates"),
+        
+        IndexModel([
+        ('chrom', ASCENDING),
+        ('pos_left', ASCENDING),
+        ('end_right', ASCENDING),
+        ], name="short_coordinates"),
+        
+        IndexModel([
+        ('chrom', ASCENDING),
+        ('end', ASCENDING),
+        ], name="end"),
+        
+    ],
 }
 
 CHROMOSOME_ORDER = ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', 

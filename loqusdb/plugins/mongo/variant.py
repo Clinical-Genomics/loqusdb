@@ -68,67 +68,102 @@ class VariantMixin(BaseVariantMixin):
         Args:
             variant (dict): A variant dictionary
         
+        
+        
+                                        -
+                                      -   -
+                                    -       -
+                                  -           -
+                                -               -
+                              -                   -
+                           |-----|              |-----|
+        
+        
         """
         # This will return the cluster most similar to variant or None
         cluster = self.get_structural_variant(variant)
+        # If there was no matcing cluster we need to create one
         if cluster is None:
             # Insert variant to get a _id
-            _id = self.db.structural_variant.insert({
+            cluster = {
                 'chrom': variant['chrom'],
                 'end_chrom': variant['end_chrom'],
                 'sv_type': variant['sv_type'],
-            })
-            
-            cluster = {
-                '_id': _id,
                 'pos_sum': 0,
                 'end_sum': 0,
                 'nr_events': 0,
+                'length': 0,
                 'sv_type': variant['sv_type'],
+                'families': [],
+                
             }
+            _id = self.db.structural_variant.insert(cluster)
+            
+            cluster['_id'] = _id
         
-        nr_events = cluster['nr_events']
+        case_id = variant.get('case_id')
+        if case_id:
+            # If the variant is already added for this case we continue
+            if case_id in cluster['families']:
+                return
+            else:
+                # Insert the new case in the beginning of array
+                cluster['families'].insert(0,case_id)
+                # Make sure array does not grow out of bounds
+                cluster['families'] = cluster['families'][:50]
+
+        # Update number of times we have seen the event
+        nr_events = cluster['nr_events'] + 1
         
-        pos_mean = int((cluster['pos_sum'] + variant['pos']) // (nr_events + 1))
-        end_mean = int((cluster['end_sum'] + variant['end'])// (nr_events + 1))
+        #                             -
+        #                           -   -
+        #                         -       -
+        #                       -           -
+        #                     -               -
+        #                   -                   -
+        #                |--.--|              |--.--|
+    
+        # This indicates the center for each of the end points for the event AFTER the new variant
+        # is added to the cluster
+        # i.e. the dots in the picture above
+        pos_mean = int((cluster['pos_sum'] + variant['pos']) // (nr_events))
+        end_mean = int((cluster['end_sum'] + variant['end']) // (nr_events))
         
         # We need to calculate the new cluster length
         if cluster['sv_type'] != 'BND':
             cluster_len = end_mean - pos_mean
+            # The max size of a interval is 2000
+            interval_size = int(min(round(cluster_len/10, -2), 3000))
         else:
-            cluster_len = float('inf')
+            # Set length to a huge number that mongodb can handle, float('inf') would not work.
+            cluster_len = 10e10
+            # This number seems large, if compared with SV size it is fairly small.
+            interval_size = 6000
         
         # If the length of SV is shorter than 500 the variant 
         # is considered precise
         # Otherwise the interval size is closest whole 100 number
         
-        # The max size of a interval is 2000
-        interval_size = int(min(round(cluster_len/10, -2), 2000))
-        
-        message = self.db.structural_variant.update(
-            {'_id': cluster['_id'],},
+        res = self.db.structural_variant.find_one_and_update(
+            {'_id': cluster['_id']},
             {
                 '$inc': {
                     'nr_events': 1,
                     'pos_sum': variant['pos'],
                     'end_sum': variant['end'],
                 },
-                '$push': {
-                    'families': {
-                        '$each': [variant.get('case_id')],
-                        '$slice': -50,
-                        }
-                },
+            
                 '$set': {
                     'pos_left': max(pos_mean - interval_size, 0),
                     'pos_right': pos_mean + interval_size,
                     'end_left': max(end_mean - interval_size, 0),
                     'end_right': end_mean + interval_size,
+                    'families': cluster['families'],
+                    'length': cluster_len,
                 }
-             }, 
-             upsert=True
+            }
         )
-
+        
         return
 
     def get_variant(self, variant):
@@ -201,8 +236,38 @@ class VariantMixin(BaseVariantMixin):
         if start:
             query['start'] = {'$lte': end}
             query['end'] = {'$gte': start}
-        LOG.debug("Find all variants {}".format(query))
+        LOG.info("Find all variants {}".format(query))
         return self.db.variant.find(query).sort([('start', ASCENDING)])
+
+    def get_sv_variants(self, chromosome=None, end_chromosome=None, sv_type=None, 
+                        start=None, end=None):
+        """Return all structural variants in the database
+
+        Args:
+            chromosome (str)
+            end_chromosome (str)
+            sv_type (str)
+            start (int)
+            end (int)
+        
+    
+        Returns:
+            variants (Iterable(Variant))
+        """
+        query = {}
+        if chromosome:
+            query['chrom'] = chromosome
+        if end_chromosome:
+            query['end_chrom'] = chromosome
+        if sv_type:
+            query['sv_type'] = sv_type
+        if start:
+            query['pos_right'] = {'$gte': start}
+        if end:
+            query['end_left'] = {'$lte': end}
+        LOG.info("Find all sv variants {}".format(query))
+        
+        return self.db.structural_variant.find(query).sort([('chrom', ASCENDING), ('pos_left', ASCENDING)])
 
     def delete_variant(self, variant):
         """Remove variant from database
