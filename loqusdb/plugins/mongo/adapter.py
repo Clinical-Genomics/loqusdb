@@ -48,7 +48,7 @@ class MongoAdapter(BaseAdapter, VariantMixin, CaseMixin, Base):
             for index in indexes:
                 index_name = index.document.get('name')
                 if not index_name in existing_indexes:
-                    logger.warning("Index missing. Run command `loqusdb index`")
+                    logger.warning("Index {0} missing. Run command `loqusdb index`".format(index_name))
                     return
         logger.info("All indexes exists")
         
@@ -62,7 +62,9 @@ class MongoAdapter(BaseAdapter, VariantMixin, CaseMixin, Base):
                 if index_name in existing_indexes:
                     logger.debug("Index exists: %s" % index_name)
                     self.db[collection_name].drop_index(index_name)
-            logger.info("creating indexes: %s" % ', '.join([
-                index.document.get('name') for index in indexes
-            ]))
+            logger.info("creating indexes for collection {0}: {1}".format(
+                collection_name,
+                ', '.join([index.document.get('name') for index in indexes]),
+                )
+            )
             self.db[collection_name].create_indexes(indexes)

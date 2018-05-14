@@ -26,10 +26,10 @@ INDEXES = {
         ('chrom', ASCENDING),
         ('end_chrom', ASCENDING),
         ('sv_type', ASCENDING),
-        ('pos_left', ASCENDING),
-        ('pos_right', ASCENDING),
         ('end_left', ASCENDING),
+        ('pos_left', ASCENDING),
         ('end_right', ASCENDING),
+        ('pos_right', ASCENDING),
         ], name="coordinates"),
         
         IndexModel([
@@ -37,12 +37,6 @@ INDEXES = {
         ('pos_left', ASCENDING),
         ('end_right', ASCENDING),
         ], name="short_coordinates"),
-        
-        IndexModel([
-        ('chrom', ASCENDING),
-        ('end', ASCENDING),
-        ], name="end"),
-        
     ],
 }
 

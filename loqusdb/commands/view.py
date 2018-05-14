@@ -12,25 +12,34 @@ LOG = logging.getLogger(__name__)
 @click.option('-c' ,'--case-id', 
                 help='Search for case'
 )
+@click.option('--to-json', is_flag=True)
 @click.pass_context
-def cases(ctx, case_id):
-    """Display all cases in the database."""
+def cases(ctx, case_id, to_json):
+    """Display cases in the database."""
     
     adapter = ctx.obj['adapter']
+    cases = []
     
     if case_id:
-        case = adapter.case(case_id)
-        if case:
-            click.echo(case)
-        else:
+        case_obj = adapter.case(case_id)
+        if not case_obj:
             LOG.info("Case {0} does not exist in database".format(case_id))
+            return
+        cases.append(case_obj)
     else:
-        i = 0
-        for case in adapter.cases():
-            i += 1
-            click.echo(case)
-        if i == 0:
+        cases = adapter.cases()
+        if cases.count() == 0:
             LOG.info("No cases found in database")
+            return
+    
+    if not to_json:
+        click.echo("#case_id\tvcf_path")
+
+    for case_obj in cases:
+        if to_json:
+            click.echo(case_obj)
+        else:
+            click.echo("{0}\t{1}".format(case_obj.get('case_id'), case_obj.get('vcf_path')))
 
 @base_command.command('variants', short_help="Display variants in database")
 @click.option('--variant-id', 
@@ -107,8 +116,15 @@ def variants(ctx, variant_id, chromosome, end_chromosome, start, end, variant_ty
     LOG.info("Number of variants found in database: %s", i)
 
 @base_command.command('index', short_help="Add indexes to database")
+@click.option('--view', 
+    is_flag=True,
+    help='Only display existing indexes',
+)
 @click.pass_context
-def index(ctx):
+def index(ctx, view):
     """Index the database."""
     adapter = ctx.obj['adapter']
+    if view:
+        click.echo(adapter.indexes())
+        return
     adapter.ensure_indexes()

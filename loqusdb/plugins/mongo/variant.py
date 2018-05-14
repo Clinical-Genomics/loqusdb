@@ -3,6 +3,7 @@ import logging
 from pprint import pprint as pp
 
 from loqusdb.plugins import BaseVariantMixin
+from .structural_variant import SVMixin
 
 from pymongo import (ASCENDING, DESCENDING)
 
@@ -190,7 +191,7 @@ class VariantMixin(BaseVariantMixin):
             Returns:
                 variant (dict): A variant dictionary
         """
-        res = self.db.structural_variant.find({
+        query = {
             'chrom': variant['chrom'],
             'end_chrom': variant['end_chrom'],
             'sv_type': variant['sv_type'],
@@ -198,8 +199,8 @@ class VariantMixin(BaseVariantMixin):
             'pos_right': {'$gte': variant['pos']},
             'end_left': {'$lte': variant['end']},
             'end_right': {'$gte': variant['end']},
-        })
-
+        }
+        res = self.db.structural_variant.find(query)
         match = None
         distance = None
         closest_hit = None

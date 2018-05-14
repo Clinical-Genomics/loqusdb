@@ -14,7 +14,6 @@ from . import base_command
 
 LOG = logging.getLogger(__name__)
 
-
 @base_command.command('load', short_help="Load the variants of a family")
 @click.argument('variant-file',
                     type=click.Path(exists=True),
@@ -71,6 +70,7 @@ def load(ctx, variant_file, family_file, family_type, skip_case_id, gq_treshold,
     adapter = ctx.obj['adapter']
     
     try:
+        # Open the file regardless of compression
         variant_handle = get_file_handle(variant_path)
         vcf_info = check_vcf(variant_handle)
         nr_variants = vcf_info['nr_variants']

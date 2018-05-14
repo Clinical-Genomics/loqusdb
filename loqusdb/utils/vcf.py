@@ -45,6 +45,10 @@ def get_vcf(file_path):
     
     return vcf_obj
 
+def check_sorting(previous_chrom, previous_pos, current_chrom, current_pos):
+    """docstring for check_sorting"""
+    pass
+
 def check_vcf(variants):
     """Check if there are any problems with the vcf file
 
@@ -101,19 +105,20 @@ def check_vcf(variants):
             posititon_variants = set([variant_id])
             continue
         
-        # Check if variant is unique
-        if (current_pos == previous_pos and variant_type == 'snv'):
-            if variant_id in posititon_variants:
-                raise VcfError("Variant {0} occurs several times"\
-                               " in vcf".format(variant_id))
+        if variant_type == 'snv':
+            # Check if variant is unique
+            if current_pos == previous_pos:
+                if variant_id in posititon_variants:
+                    raise VcfError("Variant {0} occurs several times"\
+                                   " in vcf".format(variant_id))
+                else:
+                    posititon_variants.add(variant_id)
+            # Check if vcf is sorted
             else:
-                posititon_variants.add(variant_id)
-        # Check if vcf is sorted
-        else:
-            if not current_pos >= previous_pos:
-                raise VcfError("Vcf if not sorted in a correct way")
-            previous_pos = current_pos
-            posititon_variants = set([variant_id])
+                if not current_pos >= previous_pos:
+                    raise VcfError("Vcf if not sorted in a correct way")
+                previous_pos = current_pos
+                posititon_variants = set([variant_id])
     
     vcf_info = {
         'nr_variants': nr_variants,
