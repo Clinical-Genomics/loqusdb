@@ -140,9 +140,7 @@ class SVMixin():
                 'sv_type': variant['sv_type'],
                 '$and': [
                     {'pos_left': {'$lte': variant['pos']}},
-                    {'end_left': {'$lte': variant['end']}},
                     {'pos_right': {'$gte': variant['pos']}},
-                    {'end_right': {'$gte': variant['end']}},
                 ]
             }
 
@@ -157,10 +155,10 @@ class SVMixin():
             # the cluster. 
             # If the right most part of the cluster is smaller than the variant position they do
             # not overlap
-            # if hit['end_left'] > variant['end']:
-            #     continue
-            # if hit['end_right'] < variant['end']:
-            #     continue
+            if hit['end_left'] > variant['end']:
+                continue
+            if hit['end_right'] < variant['end']:
+                continue
 
             # We need to calculate the distance to see what cluster that was closest to the variant
             distance = (abs(variant['pos'] - (hit['pos_left'] + hit['pos_right'])/2) + 
