@@ -26,10 +26,7 @@ INDEXES = {
         ('chrom', ASCENDING),
         ('end_chrom', ASCENDING),
         ('sv_type', ASCENDING),
-        ('end_left', ASCENDING),
         ('pos_left', ASCENDING),
-        ('end_right', ASCENDING),
-        ('pos_right', ASCENDING),
         ], name="coordinates"),
         
         IndexModel([
