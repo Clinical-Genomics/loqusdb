@@ -3,6 +3,7 @@ import logging
 from pprint import pprint as pp
 
 from loqusdb.plugins import BaseVariantMixin
+from loqusdb.models import Identity
 
 from pymongo import (ASCENDING, DESCENDING, UpdateOne)
 
@@ -118,6 +119,12 @@ class SVMixin():
             }
         )
         
+        # Insert an identity object to link cases to variants and clusters
+        identity_obj = Identity(cluster_id=cluster['_id'], variant_id=variant['id_column'], 
+                                case_id=case_id)
+        
+        self.db.identity.insert_one(identity_obj)
+        
         return
 
     def get_structural_variant(self, variant):
@@ -205,3 +212,16 @@ class SVMixin():
         LOG.info("Find all sv variants {}".format(query))
         
         return self.db.structural_variant.find(query).sort([('chrom', ASCENDING), ('pos_left', ASCENDING)])
+
+    def get_clusters(self, variant_id):
+        """Search what clusters a variant belongs to
+        
+        Args:
+            variant_id(str): From ID column in vcf
+        
+        Returns:
+            clusters()
+        """
+        query = {'variant_id':variant_id}
+        identities = self.db.identity.find(query)
+        return identities

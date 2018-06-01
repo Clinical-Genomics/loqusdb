@@ -35,6 +35,16 @@ INDEXES = {
         ('end_right', ASCENDING),
         ], name="short_coordinates"),
     ],
+    'identity' : [
+        IndexModel([
+        ('cluster_id', ASCENDING),
+        ], name="cluster"),
+        
+        IndexModel([
+        ('variant_id', ASCENDING),
+        ], name="variant"),
+    ],
+    
 }
 
 CHROMOSOME_ORDER = ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', 

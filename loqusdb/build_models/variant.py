@@ -162,6 +162,7 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
             homozygote = found_homozygote,
             hemizygote = found_hemizygote,
             is_sv = sv,
+            id_column = variant.ID,
         )
 
     return variant_obj
