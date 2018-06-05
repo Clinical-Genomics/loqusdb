@@ -1,19 +1,17 @@
 import logging
 
 from pprint import pprint as pp
+from collections import namedtuple
 
 from loqusdb.models import Variant 
 from loqusdb.exceptions import CaseError
+from loqusdb.constants import (PAR,GENOTYPE_MAP,CHROM_TO_INT)
 
 LOG = logging.getLogger(__name__)
 
-# These are coordinate for the pseudo autosomal regions in GRCh37
-PAR = {
-    'Y': [[10001, 2649520], [59034050, 59373566]],
-    'X': [[60001, 2699520], [154931044, 155270560]]
-}
+Position = namedtuple('Position', 'chrom pos')
 
-GENOTYPE_MAP = {0: 'hom_ref', 1: 'het', 2: 'no_call', 3:'hom_alt'}
+# These are coordinate for the pseudo autosomal regions in GRCh37
 
 def check_par(chrom, pos):
     """Check if a coordinate is in the PAR region
@@ -44,6 +42,38 @@ def get_variant_id(variant):
         ]
     )
     return variant_id
+
+def is_greater(a,b):
+    """Check if position a is greater than position b
+    This will look at chromosome and position.
+    
+    For example a position where chrom = 2 and pos = 300 is greater than a position where
+    chrom = 1 and pos = 1000
+    
+    If any of the chromosomes is outside [1-22,X,Y,MT] we can not say which is biggest.
+    
+    Args:
+        a,b(Position)
+    
+    Returns:
+        bool: True if a is greater than b
+    """
+    
+    a_chrom = CHROM_TO_INT.get(a.chrom,0)
+    b_chrom = CHROM_TO_INT.get(b.chrom,0)
+    
+    if (a_chrom == 0 or b_chrom == 0):
+        return False
+    
+    if a_chrom > b_chrom:
+        return True
+    
+    if a_chrom == b_chrom:
+        if a.pos > b.pos:
+            return True
+    
+    return False
+
 
 def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
     """Return a Variant object
@@ -112,6 +142,18 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
 
     if (pos == end) and (sv_len > 0):
         end = pos + sv_len
+
+    position = Position(chrom, pos)
+    end_position = Position(end_chrom, end)
+    
+    # If 'start' is greater than 'end', switch positions
+    if is_greater(position, end_position):
+        end_chrom = position.chrom
+        end = position.pos
+        
+        chrom = end_position.chrom
+        pos = end_position.pos
+        
 
     # These are integers that will be used when uploading
     found_homozygote = 0
