@@ -198,8 +198,6 @@ class SVMixin():
             variants (Iterable(Variant))
         """
         query = {}
-        '$and': [
-        ]
         
         if chromosome:
             query['chrom'] = chromosome
