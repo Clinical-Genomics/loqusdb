@@ -104,7 +104,7 @@ def variants(ctx, variant_id, chromosome, end_chromosome, start, end, variant_ty
             chromosome=chromosome, 
             end_chromosome=end_chromosome, 
             sv_type=sv_type, 
-            start=start, 
+            pos=start, 
             end=end
         )
         

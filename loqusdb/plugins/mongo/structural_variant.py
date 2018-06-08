@@ -184,31 +184,41 @@ class SVMixin():
         return match
 
     def get_sv_variants(self, chromosome=None, end_chromosome=None, sv_type=None, 
-                        start=None, end=None):
+                        pos=None, end=None):
         """Return all structural variants in the database
 
         Args:
             chromosome (str)
             end_chromosome (str)
             sv_type (str)
-            start (int)
-            end (int)
-        
-    
+            pos (int): Left position of SV
+            end (int): Right position of SV
+
         Returns:
             variants (Iterable(Variant))
         """
         query = {}
+        '$and': [
+        ]
+        
         if chromosome:
             query['chrom'] = chromosome
         if end_chromosome:
             query['end_chrom'] = chromosome
         if sv_type:
             query['sv_type'] = sv_type
-        if start:
-            query['pos_right'] = {'$gte': start}
+        if pos:
+            if not '$and' in query:
+                query['$and'] = []
+            query['$and'].append({'pos_left': {'$lte': pos}})
+            query['$and'].append({'pos_right': {'$gte': pos}})
+            
         if end:
-            query['end_left'] = {'$lte': end}
+            if not '$and' in query:
+                query['$and'] = []
+            query['$and'].append({'end_left': {'$lte': end}})
+            query['$and'].append({'end_right': {'$gte': end}})
+        
         LOG.info("Find all sv variants {}".format(query))
         
         return self.db.structural_variant.find(query).sort([('chrom', ASCENDING), ('pos_left', ASCENDING)])
