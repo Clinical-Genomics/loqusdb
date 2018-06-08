@@ -27,9 +27,6 @@ INDEXES = {
         ('end_chrom', ASCENDING),
         ('sv_type', ASCENDING),
         ('pos_left', ASCENDING),
-        ('pos_right', ASCENDING),
-        ('end_left', ASCENDING),
-        ('end_right', ASCENDING),
         ], name="coordinates"),
         
         IndexModel([
@@ -37,13 +34,17 @@ INDEXES = {
         ('pos_left', ASCENDING),
         ('end_right', ASCENDING),
         ], name="short_coordinates"),
+    ],
+    'identity' : [
+        IndexModel([
+        ('cluster_id', ASCENDING),
+        ], name="cluster"),
         
         IndexModel([
-        ('chrom', ASCENDING),
-        ('end', ASCENDING),
-        ], name="end"),
-        
+        ('variant_id', ASCENDING),
+        ], name="variant"),
     ],
+    
 }
 
 CHROMOSOME_ORDER = ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', 

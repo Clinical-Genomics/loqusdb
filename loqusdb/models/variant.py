@@ -9,7 +9,7 @@ class Variant(DotDict):
     snv/indels will miss some of the information
     """
     def __init__(self, chrom, pos, end, ref, alt, variant_id=None, end_chrom=None, sv_type=None,
-                 sv_len=None, case_id=None, homozygote=0, hemizygote=0, is_sv=False):
+                 sv_len=None, case_id=None, homozygote=0, hemizygote=0, is_sv=False, id_column=None):
         super(Variant, self).__init__(
             _id=variant_id,
             variant_id=variant_id, 
@@ -25,5 +25,6 @@ class Variant(DotDict):
             homozygote = homozygote,
             hemizygote = hemizygote,
             is_sv=is_sv,
+            id_column = id_column
         )
     
