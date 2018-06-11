@@ -88,7 +88,7 @@ class SVMixin():
         # We need to calculate the new cluster length
         if cluster['sv_type'] != 'BND':
             cluster_len = end_mean - pos_mean
-            interval_size = int(min(round(cluster_len/10, -2), max_window))
+            interval_size = int(min(round(cluster_len/4, -2), max_window))
         else:
             # Set length to a huge number that mongodb can handle, float('inf') would not work.
             cluster_len = 10e10
