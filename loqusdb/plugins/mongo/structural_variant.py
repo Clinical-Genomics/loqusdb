@@ -215,7 +215,7 @@ class SVMixin():
         if chromosome:
             query['chrom'] = chromosome
         if end_chromosome:
-            query['end_chrom'] = chromosome
+            query['end_chrom'] = end_chromosome
         if sv_type:
             query['sv_type'] = sv_type
         if pos:
