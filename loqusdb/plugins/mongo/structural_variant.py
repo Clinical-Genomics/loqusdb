@@ -16,7 +16,12 @@ class SVMixin():
         
         The process of adding an SV variant differs quite a bit from the 
         more straight forward case of SNV/INDEL.
-        Here we need to search if the variant mathes any of the existing
+        
+        Variants are represented in the database by clusters that are two intervals,
+        one interval for start(pos) and one for end. The size of the intervals changes
+        according to the size of the variants. The maximum window size is a parameter.
+        
+        Here we need to search if the variant matches any of the existing
         clusters. Then we need to choose the closest cluster and update
         the boundaries for that cluster.
         
@@ -38,9 +43,10 @@ class SVMixin():
         """
         # This will return the cluster most similar to variant or None
         cluster = self.get_structural_variant(variant)
-        # If there was no matcing cluster we need to create one
+        # If there was no matcing cluster we need to create a new cluster
         if cluster is None:
             # Insert variant to get a _id
+            # The cluster will be populated with information later.
             cluster = {
                 'chrom': variant['chrom'],
                 'end_chrom': variant['end_chrom'],
@@ -60,6 +66,7 @@ class SVMixin():
         case_id = variant.get('case_id')
         if case_id:
             # If the variant is already added for this case we continue
+            # One case will only give duplicated information
             if case_id in cluster['families']:
                 return
             else:
@@ -88,8 +95,14 @@ class SVMixin():
         # We need to calculate the new cluster length
         if cluster['sv_type'] != 'BND':
             cluster_len = end_mean - pos_mean
-            interval_size = int(min(round(cluster_len/4, -2), max_window))
+            # We need to adapt the interval size depending on the size of the cluster
+            divider = 10
+            if cluster_len < 1000:
+                # We allow smaller interval to be relatively larger
+                divider = 4
+            interval_size = int(min(round(cluster_len/divider, -2), max_window))
         else:
+            # We need to treat translocations as a special case.
             # Set length to a huge number that mongodb can handle, float('inf') would not work.
             cluster_len = 10e10
             # This number seems large, if compared with SV size it is fairly small.

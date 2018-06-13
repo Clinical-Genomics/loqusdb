@@ -25,7 +25,7 @@ class CyvcfVariant(object):
     """
     def __init__(self, chrom='1', pos=80000, ref='A', alt='C', end=None, 
                  gt_quals=[60, 60, 60], gt_types=[1, 1, 0], var_type='snv',
-                 info_dict={}):
+                 id='.', info_dict={}):
         super(CyvcfVariant, self).__init__()
         self.CHROM = chrom
         self.POS = pos
@@ -36,6 +36,7 @@ class CyvcfVariant(object):
         self.gt_types = gt_types
         self.var_type = var_type
         self.INFO = info_dict
+        self.ID = info_dict
 
 @pytest.fixture(scope='function')
 def mongo_client(request):
