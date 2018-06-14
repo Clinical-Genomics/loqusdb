@@ -2,13 +2,18 @@ import logging
 import click
 import coloredlogs
 
+from mongomock import MongoClient as MockClient
+
+from mongo_adapter import get_client
+from mongo_adapter.exceptions import Error as DB_Error
+
 from loqusdb.log import LEVELS, init_log
-from loqusdb import logger, __version__
+from loqusdb import __version__
 from loqusdb.plugins import MongoAdapter
 
 LOG_LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
 
-logger = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 @click.group()
 @click.option('-db', '--database',
@@ -37,42 +42,44 @@ logger = logging.getLogger(__name__)
 #                 type=click.Choice(['mongo',]),
 #                 help='Specify what backend to use.'
 # )
-@click.option('-c', '--conn_host',
-                default='mongodb://',
-                show_default=True,
+@click.option('-t', '--test',
+                is_flag=True,
                 help='Used for testing.'
 )
 @click.option('-v', '--verbose', count=True, default=1)
 @click.version_option(__version__)
 @click.pass_context
-def cli(ctx, conn_host, database, username, password, port, host, verbose):
+def cli(ctx, database, username, password, port, host, verbose, test):
     """loqusdb: manage a local variant count database."""
     # configure root logger to print to STDERR
     loglevel = LEVELS.get(max(verbose,1), "INFO")
     coloredlogs.install(level=loglevel)
-    
+    if test:
+        client = MockClient()
+    else:
+        try:
+            client = get_client(
+                host=host, 
+                port=port, 
+                username=username,
+                password=password,
+            )
+        except DB_Error as err:
+            LOG.warning(err)
+            ctx.abort()
+
     # mongo uri looks like:
-    #mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database][?options]]
-    uri = None
-    if username and password:
-        uri = "{0}{1}:{2}@{3}:{4}/{5}".format(
-              conn_host, username, password, host, port, database
-              )
-        if password:
-            pwd = '******'
-        else:
-            pwd = None
-        logger.info('uri={0}{1}:{2}@{3}:{4}/{5}'.format(
-            conn_host, username, pwd, host, port, database
-        ))
-    
-    adapter = MongoAdapter()
-    adapter.connect(
-        host=host, 
-        port=port, 
-        database=database,
-        uri=uri
-    )
+    # mongodb://[username:password@]host1[:port1][,host2[:port2],...
+    # [,hostN[:portN]]][/[database][?options]]
+    if password:
+        pwd = '******'
+    else:
+        pwd = None
+    LOG.info('uri=mongodb//:{0}:{1}@{2}:{3}/{4}'.format(
+        username, pwd, host, port, database
+    ))
+
+    adapter = MongoAdapter(client, db_name = database)
     
     ctx.obj = {}
     ctx.obj['db'] = database
@@ -81,3 +88,4 @@ def cli(ctx, conn_host, database, username, password, port, host, verbose):
     ctx.obj['port'] = port
     ctx.obj['host'] = host
     ctx.obj['adapter'] = adapter
+    ctx.obj['version'] = __version__

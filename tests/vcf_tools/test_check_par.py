@@ -1,4 +1,4 @@
-from loqusdb.vcf_tools.variant import check_par
+from loqusdb.build_models.variant import check_par
 
 def test_par_region_X_lower():
     chrom = 'X'

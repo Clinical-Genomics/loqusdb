@@ -4,10 +4,10 @@ import click
 from datetime import datetime
 
 from loqusdb.exceptions import CaseError
-from loqusdb.utils import delete as delete_variants
+from loqusdb.utils.delete import delete as delete_command
 from . import base_command
 
-logger = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 @base_command.command('delete', short_help="Delete the variants of a family")
 @click.argument('variant-file',
@@ -30,15 +30,15 @@ logger = logging.getLogger(__name__)
 @click.pass_context
 def delete(ctx, variant_file, family_file, family_type, case_id):
     """Delete the variants of a case."""
-    if not family_file:
-        logger.error("Please provide a family file")
+    if not (family_file or case_id):
+        LOG.error("Please provide a family file")
         ctx.abort()
     
     adapter = ctx.obj['adapter']
 
     start_deleting = datetime.now()
     try:
-        delete_variants(
+        delete_command(
             adapter=adapter, 
             variant_file=variant_file, 
             family_file=family_file, 
@@ -46,8 +46,5 @@ def delete(ctx, variant_file, family_file, family_type, case_id):
             case_id=case_id
         )
     except (CaseError, IOError) as error:
-        logger.warning(error)
+        LOG.warning(error)
         ctx.abort()
-
-    logger.info("Time to delete variants: {0}"
-                .format(datetime.now() - start_deleting))

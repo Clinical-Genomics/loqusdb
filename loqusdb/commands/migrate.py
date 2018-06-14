@@ -6,7 +6,7 @@ from datetime import datetime
 from loqusdb.utils.migrate import migrate_database
 from . import base_command
 
-logger = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 @base_command.command('migrate', short_help="Migrate an old loqusdb instance")
@@ -20,6 +20,6 @@ def migrate(ctx,):
     
     nr_updated = migrate_database(adapter)
     
-    logger.info("All variants updated, time to complete migration: {}".format(
+    LOG.info("All variants updated, time to complete migration: {}".format(
         datetime.now() - start_time))
-    logger.info("Nr variants that where updated: %s", nr_updated)
+    LOG.info("Nr variants that where updated: %s", nr_updated)

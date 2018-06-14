@@ -1,7 +1,7 @@
 import logging
 from click import progressbar
 
-logger = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 def migrate_database(adapter):

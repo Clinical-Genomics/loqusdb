@@ -1,110 +1,77 @@
-from loqusdb.utils import (delete_variants, load_variants)
+from loqusdb.utils.delete import delete_variants
+from loqusdb.utils.load import load_variants
+from loqusdb.build_models.variant import get_variant_id
 
 
-def test_delete_variants(mongo_adapter, het_variant, case_obj, ind_positions):
-    """docstring for test_load_variants"""
+def test_delete_variants(mongo_adapter, het_variant, case_obj):
+    ## GIVEN a database with one variant
     db = mongo_adapter.db
+    case_id = case_obj['case_id']
     
-    vcf = []
-    vcf.append(het_variant)
-    
-    family_id = case_obj.family_id
-    individuals = case_obj.individuals
-    
-    load_variants(
-        adapter=mongo_adapter,
-        family_id=family_id, 
-        individuals=individuals,
-        ind_positions=ind_positions,
-        vcf=vcf,
-        gq_treshold=20,
-    )
+    db.variant.insert_one({
+        '_id': get_variant_id(het_variant),
+        'families': [case_id],
+        'observations': 1,
+    })
     
     mongo_variant = db.variant.find_one()
-    
-    assert mongo_variant['families'] == [family_id]
+    assert mongo_variant['families'] == [case_id]
 
+    ## WHEN deleting the variant
     delete_variants(
         adapter=mongo_adapter,
-        family_id=family_id, 
-        ind_positions=ind_positions,
-        individuals=individuals, 
-        vcf=vcf
+        vcf_obj=[het_variant],
+        case_obj=case_obj
     )
 
     mongo_variant = db.variant.find_one()
 
+    ## THEN assert that the variant was not found
     assert mongo_variant == None
 
-def test_delete_variant(mongo_adapter, het_variant, case_obj, ind_positions):
-    """docstring for test_load_variants"""
+def test_delete_variant(mongo_adapter, het_variant, case_obj):
+    ## GIVEN a database with one variant that is observed twice
     db = mongo_adapter.db
-
-    vcf = []
-    vcf.append(het_variant)
-
-    family_id_1 = case_obj.family_id
-    individuals = case_obj.individuals
-
-    load_variants(
-        adapter=mongo_adapter,
-        family_id=family_id_1,
-        individuals=individuals,
-        ind_positions=ind_positions,
-        vcf=vcf,
-        gq_treshold=20,
-    )
-
-    mongo_variant = db.variant.find_one()
+    case_id = case_obj['case_id']
     
-    assert mongo_variant['families'] == [family_id_1]
-
-    family_id_2 = '2'
-
-    load_variants(
-        adapter=mongo_adapter,
-        family_id=family_id_2,
-        individuals=individuals,
-        ind_positions=ind_positions,
-        vcf=vcf,
-        gq_treshold=20,
-    )
+    db.variant.insert_one({
+        '_id': get_variant_id(het_variant),
+        'families': [case_id, '2'],
+        'observations': 2,
+    })
 
     mongo_variant = db.variant.find_one()
-
-    assert mongo_variant['families'] == [family_id_1, family_id_2]
     assert mongo_variant['observations'] == 2
 
+    ## WHEN deleting the variant for one case
     delete_variants(
         adapter=mongo_adapter,
-        family_id=family_id_2,
-        ind_positions=ind_positions,
-        individuals=individuals,
-        vcf=vcf
+        vcf_obj=[het_variant],
+        case_obj=case_obj,
+        case_id='2',
     )
 
     mongo_variant = db.variant.find_one()
 
-    assert mongo_variant['families'] == [family_id_1]
+    ## THEN assert that one case has been removed from 'families'
+    assert mongo_variant['families'] == [case_id]
+    ## THEN assert that the observation count is decreased
     assert mongo_variant['observations'] == 1
 
-def test_delete_non_existing_variant(mongo_adapter, het_variant, case_obj, ind_positions):
+def test_delete_non_existing_variant(mongo_adapter, het_variant, case_obj):
     """docstring for test_load_variants"""
+    ## GIVEN a mongo adapter to an empty database
     db = mongo_adapter.db
+    case_id = case_obj['case_id']
 
-    vcf = []
-    vcf.append(het_variant)
-    family_id = case_obj.family_id
-    individuals = case_obj.individuals
-
+    ## WHEN deleting the variants
     delete_variants(
         adapter=mongo_adapter,
-        family_id=family_id,
-        individuals=individuals,
-        ind_positions=ind_positions,
-        vcf=vcf
+        vcf_obj=[het_variant],
+        case_obj=case_obj
     )
 
+    # THEN assert nothing happens
     mongo_variant = db.variant.find_one()
 
     assert mongo_variant == None

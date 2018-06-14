@@ -1,6 +1,6 @@
 import pytest
 import gzip
-from loqusdb.vcf_tools.vcf import get_vcf, get_file_handle
+from loqusdb.utils.vcf import (get_vcf, get_file_handle)
 from cyvcf2 import VCF
 
 def test_get_file_handle(vcf_path):

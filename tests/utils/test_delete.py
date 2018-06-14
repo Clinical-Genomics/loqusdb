@@ -1,4 +1,24 @@
-from loqusdb.utils import (load_database, delete)
+from loqusdb.utils.delete import delete
+from loqusdb.utils.load import load_database
+
+def test_delete_case(mongo_adapter, simple_case):
+    ## GIVEN a mongoadapter with a inserted case
+    db = mongo_adapter.db 
+    db.case.insert_one(simple_case)
+    mongo_case = db.case.find_one()
+
+    assert mongo_case
+    ## WHEN deleting the case
+    
+    mongo_adapter.delete_case(simple_case)
+    ## THEN assert that the case was deleted
+    mongo_case = db.case.find_one()
+    
+    mongo_case = db.case.find_one()
+
+    assert mongo_case == None
+    
+
 
 def test_delete_case_and_variants(vcf_path, ped_path, mongo_adapter, case_id):
     db = mongo_adapter.db

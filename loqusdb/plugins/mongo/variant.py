@@ -1,12 +1,15 @@
 import logging
 
+from pprint import pprint as pp
+
 from loqusdb.plugins import BaseVariantMixin
+from .structural_variant import SVMixin
 
 from pymongo import (ASCENDING, DESCENDING)
 
-logger = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
-class VariantMixin(BaseVariantMixin):
+class VariantMixin(BaseVariantMixin, SVMixin):
     
     def add_variant(self, variant):
         """Add a variant to the variant collection
@@ -18,52 +21,42 @@ class VariantMixin(BaseVariantMixin):
                 variant (dict): A variant dictionary
         
         """
-        logger.debug("Upserting variant: {0}".format(variant.get('_id')))
+        LOG.debug("Upserting variant: {0}".format(variant.get('_id')))
         
-        if variant.get('family_id'):
-            message = self.db.variant.update(
-                {'_id': variant['_id'],},
-                {
-                    '$inc': {
-                        'homozygote': variant.get('homozygote', 0),
-                        'hemizygote': variant.get('hemizygote', 0),
-                        'observations': 1
-                    },
-                    '$push': {
-                        'families': {
-                            '$each': [variant.get('family_id')],
-                            '$slice': -50
+        update = {
+                '$inc': {
+                    'homozygote': variant.get('homozygote', 0),
+                    'hemizygote': variant.get('hemizygote', 0),
+                    'observations': 1
+                },
+                '$set': {
+                    'chrom': variant.get('chrom'),
+                    'start': variant.get('pos'),
+                    'end': variant.get('end'),
+                    'ref': variant.get('ref'),
+                    'alt': variant.get('alt'),
+                }
+             }
+        if variant.get('case_id'):
+            update['$push'] = {
+                                'families': {
+                                '$each': [variant.get('case_id')],
+                                '$slice': -50
+                                }
                             }
-                    },
-                    '$set': {
-                        'chrom': variant.get('chrom'),
-                        'start': variant.get('pos'),
-                        'end': variant.get('end'),
-                        'ref': variant.get('ref'),
-                        'alt': variant.get('alt'),
-                    }
-                 }, 
-                 upsert=True
-            )
-        else:
-            message = self.db.variant.update(
-                {'_id': variant['_id']},
-                {
-                    '$inc': {
-                        'homozygote': variant.get('homozygote', 0),
-                        'hemizygote': variant.get('hemizygote', 0),
-                        'observations': 1,
-                    }
-                 }, 
-                 upsert=True
-            )
+
+        message = self.db.variant.update(
+            {'_id': variant['_id'],},
+            update,
+             upsert=True
+        )
 
         if message.get('updatedExisting'):
-            logger.debug("Variant %s was updated", message.get("upserted"))
+            LOG.debug("Variant %s was updated", message.get("upserted"))
         else:
-            logger.debug("Variant was added to database for first time")
+            LOG.debug("Variant was added to database for first time")
         return
-    
+
     def get_variant(self, variant):
         """Check if a variant exists in the database and return it
     
@@ -95,11 +88,11 @@ class VariantMixin(BaseVariantMixin):
         if start:
             query['start'] = {'$lte': end}
             query['end'] = {'$gte': start}
-        logger.debug("Find all variants {}".format(query))
+        LOG.info("Find all variants {}".format(query))
         return self.db.variant.find(query).sort([('start', ASCENDING)])
 
     def delete_variant(self, variant):
-        """Remove variant from database
+        """Delete observation in database
             
             This means that we take down the observations variable with one.
             If 'observations' == 1 we remove the variant. If variant was homozygote
@@ -113,12 +106,12 @@ class VariantMixin(BaseVariantMixin):
         if mongo_variant:
             
             if mongo_variant['observations'] == 1:
-                logger.debug("Removing variant {0}".format(
+                LOG.debug("Removing variant {0}".format(
                     mongo_variant.get('_id')
                 ))
                 message = self.db.variant.remove({'_id': variant['_id']})
             else:
-                logger.debug("Decreasing observations for {0}".format(
+                LOG.debug("Decreasing observations for {0}".format(
                     mongo_variant.get('_id')
                 ))
                 message = self.db.variant.update({
@@ -130,7 +123,7 @@ class VariantMixin(BaseVariantMixin):
                             'hemizygote': - (variant.get('hemizygote', 0)),
                         },
                         '$pull': {
-                            'families': variant.get('family_id')
+                            'families': variant.get('case_id')
                         }
                     }, upsert=False)
         return
