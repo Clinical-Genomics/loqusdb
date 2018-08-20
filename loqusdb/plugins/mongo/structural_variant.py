@@ -53,7 +53,7 @@ class SVMixin():
                 'sv_type': variant['sv_type'],
                 'pos_sum': 0,
                 'end_sum': 0,
-                'nr_events': 0,
+                'observations': 0,
                 'length': 0,
                 'sv_type': variant['sv_type'],
                 'families': [],
@@ -76,7 +76,7 @@ class SVMixin():
                 cluster['families'] = cluster['families'][:50]
 
         # Update number of times we have seen the event
-        nr_events = cluster['nr_events'] + 1
+        nr_events = cluster['observations'] + 1
         
         #                             -
         #                           -   -
@@ -116,7 +116,7 @@ class SVMixin():
             {'_id': cluster['_id']},
             {
                 '$inc': {
-                    'nr_events': 1,
+                    'observations': 1,
                     'pos_sum': variant['pos'],
                     'end_sum': variant['end'],
                 },

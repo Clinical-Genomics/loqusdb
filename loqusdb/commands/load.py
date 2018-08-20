@@ -101,6 +101,7 @@ def load(ctx, variant_file, family_file, family_type, skip_case_id, gq_treshold,
         LOG.warning(error)
         ctx.abort()
     
+    LOG.info("Nr variants inserted: %s", nr_inserted)
     LOG.info("Time to insert variants: {0}".format(
                 datetime.now() - start_inserting))
     if ensure_index:
