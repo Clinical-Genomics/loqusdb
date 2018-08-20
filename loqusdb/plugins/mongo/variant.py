@@ -129,9 +129,13 @@ class VariantMixin(BaseVariantMixin, SVMixin):
         return
 
 
-    def get_chromosomes(self):
+    def get_chromosomes(self, sv=False):
         """Return a list of all chromosomes found in database"""
-        res = self.db.variant.distinct('chrom')
+        if sv:
+            res = self.db.structural_variant.distinct('chrom')
+        else:
+            res = self.db.variant.distinct('chrom')
+            
         return res
     
     def get_max_position(self, chrom):

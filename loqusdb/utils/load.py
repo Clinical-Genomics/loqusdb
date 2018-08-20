@@ -30,6 +30,8 @@ def load_database(adapter, variant_file, family_file, nr_variants=None,
           variant_type(str): Specify the variant type
           max_window(int): Specify the max size for sv windows
  
+    Returns:
+          nr_inserted(int)
     """
     # Get a cyvcf2.VCF object
     vcf = get_vcf(variant_file)
@@ -71,7 +73,7 @@ def load_database(adapter, variant_file, family_file, nr_variants=None,
     
     # If case was succesfully added we can store the variants
     try:
-        load_variants(  
+        nr_inserted = load_variants(  
             adapter=adapter, 
             case_obj=case_obj, 
             vcf_obj=vcf,
@@ -91,6 +93,7 @@ def load_database(adapter, variant_file, family_file, nr_variants=None,
             case_id=case_id,
         )
         raise err
+    return nr_inserted
 
 def load_variants(adapter, vcf_obj, case_obj, nr_variants=None, skip_case_id=False, 
                   gq_treshold=None, max_window=3000):
@@ -105,7 +108,11 @@ def load_variants(adapter, vcf_obj, case_obj, nr_variants=None, skip_case_id=Fal
                              or not
         gq_treshold(int)
         max_window(int): Specify the max size for sv windows
+    
+    Returns:
+        nr_inserted(int)
     """
+    nr_inserted = 0
     case_id = case_obj['case_id']
     if skip_case_id:
         case_id = None
@@ -128,4 +135,6 @@ def load_variants(adapter, vcf_obj, case_obj, nr_variants=None, skip_case_id=Fal
                 adapter.add_structural_variant(variant=formated_variant, max_window=max_window)
             else:
                 adapter.add_variant(variant=formated_variant)
+            nr_inserted += 1
+    return nr_inserted
 
