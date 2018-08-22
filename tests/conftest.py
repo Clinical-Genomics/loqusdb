@@ -4,7 +4,6 @@ import pytest
 import cyvcf2
 
 from mongomock import MongoClient
-from pymongo import MongoClient as RealMongoClient
 from ped_parser import FamilyParser
 
 from loqusdb.plugins import MongoAdapter
@@ -80,17 +79,25 @@ def vcf_path(request):
     return file_path
 
 @pytest.fixture(scope='function')
+def sv_vcf_path(request):
+    file_path = 'tests/fixtures/643594.clinical.SV.vcf'
+    return file_path
+
+@pytest.fixture(scope='function')
 def double_vcf_path(request):
+    "This will return a vcf with the same variant two times"
     file_path = 'tests/fixtures/double_variant.vcf'
     return file_path
 
 @pytest.fixture(scope='function')
 def unsorted_vcf_path(request):
+    "This will return a vcf with unsorted variants"
     file_path = 'tests/fixtures/unsorted.vcf'
     return file_path
 
 @pytest.fixture(scope='function')
 def zipped_vcf_path(request):
+    "Returns a VCF that is gzipped and have a index companion"
     file_path = 'tests/fixtures/test.vcf.gz'
     return file_path
 
@@ -101,6 +108,7 @@ def ped_path(request):
 
 @pytest.fixture(scope='function')
 def funny_ped_path(request):
+    "Returns a ped file with incorrect family relations"
     file_path = 'tests/fixtures/funny_trio.ped'
     return file_path
 
