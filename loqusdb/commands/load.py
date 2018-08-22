@@ -19,6 +19,11 @@ LOG = logging.getLogger(__name__)
                     type=click.Path(exists=True),
                     metavar='<vcf_file>'
 )
+@click.option('--sv-variants',
+                    type=click.Path(exists=True),
+                    metavar='<sv_vcf_file>',
+                    help="Add a VCF with Structural Variants",
+)
 @click.option('-f', '--family-file',
                     type=click.Path(exists=True),
                     metavar='<ped_file>'
@@ -53,13 +58,12 @@ LOG = logging.getLogger(__name__)
     help='Specify the maximum window size for svs'
 )
 @click.pass_context
-def load(ctx, variant_file, family_file, family_type, skip_case_id, gq_treshold, case_id, 
-         ensure_index, max_window):
+def load(ctx, variant_file, sv_variants, family_file, family_type, skip_case_id, gq_treshold, 
+         case_id, ensure_index, max_window):
     """Load the variants of a case
 
-    The loading is based on if the variant is seen in a ny affected individual
-    in the family. If no family file is provided all individuals in vcf file will 
-    be considered.
+    A variant is loaded if it is observed in any individual of a case
+    If no family file is provided all individuals in vcf file will be considered.
     """
     if not (family_file or case_id):
         LOG.warning("Please provide a family file or a case id")
@@ -79,7 +83,7 @@ def load(ctx, variant_file, family_file, family_type, skip_case_id, gq_treshold,
         LOG.warning(error)
         ctx.abort()
 
-    LOG.info("Vcf file looks fine")
+    LOG.info("Vcf file %s looks fine", variant_path)
     LOG.info("Nr of variants in vcf: {0}".format(nr_variants))
     LOG.info("Type of variants in vcf: {0}".format(variant_type))
     start_inserting = datetime.now()
@@ -109,5 +113,47 @@ def load(ctx, variant_file, family_file, family_type, skip_case_id, gq_treshold,
     else:
         adapter.check_indexes()
     
+    if sv_variants:
+        if variant_type == 'sv':
+            LOG.warning("You are trying to load two files with structural variants")
+            LOG.info("%s will be skipped")
+            return
+        try:
+            # Open the file regardless of compression
+            variant_handle = get_file_handle(sv_variants)
+            vcf_info = check_vcf(variant_handle)
+            nr_variants = vcf_info['nr_variants']
+            variant_type = vcf_info['variant_type']
+        except VcfError as error:
+            LOG.warning(error)
+            ctx.abort()
         
-        
+        if not variant_type == 'sv':
+            LOG.warning("%s does not include structural variants", sv_variants)
+            ctx.abort()
+
+        LOG.info("Vcf file %s looks fine", sv_variants)
+        LOG.info("Nr of variants in vcf: {0}".format(nr_variants))
+        start_inserting = datetime.now()
+    
+        try:
+            nr_inserted = load_database(
+                adapter=adapter,
+                variant_file=variant_path,
+                family_file=family_file,
+                family_type=family_type,
+                skip_case_id=skip_case_id,
+                case_id=case_id,
+                gq_treshold=gq_treshold,
+                nr_variants=nr_variants,
+                variant_type=variant_type,
+                max_window=max_window,
+                skip_case=True
+            )
+        except (SyntaxError, CaseError, IOError) as error:
+            LOG.warning(error)
+            ctx.abort()
+    
+        LOG.info("Nr variants inserted: %s", nr_inserted)
+        LOG.info("Time to insert variants: {0}".format(
+                    datetime.now() - start_inserting))

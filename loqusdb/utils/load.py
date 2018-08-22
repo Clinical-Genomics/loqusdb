@@ -15,7 +15,8 @@ LOG = logging.getLogger(__name__)
 
 def load_database(adapter, variant_file, family_file, nr_variants=None, 
                   family_type='ped', skip_case_id=False, gq_treshold=None, 
-                  case_id=None, variant_type='snv', max_window = 3000):
+                  case_id=None, variant_type='snv', max_window = 3000, 
+                  skip_case=False):
     """Load the database with a case and its variants
             
     Args:
@@ -29,6 +30,7 @@ def load_database(adapter, variant_file, family_file, nr_variants=None,
           case_id(str): If different case id than the one in family file should be used
           variant_type(str): Specify the variant type
           max_window(int): Specify the max size for sv windows
+          skip_case(bool): If case should be skipped
  
     Returns:
           nr_inserted(int)
@@ -66,10 +68,11 @@ def load_database(adapter, variant_file, family_file, nr_variants=None,
     )
     
     # Add the case to database
-    try:
-        adapter.add_case(case_obj)
-    except CaseError as err:
-        raise err
+    if not skip_case:
+        try:
+            adapter.add_case(case_obj)
+        except CaseError as err:
+            raise err
     
     # If case was succesfully added we can store the variants
     try:
