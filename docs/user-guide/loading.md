@@ -1,6 +1,7 @@
 #Load a case
 
 Variants are loaded in a case context, this is so that we can trace back where we have observed a variation. VCF files usually does not hold family information, this is why we use a [ped][ped] file.
+
 A case is loaded with:
 
 ```

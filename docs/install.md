@@ -1,6 +1,6 @@
 ## Installation ##
 
-Install [mongo db][mongo_installation]
+Install **[mongo db][mongo_installation]**
 
 then do any of these:
 
