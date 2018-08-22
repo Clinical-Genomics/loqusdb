@@ -10,7 +10,7 @@ Instead loqusdb is used to keep track of what variants that have been observed, 
 where observed and in what individuals or families they where observed. 
 loqusdb was developed to aid in rare variant analysies and therefore information about single variants 
 are extremely important. If for example there is a potentially disease causing variant in a patient 
-we could ask loqusdb if it was seen before, if loqusdb then tells us that it has been observed in a 
+we could ask loqusdb if it has been observed before, if loqusdb then tells us that it has been observed in a 
 homozygous state 2 times before we could either exclude the variant or solve 2 more cases.
 
 ### Counting observations
