@@ -1,3 +1,9 @@
+"""
+tests/vcf_tools/check_par.py
+
+Test if variants are in the Pseudo Autosomal Recessive region.
+"""
+
 from loqusdb.build_models.variant import check_par
 
 def test_par_region_X_lower():
