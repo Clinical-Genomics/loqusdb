@@ -12,9 +12,6 @@ def test_build_case_no_ped():
         case = None, 
         vcf_individuals=vcf_individuals, 
         case_id=case_id, 
-        vcf_path=None, 
-        sv_individuals=None, 
-        nr_variants=None
     )
     
     ## THEN assert that the case got the right ID
@@ -32,10 +29,6 @@ def test_build_case_ped(family_obj):
     case_obj = build_case(
         case = family_obj, 
         vcf_individuals=vcf_inds, 
-        case_id=None, 
-        vcf_path=None, 
-        sv_individuals=None, 
-        nr_variants=None
     )
     
     ## THEN assert that the case has the correct id 

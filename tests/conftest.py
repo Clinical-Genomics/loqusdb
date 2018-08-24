@@ -9,7 +9,7 @@ from ped_parser import FamilyParser
 from loqusdb.plugins import MongoAdapter
 from loqusdb.log import init_log
 from loqusdb.models import Case
-from loqusdb.build_models import build_variant, build_case
+from loqusdb.build_models import (build_variant, build_case)
 
 logger = logging.getLogger('.')
 
@@ -80,7 +80,7 @@ def vcf_path(request):
 
 @pytest.fixture(scope='function')
 def sv_vcf_path(request):
-    file_path = 'tests/fixtures/643594.clinical.SV.vcf'
+    file_path = 'tests/fixtures/test.SV.vcf'
     return file_path
 
 @pytest.fixture(scope='function')
@@ -132,13 +132,46 @@ def vcf_obj(request, vcf_path):
     return cyvcf2.VCF(vcf_path)
 
 @pytest.fixture(scope='function')
+def sv_vcf_obj(request, sv_vcf_path):
+    """return a cyvcf2.VCF obj"""
+    return cyvcf2.VCF(sv_vcf_path)
+
+@pytest.fixture(scope='function')
 def case_obj(request, case_lines, vcf_obj, vcf_path):
     """Return a case obj"""
     family_parser = FamilyParser(case_lines, family_type='ped')
     families = list(family_parser.families.keys())
     family = family_parser.families[families[0]]
     vcf_individuals = vcf_obj.samples
-    _case_obj = build_case(family, vcf_individuals, vcf_path=vcf_path)
+    nr_variants = 0
+    for nr_variants,variant in enumerate(vcf_obj,1):
+        pass
+    _case_obj = build_case(
+        case=family, 
+        vcf_individuals=vcf_individuals, 
+        vcf_path=vcf_path,
+        variant_type='snv',
+        nr_variants=nr_variants,
+        )
+    return _case_obj
+
+@pytest.fixture(scope='function')
+def sv_case_obj(request, case_lines, sv_vcf_obj, sv_vcf_path):
+    """Return a case obj"""
+    family_parser = FamilyParser(case_lines, family_type='ped')
+    families = list(family_parser.families.keys())
+    family = family_parser.families[families[0]]
+    vcf_individuals = sv_vcf_obj.samples
+    nr_variants = 0
+    for nr_variants,variant in enumerate(sv_vcf_obj,1):
+        pass
+    _case_obj = build_case(
+        case=family, 
+        vcf_individuals=vcf_individuals, 
+        vcf_path=sv_vcf_path,
+        variant_type='sv',
+        nr_variants=nr_variants,
+        )
     return _case_obj
 
 

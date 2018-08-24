@@ -1,7 +1,16 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime
+"""
+loqusdb.utils.load.py
+
+Functions to load data into the database.
+This functions take an adapter which is the communication device for the database.
+
+"""
+
 import logging
 import click
+from datetime import datetime
+from copy import deepcopy
 
 from pprint import pprint as pp
 
@@ -16,7 +25,7 @@ LOG = logging.getLogger(__name__)
 def load_database(adapter, variant_file, family_file, nr_variants=None, 
                   family_type='ped', skip_case_id=False, gq_treshold=None, 
                   case_id=None, variant_type='snv', max_window = 3000, 
-                  skip_case=False):
+                  update_case=False):
     """Load the database with a case and its variants
             
     Args:
@@ -30,8 +39,8 @@ def load_database(adapter, variant_file, family_file, nr_variants=None,
           case_id(str): If different case id than the one in family file should be used
           variant_type(str): Specify the variant type
           max_window(int): Specify the max size for sv windows
-          skip_case(bool): If case should be skipped
- 
+          update_case(bool): If case should be updated
+
     Returns:
           nr_inserted(int)
     """
@@ -43,37 +52,21 @@ def load_database(adapter, variant_file, family_file, nr_variants=None,
             LOG.warning('Set gq-treshold to 0 or add info to vcf')
             raise SyntaxError('GQ is not defined in vcf header')
 
-    # Get a ped_parser.Family object from family file
-    family = None
-    family_id = None
-    if family_file:
-        with open(family_file, 'r') as family_lines:
-            family = get_case(
-                family_lines=family_lines, 
-                family_type=family_type
-            )
-            family_id = family.family_id
-    
-    # There has to be a case_id or a family at this stage.
-    case_id = case_id or family_id 
-
     # Get the indivuduals that are present in vcf file
     vcf_individuals = vcf.samples
-    # Convert infromation to a loqusdb Case object
-    case_obj = build_case(
-        case=family, 
-        case_id=case_id,
-        vcf_path=variant_file,
-        vcf_individuals=vcf_individuals
-    )
-    
-    # Add the case to database
-    if not skip_case:
-        try:
-            adapter.add_case(case_obj)
-        except CaseError as err:
-            raise err
-    
+
+    case_obj = load_case(
+        adapter=adapter,
+        variant_file=variant_file,
+        family_file=family_file, 
+        vcf_individuals=vcf_individuals, 
+        family_type=family_type, 
+        case_id=case_id, 
+        variant_type=variant_type,
+        nr_variants=nr_variants,
+        update=update_case,
+        )
+   
     # If case was succesfully added we can store the variants
     try:
         nr_inserted = load_variants(  
@@ -97,6 +90,92 @@ def load_database(adapter, variant_file, family_file, nr_variants=None,
         )
         raise err
     return nr_inserted
+
+def load_case(adapter, variant_file, family_file, vcf_individuals, family_type='ped', 
+              case_id=None, variant_type='snv', nr_variants=None, update=False):
+    """Load a case to the database
+    
+    Args:
+        adapter: Connection to database
+        variant_file(str): Path to variant file
+        family_file(str): Path to family_file
+        vcf_individuals(list[str]): Individual ids in order of vcf
+        family_type(str)
+        case_id(str): Alternative case id
+        variant_type(str): 'snv' or 'sv'
+        update(bool): If existing case should be updated
+    
+    Returns:
+        case_obj(models.Case)
+    """
+    # Get a ped_parser.Family object from family file
+    family = None
+    family_id = None
+    if family_file:
+        with open(family_file, 'r') as family_lines:
+            family = get_case(
+                family_lines=family_lines, 
+                family_type=family_type
+            )
+            family_id = family.family_id
+    
+    # There has to be a case_id or a family at this stage.
+    case_id = case_id or family_id
+
+    # Convert infromation to a loqusdb Case object
+    case_obj = build_case(
+        case=family, 
+        case_id=case_id,
+        vcf_path=variant_file,
+        vcf_individuals=vcf_individuals,
+        nr_variants=nr_variants,
+        variant_type=variant_type,
+    )
+    
+    # Check if the case already exists in database.
+    existing_case = adapter.case(case_obj)
+    if existing_case:
+        if not update:
+            raise CaseError("Case {0} already exists in database".format(case_id))
+        case_obj = update_case(case_obj, existing_case)
+    
+    # Add the case to database
+    try:
+        adapter.add_case(case_obj)
+    except CaseError as err:
+        raise err
+    
+    return case_obj
+
+
+def update_case(case_obj, existing_case):
+    """Update an existing case
+    
+    This will add paths to VCF files, individuals etc
+    
+    Args:
+        case_obj(models.Case)
+        existing_case(models.Case)
+    
+    Returns:
+        updated_case(models.Case): Updated existing case
+    """
+    variant_nrs = ['nr_variants', 'nr_sv_variants']
+    individuals = [('individuals','_inds'), ('sv_individuals','_sv_inds')]
+    
+    updated_case = deepcopy(existing_case)
+    
+    for i,file_name in enumerate(['vcf_path','vcf_sv_path']):
+        if case_obj.get(file_name):
+            if updated_case.get(file_name):
+                raise CaseError("Can not replace VCF in existing case")
+            else:
+                updated_case[file_name] = case_obj[file_name]
+                updated_case[variant_nrs[i]] = case_obj[variant_nrs[i]]
+                updated_case[individuals[i][0]] = case_obj[individuals[i][0]]
+                updated_case[individuals[i][1]] = case_obj[individuals[i][1]]
+
+    return updated_case
 
 def load_variants(adapter, vcf_obj, case_obj, nr_variants=None, skip_case_id=False, 
                   gq_treshold=None, max_window=3000):
