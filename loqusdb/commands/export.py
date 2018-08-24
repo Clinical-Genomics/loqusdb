@@ -77,7 +77,7 @@ def export(ctx, outfile, variant_type):
         else:
             LOG.info("Collecting all SV variants")
             variants = adapter.get_sv_variants(chromosome=chrom)
-        LOG.info(f"{variants.count()} variants found")
+        LOG.info("{} variants found".format(variants.count()))
         for variant in variants:
             variant_line = format_variant(variant, variant_type=variant_type)
             # chrom = variant['chrom']
