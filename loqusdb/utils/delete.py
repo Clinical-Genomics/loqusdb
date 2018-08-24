@@ -9,7 +9,7 @@ from loqusdb.build_models import (build_case, build_variant)
 LOG = logging.getLogger(__name__)
 
 
-def delete(adapter, variant_file, family_file, family_type='ped', case_id=None):
+def delete(adapter, variant_file, family_file, family_type='ped', case_id=None, skip_case=False):
     """Delete a case and all of it's variants from the database
     
     Args:
@@ -21,6 +21,7 @@ def delete(adapter, variant_file, family_file, family_type='ped', case_id=None):
         skip_case_id(bool): If no case information should be added to variants
         gq_treshold(int): If only quality variants should be considered
         case_id(str): If different case id than the one in family file should be used
+        skip_case(bool): If only variants should be deleted
     
     """
     # Get a cyvcf2.VCF object
@@ -44,8 +45,9 @@ def delete(adapter, variant_file, family_file, family_type='ped', case_id=None):
         vcf_individuals=vcf_obj.samples,
         case_id=case_id,
     )
-
-    adapter.delete_case(case_obj)
+    
+    if not skip_case:
+        adapter.delete_case(case_obj)
     
     delete_variants(
         adapter=adapter,
@@ -64,10 +66,10 @@ def delete_variants(adapter, vcf_obj, case_obj, case_id=None):
         case_id(str)
     
     Returns:
-        nr_of_deleted (int): Number of deleted variants
+        nr_deleted (int): Number of deleted variants
     """
     case_id = case_id or case_obj['case_id']
-    nr_of_deleted = 0
+    nr_deleted = 0
     start_deleting = datetime.now()
     chrom_time = datetime.now()
     current_chrom = None
@@ -85,7 +87,7 @@ def delete_variants(adapter, vcf_obj, case_obj, case_id=None):
         
         new_chrom = formated_variant.get('chrom')
         adapter.delete_variant(formated_variant)
-        nr_of_deleted += 1
+        nr_deleted += 1
         
         if not current_chrom:
             LOG.info("Start deleting chromosome {}".format(new_chrom))
@@ -101,4 +103,4 @@ def delete_variants(adapter, vcf_obj, case_obj, case_id=None):
             current_chrom = new_chrom
 
 
-    return nr_of_deleted
+    return nr_deleted
