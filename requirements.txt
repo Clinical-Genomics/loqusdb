@@ -11,4 +11,4 @@ mongomock
 vcftoolbox==1.5
 cyvcf2
 coloredlogs
-mongo_adapter
+mongo_adapter>=0.2
