@@ -42,23 +42,17 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
     Returns:
           nr_inserted(int)
     """
+    
     nr_variants = None
     if variant_file:
         vcf_info = check_vcf(variant_file)
         nr_variants = vcf_info['nr_variants']
         variant_type = vcf_info['variant_type']
-        if variant_type != 'snv':
-            raise VcfError("SNV file does not only include SNVs, please check vcf {0}".format(
-                            variant_file))
 
     nr_sv_variants = None
     if sv_file:
         vcf_info = check_vcf(sv_file)
         nr_sv_variants = vcf_info['nr_variants']
-        variant_type = vcf_info['variant_type']
-        if variant_type != 'sv':
-            raise VcfError("SV file does not only include SVs, please check vcf {0}".format(
-                            sv_file))
 
     # Get a cyvcf2.VCF object
     vcf = get_vcf(variant_file)
