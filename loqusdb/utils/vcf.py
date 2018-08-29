@@ -49,25 +49,26 @@ def check_sorting(previous_chrom, previous_pos, current_chrom, current_pos):
     """docstring for check_sorting"""
     pass
 
-def check_vcf(variants):
+def check_vcf(vcf_path, expected_type='snv'):
     """Check if there are any problems with the vcf file
 
     Args:
-        variants(iterable(cyvcf2.Variant))
+        vcf_path(str)
+        expected_type(str): 'sv' or 'snv'
 
     Returns:
         vcf_info(dict): dict like {'nr_variants':<INT>, 'variant_type': <STR>}
                         'variant_type' in ['snv', 'sv']
     """
     LOG.info("Check if vcf is on correct format...")
-    
+
     variant_type = None
-    
+
     previous_pos = None
     previous_chrom = None
-    
+
     posititon_variants = set()
-    
+
     nr_variants = 0
     for nr_variants,variant in enumerate(variants,1):
 
@@ -118,6 +119,14 @@ def check_vcf(variants):
                 previous_pos = current_pos
                 # Reset posititon_variants since we are on a new position
                 posititon_variants = set([variant_id])
+
+    if variant_type != expected_type:
+        raise VcfError("VCF file does not only include {0}s, please check vcf {1}".format(
+                        expected_type.upper(), variant_file))
+
+    LOG.info("Vcf file %s looks fine", vcf_path)
+    LOG.info("Nr of variants in vcf: {0}".format(nr_variants))
+    LOG.info("Type of variants in vcf: {0}".format(variant_type))
     
     vcf_info = {
         'nr_variants': nr_variants,

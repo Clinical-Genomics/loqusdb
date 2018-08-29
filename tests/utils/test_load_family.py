@@ -50,3 +50,13 @@ def test_update_case_same_vcf(case_obj, sv_case_obj):
     ## THEN assert that a CaseError is raised since we are trying to modify existing VCF
     with pytest.raises(CaseError):
         updated_case = update_case(sv_case_obj, case_obj)
+
+def test_load_complete_case(mongo_adapter, complete_case_obj):
+    ## GIVEN a case that includes both svs and snvs
+    
+    ## WHEN loading the case
+    
+    ## THEN assert that both types of variants are added.
+    
+    pp(complete_case_obj)
+    assert False

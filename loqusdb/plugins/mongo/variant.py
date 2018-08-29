@@ -14,14 +14,14 @@ class VariantMixin(BaseVariantMixin, SVMixin):
     def add_variant(self, variant):
         """Add a variant to the variant collection
         
-            If the variant exists we update the count else we insert a new variant
-            object.
+            If the variant exists we update the count else we insert a new variant object.
         
             Args:
                 variant (dict): A variant dictionary
         
         """
         LOG.debug("Upserting variant: {0}".format(variant.get('_id')))
+        
         
         update = {
                 '$inc': {
@@ -58,29 +58,34 @@ class VariantMixin(BaseVariantMixin, SVMixin):
         return
 
     def get_variant(self, variant):
-        """Check if a variant exists in the database and return it
-    
-            Search the variants with the variant id
-        
-            Args:
-                variant (dict): A variant dictionary
-        
-            Returns:
-                variant (dict): A variant dictionary
+        """Check if a variant exists in the database and return it.
+        Variants are searched with a variant id which is a string that consists of
+        chrom_pos_ref_alt. 
+        There is no simple way to create a similar ID for structural variants so this function
+        will not work for SVs
+
+        Search the variants with the variant id
+
+        Args:
+            variant(dict): A variant dictionary
+
+        Returns:
+            variant(dict): A variant dictionary or None
         """
         return self.db.variant.find_one({'_id': variant.get('_id')})
 
     def get_variants(self, chromosome=None, start=None, end=None):
         """Return all variants in the database
+        If no region is specified all variants will be returned.
 
         Args:
-            chromosome (str)
-            start (int)
-            end (int)
+            chromosome(str)
+            start(int)
+            end(int)
         
     
         Returns:
-            variants (Iterable(Variant))
+            variants(Iterable(Variant))
         """
         query = {}
         if chromosome:
@@ -93,13 +98,15 @@ class VariantMixin(BaseVariantMixin, SVMixin):
 
     def delete_variant(self, variant):
         """Delete observation in database
-            
-            This means that we take down the observations variable with one.
-            If 'observations' == 1 we remove the variant. If variant was homozygote
-            we decrease 'homozygote' with one.
-            
-            Args:
-                variant (dict): A variant dictionary            
+
+        This means that we take down the observations variable with one.
+        If 'observations' == 1 we remove the variant. If variant was homozygote
+        we decrease 'homozygote' with one.
+        Also remove the family from array 'families'.
+
+        Args:
+            variant (dict): A variant dictionary
+
         """
         mongo_variant = self.get_variant(variant)
         
@@ -130,7 +137,14 @@ class VariantMixin(BaseVariantMixin, SVMixin):
 
 
     def get_chromosomes(self, sv=False):
-        """Return a list of all chromosomes found in database"""
+        """Return a list of all chromosomes found in database
+        
+        Args:
+            sv(bool): if sv variants should be choosen
+        
+        Returns:
+            res(iterable(str)): An iterable with all chromosomes in the database
+        """
         if sv:
             res = self.db.structural_variant.distinct('chrom')
         else:
@@ -139,9 +153,18 @@ class VariantMixin(BaseVariantMixin, SVMixin):
         return res
     
     def get_max_position(self, chrom):
-        """Get the last position observed on a chromosome in the database"""
+        """Get the last position observed on a chromosome in the database
+        
+        Args:
+            chrom(str)
+        
+        Returns:
+            end(int): The largest end position found
+            
+        """
         res = self.db.variant.find({'chrom':chrom}, {'_id':0, 'end':1}).sort([('end', DESCENDING)]).limit(1)
         end = 0
         for variant in res:
             end = variant['end']
         return end
+    

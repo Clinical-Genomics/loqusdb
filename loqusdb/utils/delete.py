@@ -9,19 +9,17 @@ from loqusdb.build_models import (build_case, build_variant)
 LOG = logging.getLogger(__name__)
 
 
-def delete(adapter, variant_file, family_file, family_type='ped', case_id=None, skip_case=False):
-    """Delete a case and all of it's variants from the database
+def delete(adapter, variant_file, family_file, family_type='ped', case_id=None, case_obj=False, update=False):
+    """Delete a case and all of it's variants from the database.
     
     Args:
         adapter: Connection to database
         variant_file(str): Path to variant file
         family_file(str): Path to family file
         family_type(str): Format of family file
-        nr_variants(int): number of variants in vcf
-        skip_case_id(bool): If no case information should be added to variants
-        gq_treshold(int): If only quality variants should be considered
         case_id(str): If different case id than the one in family file should be used
-        skip_case(bool): If only variants should be deleted
+        case_obj(models.Case)
+        update(bool): If update then change existing case in database to case_obj
     
     """
     # Get a cyvcf2.VCF object

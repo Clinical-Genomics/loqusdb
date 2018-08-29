@@ -45,7 +45,6 @@ class SVMixin():
         cluster = self.get_structural_variant(variant)
         # If there was no matcing cluster we need to create a new cluster
         if cluster is None:
-            # Insert variant to get a _id
             # The cluster will be populated with information later.
             cluster = {
                 'chrom': variant['chrom'],
@@ -59,6 +58,7 @@ class SVMixin():
                 'families': [],
                 
             }
+            # Insert variant to get a _id
             _id = self.db.structural_variant.insert(cluster)
             
             cluster['_id'] = _id
@@ -93,6 +93,7 @@ class SVMixin():
         end_mean = int((cluster['end_sum'] + variant['end']) // (nr_events))
         
         # We need to calculate the new cluster length
+        # Handle translocation as a special case
         if cluster['sv_type'] != 'BND':
             cluster_len = end_mean - pos_mean
             # We need to adapt the interval size depending on the size of the cluster
@@ -142,14 +143,14 @@ class SVMixin():
 
     def get_structural_variant(self, variant):
         """Check if there are any overlapping sv clusters
-    
-            Search the sv variants with chrom start end_chrom end and sv_type
-        
-            Args:
-                variant (dict): A variant dictionary
-        
-            Returns:
-                variant (dict): A variant dictionary
+
+       Search the sv variants with chrom start end_chrom end and sv_type
+
+       Args:
+           variant (dict): A variant dictionary
+
+       Returns:
+           variant (dict): A variant dictionary
         """
         # Create a query for the database
         # This will include more variants than we want
@@ -192,7 +193,10 @@ class SVMixin():
 
             # If the distance is closer than previous we choose current cluster
             if distance < closest_hit:
+                # Set match to the current closest hit
                 match = hit
+                # Update the closest distance
+                closest_hit = distance
 
         return match
 

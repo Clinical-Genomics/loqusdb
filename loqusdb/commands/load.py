@@ -15,14 +15,15 @@ from . import base_command
 LOG = logging.getLogger(__name__)
 
 @base_command.command('load', short_help="Load the variants of a family")
-@click.argument('variant-file',
+@click.option('--variant-file',
                     type=click.Path(exists=True),
-                    metavar='<vcf_file>'
+                    metavar='<vcf_file>',
+                    help="Load a VCF with SNV/INDEL Variants",
 )
 @click.option('--sv-variants',
                     type=click.Path(exists=True),
                     metavar='<sv_vcf_file>',
-                    help="Add a VCF with Structural Variants",
+                    help="Load a VCF with Structural Variants",
 )
 @click.option('-f', '--family-file',
                     type=click.Path(exists=True),
@@ -41,7 +42,7 @@ LOG = logging.getLogger(__name__)
 @click.option('-s' ,'--skip-case-id', 
                 is_flag=True, 
                 show_default=True,
-                help='Do not store which cases that have a variant'
+                help='Do not store case information on variants'
 )
 @click.option('--ensure-index', 
                 is_flag=True, 
@@ -69,36 +70,32 @@ def load(ctx, variant_file, sv_variants, family_file, family_type, skip_case_id,
         LOG.warning("Please provide a family file or a case id")
         ctx.abort()
     
-    variant_path = os.path.abspath(variant_file)
-
-    adapter = ctx.obj['adapter']
-    
-    try:
-        # Open the file regardless of compression
-        variant_handle = get_file_handle(variant_path)
-        vcf_info = check_vcf(variant_handle)
-        nr_variants = vcf_info['nr_variants']
-        variant_type = vcf_info['variant_type']
-    except VcfError as error:
-        LOG.warning(error)
+    if not (variant_file or sv_variants):
+        LOG.warning("Please provide a VCF file")
         ctx.abort()
 
-    LOG.info("Vcf file %s looks fine", variant_path)
-    LOG.info("Nr of variants in vcf: {0}".format(nr_variants))
-    LOG.info("Type of variants in vcf: {0}".format(variant_type))
+    variant_path = None
+    if variant_file:
+        variant_path = os.path.abspath(variant_file)
+        
+    variant_sv_path = None
+    if sv_variants:
+        variant_sv_path = os.path.abspath(sv_variants)
+
+    adapter = ctx.obj['adapter']
+
     start_inserting = datetime.now()
     
     try:
         nr_inserted = load_database(
             adapter=adapter,
             variant_file=variant_path,
+            sv_variant_file=variant_sv_path,
             family_file=family_file,
             family_type=family_type,
             skip_case_id=skip_case_id,
             case_id=case_id,
             gq_treshold=gq_treshold,
-            nr_variants=nr_variants,
-            variant_type=variant_type,
             max_window=max_window,
         )
     except (SyntaxError, CaseError, IOError) as error:
@@ -108,52 +105,9 @@ def load(ctx, variant_file, sv_variants, family_file, family_type, skip_case_id,
     LOG.info("Nr variants inserted: %s", nr_inserted)
     LOG.info("Time to insert variants: {0}".format(
                 datetime.now() - start_inserting))
+    
     if ensure_index:
         adapter.ensure_indexes()
     else:
         adapter.check_indexes()
     
-    if sv_variants:
-        if variant_type == 'sv':
-            LOG.warning("You are trying to load two files with structural variants")
-            LOG.info("%s will be skipped")
-            return
-        try:
-            # Open the file regardless of compression
-            variant_handle = get_file_handle(sv_variants)
-            vcf_info = check_vcf(variant_handle)
-            nr_variants = vcf_info['nr_variants']
-            variant_type = vcf_info['variant_type']
-        except VcfError as error:
-            LOG.warning(error)
-            ctx.abort()
-        
-        if not variant_type == 'sv':
-            LOG.warning("%s does not include structural variants", sv_variants)
-            ctx.abort()
-
-        LOG.info("Vcf file %s looks fine", sv_variants)
-        LOG.info("Nr of variants in vcf: {0}".format(nr_variants))
-        start_inserting = datetime.now()
-    
-        try:
-            nr_inserted = load_database(
-                adapter=adapter,
-                variant_file=variant_path,
-                family_file=family_file,
-                family_type=family_type,
-                skip_case_id=skip_case_id,
-                case_id=case_id,
-                gq_treshold=gq_treshold,
-                nr_variants=nr_variants,
-                variant_type=variant_type,
-                max_window=max_window,
-                skip_case=True
-            )
-        except (SyntaxError, CaseError, IOError) as error:
-            LOG.warning(error)
-            ctx.abort()
-    
-        LOG.info("Nr variants inserted: %s", nr_inserted)
-        LOG.info("Time to insert variants: {0}".format(
-                    datetime.now() - start_inserting))

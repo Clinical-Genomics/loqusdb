@@ -10,6 +10,7 @@ from loqusdb.plugins import MongoAdapter
 from loqusdb.log import init_log
 from loqusdb.models import Case
 from loqusdb.build_models import (build_variant, build_case)
+from loqusdb.utils.load import update_case
 
 logger = logging.getLogger('.')
 
@@ -172,6 +173,12 @@ def sv_case_obj(request, case_lines, sv_vcf_obj, sv_vcf_path):
         variant_type='sv',
         nr_variants=nr_variants,
         )
+    return _case_obj
+
+@pytest.fixture(scope='function')
+def complete_case_obj(request, case_obj, sv_case_obj):
+    """Return a case obj with both sv and snv information"""
+    _case_obj = update_case(case_obj, sv_case_obj)
     return _case_obj
 
 
