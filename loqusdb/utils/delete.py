@@ -9,50 +9,34 @@ from loqusdb.build_models import (build_case, build_variant)
 LOG = logging.getLogger(__name__)
 
 
-def delete(adapter, variant_file, family_file, family_type='ped', case_id=None, case_obj=False, skip_case=False):
+def delete(adapter, case_obj, update=False, existing_case=False):
     """Delete a case and all of it's variants from the database.
     
     Args:
         adapter: Connection to database
-        variant_file(str): Path to variant file
-        family_file(str): Path to family file
-        family_type(str): Format of family file
-        case_id(str): If different case id than the one in family file should be used
         case_obj(models.Case)
-        skip_case(bool): If update then change existing case in database to case_obj
+        update(bool): If we are in the middle of an update
+        existing_case(models.Case): If something failed during an update we need to revert
+                                    to the original case
     
     """
-    # Get a cyvcf2.VCF object
-    vcf_obj = get_vcf(variant_file)
-
-    # Parse the family file infromation
-    family = None
-    family_id = None
-    if family_file:
-        with open(family_file, 'r') as family_lines:
-            family = get_case(
-                family_lines=family_lines, 
-                family_type=family_type
-            )
-            family_id = family.family_id
-
-    case_id = case_id or family_id
-
-    case_obj = build_case(
-        case=family,
-        vcf_individuals=vcf_obj.samples,
-        case_id=case_id,
-    )
-    
-    if not skip_case:
+    # This will overwrite the updated case with the previous one
+    if update:
+        adapter.add_case(existing_case)
+    else:
         adapter.delete_case(case_obj)
-    
-    delete_variants(
-        adapter=adapter,
-        vcf_obj=vcf_obj,
-        case_obj=case_obj,
-        case_id=case_id,
-    )
+
+    for file_type in ['vcf_path','vcf_sv_path']:
+        if not case_obj.get(file_type):
+            continue
+        # Get a cyvcf2.VCF object
+        vcf_obj = get_vcf(variant_file)
+
+        delete_variants(
+            adapter=adapter,
+            vcf_obj=vcf_obj,
+            case_obj=case_obj,
+        )
 
 def delete_variants(adapter, vcf_obj, case_obj, case_id=None):
     """Delete variants for a case in the database

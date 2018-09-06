@@ -1,5 +1,7 @@
 import logging
 
+from copy import deepcopy
+
 from ped_parser import FamilyParser
 
 from loqusdb.exceptions import CaseError
@@ -34,3 +36,36 @@ def get_case(family_lines, family_type='ped', vcf_path=None):
     family = family_parser.families[families[0]]
     
     return family
+
+def update_case(case_obj, existing_case):
+    """Update an existing case
+    
+    This will add paths to VCF files, individuals etc
+    
+    Args:
+        case_obj(models.Case)
+        existing_case(models.Case)
+    
+    Returns:
+        updated_case(models.Case): Updated existing case
+    """
+    variant_nrs = ['nr_variants', 'nr_sv_variants']
+    individuals = [('individuals','_inds'), ('sv_individuals','_sv_inds')]
+    
+    updated_case = deepcopy(existing_case)
+    
+    for i,file_name in enumerate(['vcf_path','vcf_sv_path']):
+        variant_type = 'snv'
+        if file_name == 'vcf_sv_path':
+            variant_type = 'sv'
+        if case_obj.get(file_name):
+            if updated_case.get(file_name):
+                LOG.warning("VCF of type %s already exists in case", variant_type)
+                raise CaseError("Can not replace VCF in existing case")
+            else:
+                updated_case[file_name] = case_obj[file_name]
+                updated_case[variant_nrs[i]] = case_obj[variant_nrs[i]]
+                updated_case[individuals[i][0]] = case_obj[individuals[i][0]]
+                updated_case[individuals[i][1]] = case_obj[individuals[i][1]]
+
+    return updated_case
