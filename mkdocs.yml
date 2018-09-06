@@ -1,0 +1,16 @@
+site_name: loqusdb documentation
+site_url: http://moonso.github.io/loqusdb/
+repo_url: https://github.com/moonso/loqusdb
+site_author: Måns Magnusson and Jesper Eisfeldt
+
+theme:
+  name: 'material'
+  logo: 'cloud_circle'
+  palette:
+    primary: 'blue grey'
+    accent: 'cyan'
+
+nav:
+  - Home: 'README.md'
+  - User Guide: 'user-guide/README.md'
+  - Admin Guide: 'admin-guide/README.md'
