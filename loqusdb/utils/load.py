@@ -49,16 +49,16 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
         vcf_info = check_vcf(variant_file)
         nr_variants = vcf_info['nr_variants']
         variant_type = vcf_info['variant_type']
-        vcf_files.append[variant_file]
+        vcf_files.append(variant_file)
         # Get the indivuduals that are present in vcf file
         vcf_individuals = vcf_info['individuals']
 
     nr_sv_variants = None
     sv_individuals = None
     if sv_file:
-        vcf_info = check_vcf(sv_file)
+        vcf_info = check_vcf(sv_file, 'sv')
         nr_sv_variants = vcf_info['nr_variants']
-        vcf_files.append[sv_file]
+        vcf_files.append(sv_file)
         sv_individuals = vcf_info['individuals']
 
     # If a gq treshold is used the variants needs to have GQ
@@ -94,7 +94,6 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
         nr_variants=nr_variants,
         vcf_sv_path=sv_file,
         sv_individuals=sv_individuals,
-        variant_type=variant_type,
         nr_sv_variants=nr_sv_variants,
     )
     
@@ -124,7 +123,7 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
                 skip_case_id=skip_case_id,
                 gq_treshold=gq_treshold,
                 max_window=max_window,
-                variant_type=variant_type
+                variant_type=variant_type,
             )
         except Exception as err:
             # If something went wrong do a rollback

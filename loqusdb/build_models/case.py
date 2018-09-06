@@ -20,15 +20,19 @@ def get_individual_positions(individuals):
             ind_pos[ind] = i
     return ind_pos
 
-def build_case(case, vcf_individuals=None, case_id=None, vcf_path=None, variant_type='snv', 
-               sv_individuals=None, vcf_sv_path=None, nr_variants=None, nr_sv_variants=None):
+def build_case(case, vcf_individuals=None, case_id=None, vcf_path=None, sv_individuals=None, 
+               vcf_sv_path=None, nr_variants=None, nr_sv_variants=None):
     """Build a Case from the given information
     
     Args:
         case(ped_parser.Family): A family object
-        case_id(str): If another name than the one in family file should be used
         vcf_individuals(list): Show the order of inds in vcf file
-        variant_type(str): 'snv' or 'sv'
+        case_id(str): If another name than the one in family file should be used
+        vcf_path(str)
+        sv_individuals(list): Show the order of inds in vcf file
+        vcf_sv_path(str)
+        nr_variants(int)
+        nr_sv_variants(int)
     
     Returns:
         case_obj(models.Case)

@@ -128,7 +128,7 @@ def check_vcf(vcf_path, expected_type='snv'):
 
     if variant_type != expected_type:
         raise VcfError("VCF file does not only include {0}s, please check vcf {1}".format(
-                        expected_type.upper(), variant_file))
+                        expected_type.upper(), vcf_path))
 
     LOG.info("Vcf file %s looks fine", vcf_path)
     LOG.info("Nr of variants in vcf: {0}".format(nr_variants))

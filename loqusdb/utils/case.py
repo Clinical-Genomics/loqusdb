@@ -20,13 +20,13 @@ def get_case(family_lines, family_type='ped', vcf_path=None):
         family (Family): A ped_parser family object
     """
     family = None
-    logger.info("Parsing family information")
+    LOG.info("Parsing family information")
     
     family_parser = FamilyParser(family_lines, family_type)
     
     families = list(family_parser.families.keys())
     
-    logger.info("Found families {0}".format(', '.join(families)))
+    LOG.info("Found families {0}".format(', '.join(families)))
     
     if len(families) > 1:
         raise CaseError("Only one family per load can be used")
