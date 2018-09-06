@@ -57,11 +57,17 @@ def check_vcf(vcf_path, expected_type='snv'):
         expected_type(str): 'sv' or 'snv'
 
     Returns:
-        vcf_info(dict): dict like {'nr_variants':<INT>, 'variant_type': <STR>}
-                        'variant_type' in ['snv', 'sv']
+        vcf_info(dict): dict like 
+        {
+            'nr_variants':<INT>, 
+            'variant_type': <STR> in ['snv', 'sv'],
+            'individuals': <LIST> individual positions in file
+        }
     """
     LOG.info("Check if vcf is on correct format...")
 
+    vcf = VCF(vcf_path)
+    individuals = vcf.samples
     variant_type = None
 
     previous_pos = None
@@ -70,7 +76,7 @@ def check_vcf(vcf_path, expected_type='snv'):
     posititon_variants = set()
 
     nr_variants = 0
-    for nr_variants,variant in enumerate(variants,1):
+    for nr_variants,variant in enumerate(vcf,1):
 
         # Check the type of variant
         current_type = 'sv' if variant.var_type == 'sv' else 'snv'
@@ -130,7 +136,8 @@ def check_vcf(vcf_path, expected_type='snv'):
     
     vcf_info = {
         'nr_variants': nr_variants,
-        'variant_type': variant_type
+        'variant_type': variant_type,
+        'individuals': individuals,
     }
 
     return vcf_info

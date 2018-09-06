@@ -24,7 +24,7 @@ LOG = logging.getLogger(__name__)
 
 def load_database(adapter, variant_file=None, sv_file=None, family_file=None, 
                   family_type='ped', skip_case_id=False, gq_treshold=None, 
-                  case_id=None, max_window = 3000, update_case=False):
+                  case_id=None, max_window = 3000):
     """Load the database with a case and its variants
             
     Args:
@@ -37,40 +37,40 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
           gq_treshold(int): If only quality variants should be considered
           case_id(str): If different case id than the one in family file should be used
           max_window(int): Specify the max size for sv windows
-          update_case(bool): If case should be updated
 
     Returns:
           nr_inserted(int)
     """
+    vcf_files = []
     
     nr_variants = None
+    vcf_individuals = None
     if variant_file:
         vcf_info = check_vcf(variant_file)
         nr_variants = vcf_info['nr_variants']
         variant_type = vcf_info['variant_type']
+        vcf_files.append[variant_file]
+        # Get the indivuduals that are present in vcf file
+        vcf_individuals = vcf_info['individuals']
 
     nr_sv_variants = None
+    sv_individuals = None
     if sv_file:
         vcf_info = check_vcf(sv_file)
         nr_sv_variants = vcf_info['nr_variants']
+        vcf_files.append[sv_file]
+        sv_individuals = vcf_info['individuals']
 
-    # Get a cyvcf2.VCF object
-    vcf = get_vcf(variant_file)
-    
-    if gq_treshold:
-        if not vcf.contains('GQ'):
-            LOG.warning('Set gq-treshold to 0 or add info to vcf')
-            raise SyntaxError('GQ is not defined in vcf header')
-    
-    # Open the file regardless of compression
-    variant_handle = get_file_handle(variant_path)
-    vcf_info = check_vcf(variant_handle)
-    nr_variants = vcf_info['nr_variants']
-    variant_type = vcf_info['variant_type']
-    
-    # Get the indivuduals that are present in vcf file
-    vcf_individuals = vcf.samples
-    
+    # If a gq treshold is used the variants needs to have GQ
+    for _vcf_file in vcf_files:
+        # Get a cyvcf2.VCF object
+        vcf = get_vcf(_vcf_file)
+        
+        if gq_treshold:
+            if not vcf.contains('GQ'):
+                LOG.warning('Set gq-treshold to 0 or add info to vcf {0}'.format(_vcf_file))
+                raise SyntaxError('GQ is not defined in vcf header')
+
     # Get a ped_parser.Family object from family file
     family = None
     family_id = None
@@ -92,12 +92,15 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
         vcf_path=variant_file,
         vcf_individuals=vcf_individuals,
         nr_variants=nr_variants,
+        vcf_sv_path=sv_file,
+        sv_individuals=sv_individuals,
         variant_type=variant_type,
+        nr_sv_variants=nr_sv_variants,
     )
     
 
     # Build and load a new case, or update an existing one
-    case_obj,existing_case = load_case(
+    case_obj = load_case(
         adapter=adapter,
         variant_file=variant_file,
         family_file=family_file, 
