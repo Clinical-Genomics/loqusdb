@@ -1,4 +1,6 @@
 import pytest
+from cyvcf2 import VCF
+
 from loqusdb.utils.load import load_variants
 
 def test_load_variants(mongo_adapter, het_variant, case_obj):
@@ -163,3 +165,37 @@ def test_load_same_variant_different_case(mongo_adapter, het_variant, case_obj):
     assert mongo_variant['observations'] == 2
     assert mongo_variant['families'] == [case_id, case_id2]
 
+def test_load_case_variants(mongo_adapter, case_obj):
+    db = mongo_adapter.db
+    ## GIVEN a mongo adatper with snv variant file
+    vcf_obj = VCF(case_obj['vcf_path'])
+    ## WHEN loading the variants
+    nr_variants = load_variants(
+        adapter=mongo_adapter,
+        vcf_obj=vcf_obj, 
+        case_obj=case_obj,
+    )
+
+    nr_loaded = db.variant.find().count()
+    ## THEN assert that the correct number of variants was loaded
+    assert nr_loaded > 0
+    assert nr_loaded == case_obj['nr_variants']
+
+def test_load_sv_case_variants(mongo_adapter, sv_case_obj):
+    db = mongo_adapter.db
+    ## GIVEN a mongo adatper with snv variant file
+    vcf_obj = VCF(sv_case_obj['vcf_sv_path'])
+    ## WHEN loading the variants
+    nr_variants = load_variants(
+        adapter=mongo_adapter,
+        vcf_obj=vcf_obj, 
+        case_obj=sv_case_obj,
+        variant_type='sv',
+    )
+
+    nr_loaded_svs = db.structural_variant.find().count()
+    nr_loaded_snvs = db.variant.find().count()
+    ## THEN assert that the correct number of variants was loaded
+    assert nr_loaded_svs > 0
+    assert nr_loaded_snvs == 0
+    assert nr_loaded_svs == sv_case_obj['nr_sv_variants']

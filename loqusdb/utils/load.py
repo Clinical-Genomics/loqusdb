@@ -102,21 +102,24 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
     # Build and load a new case, or update an existing one
     case_obj = load_case(
         adapter=adapter,
-        variant_file=variant_file,
-        family_file=family_file, 
-        vcf_individuals=vcf_individuals, 
-        family_type=family_type, 
-        case_id=case_id, 
-        variant_type=variant_type,
-        nr_variants=nr_variants,
+        case_obj=case_obj,
         update=update_case,
         )
-   
+    
+    nr_inserted = 0
     # If case was succesfully added we can store the variants
-    for variant_type in ['sv','snv']:
+    for file_type in ['vcf_path','vcf_sv_path']:
+        variant_type = 'snv'
+        if file_type == 'vcf_sv_path':
+            variant_type = 'sv'
+        if case_obj.get(file_type) is None:
+            continue
+
+        vcf_obj = get_vcf(case_obj[file_type])
         try:
-            nr_inserted = load_variants(  
-                adapter=adapter, 
+            nr_inserted += load_variants(  
+                adapter=adapter,
+                vcf_obj=vcf_obj,
                 case_obj=case_obj, 
                 skip_case_id=skip_case_id,
                 gq_treshold=gq_treshold,
@@ -192,8 +195,8 @@ def update_case(case_obj, existing_case):
 
     return updated_case
 
-def load_variants(adapter, case_obj, nr_variants=None, skip_case_id=False, 
-                  gq_treshold=None, max_window=3000, variant_type='snv'):
+def load_variants(adapter, vcf_obj, case_obj, skip_case_id=False, gq_treshold=None, 
+                  max_window=3000, variant_type='snv'):
     """Load variants for a family into the database.
 
     Args:
@@ -210,10 +213,8 @@ def load_variants(adapter, case_obj, nr_variants=None, skip_case_id=False,
         nr_inserted(int)
     """
     if variant_type == 'snv':
-        vcf_obj = get_vcf(case_obj['vcf_path'])
         nr_variants = case_obj['nr_variants']
     else:
-        vcf_obj = get_vcf(case_obj['vcf_sv_path'])
         nr_variants = case_obj['nr_sv_variants']
 
     nr_inserted = 0
@@ -240,5 +241,7 @@ def load_variants(adapter, case_obj, nr_variants=None, skip_case_id=False,
             else:
                 adapter.add_variant(variant=formated_variant)
             nr_inserted += 1
+    
+    LOG.info("Inserted %s variants of type %s", (nr_inserted, variant_type))
     
     return nr_inserted
