@@ -6,7 +6,7 @@ class Case(dict):
         super(Case, self).__init__(
             case_id=case_id,
             vcf_path=vcf_path,
-            vcfsv_path=vcfsv_path,
+            vcf_sv_path=vcfsv_path,
             nr_variants=nr_variants,
             nr_sv_variants=nr_sv_variants,
         )

@@ -5,6 +5,8 @@ Software to setup and manage local variant observations database.
 Right now **locusdb** uses [mongodb][mongodb] as backend for 
 storing variants but it should be doable to adapt the code to another backend.
 
+* [Installation](./install.md)
+
 ## Idea ##
 
 To keep track of *what* variants that have been seen, in what *families* and what *state* they

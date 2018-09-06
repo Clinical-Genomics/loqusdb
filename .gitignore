@@ -61,12 +61,11 @@ output/*/index.html
 docs/_build
 _book
 
-# Node.js
-node_modules/
-
-
 # mkdocs
 site/
+
+# Node.js
+node_modules/
 
 # Local Files
 NOTES.md

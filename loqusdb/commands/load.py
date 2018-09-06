@@ -90,7 +90,7 @@ def load(ctx, variant_file, sv_variants, family_file, family_type, skip_case_id,
         nr_inserted = load_database(
             adapter=adapter,
             variant_file=variant_path,
-            sv_variant_file=variant_sv_path,
+            sv_file=variant_sv_path,
             family_file=family_file,
             family_type=family_type,
             skip_case_id=skip_case_id,

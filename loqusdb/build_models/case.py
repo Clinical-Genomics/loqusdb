@@ -5,7 +5,23 @@ from loqusdb.exceptions import CaseError
 
 LOG = logging.getLogger(__name__)
 
-def build_case(case, vcf_individuals, case_id=None, vcf_path=None, variant_type='snv', nr_variants=None):
+def get_individual_positions(individuals):
+    """Return a dictionary with individual positions
+    
+    Args:
+        individuals(list): A list with vcf individuals in correct order
+    
+    Returns:
+        ind_pos(dict): Map from ind_id -> index position
+    """
+    ind_pos = {}
+    if individuals:
+        for i, ind in enumerate(individuals):
+            ind_pos[ind] = i
+    return ind_pos
+
+def build_case(case, vcf_individuals=None, case_id=None, vcf_path=None, variant_type='snv', 
+               sv_individuals=None, vcf_sv_path=None, nr_variants=None, nr_sv_variants=None):
     """Build a Case from the given information
     
     Args:
@@ -18,9 +34,8 @@ def build_case(case, vcf_individuals, case_id=None, vcf_path=None, variant_type=
         case_obj(models.Case)
     """
     # Create a dict that maps the ind ids to the position they have in vcf
-    individual_positions = {}
-    for i, ind in enumerate(vcf_individuals):
-        individual_positions[ind] = i
+    individual_positions = get_individual_positions(vcf_individuals)
+    sv_individual_positions = get_individual_positions(sv_individuals)
 
     family_id = None
     if case:
@@ -28,28 +43,37 @@ def build_case(case, vcf_individuals, case_id=None, vcf_path=None, variant_type=
             LOG.warning("No affected individuals could be found in ped file")
         family_id = case.family_id
 
+    # If case id is given manually we use that one
     case_id = case_id or family_id
+    if case_id is None:
+        raise CaseError
 
     case_obj = Case(
         case_id=case_id, 
     )
 
-    if variant_type == 'snv':
+    if vcf_path:
         case_obj['vcf_path'] = vcf_path
         case_obj['nr_variants'] = nr_variants
-    elif variant_type == 'sv':
-        case_obj['vcf_sv_path'] = vcf_path
-        case_obj['nr_sv_variants'] = nr_variants
+    
+    if vcf_sv_path:
+        case_obj['vcf_sv_path'] = vcf_sv_path
+        case_obj['nr_sv_variants'] = nr_sv_variants
         
     ind_objs = []
     if case:
+        if individual_positions:
+            _ind_pos = individual_positions
+        else:
+            _ind_pos = sv_individual_positions
+
         for ind_id in case.individuals:
             individual = case.individuals[ind_id]
             try:
                 ind_obj = Individual(
                     ind_id=ind_id,
                     case_id=case_id,
-                    ind_index=individual_positions[ind_id],
+                    ind_index=_ind_pos[ind_id],
                     sex=individual.sex,
                 )
                 ind_objs.append(ind_obj)
@@ -67,10 +91,10 @@ def build_case(case, vcf_individuals, case_id=None, vcf_path=None, variant_type=
     
     # Add individuals to the correct variant type
     for ind_obj in ind_objs:
-        if variant_type == 'sv':
+        if vcf_sv_path:
             case_obj['sv_individuals'].append(ind_obj)
             case_obj['_sv_inds'][ind_obj['ind_id']] = ind_obj
-        else:
+        if vcf_path:
             case_obj['individuals'].append(ind_obj)
             case_obj['_inds'][ind_obj['ind_id']] = ind_obj
 
