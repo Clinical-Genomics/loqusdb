@@ -136,37 +136,30 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
             raise err
     return nr_inserted
 
-def load_case(adapter, variant_file, family_file, vcf_individuals, family_type='ped', 
-              case_id=None, variant_type='snv', nr_variants=None, update=False):
+def load_case(adapter, case_obj, update=False):
     """Load a case to the database
     
     Args:
         adapter: Connection to database
-        variant_file(str): Path to variant file
-        family_file(str): Path to family_file
-        vcf_individuals(list[str]): Individual ids in order of vcf
-        family_type(str)
-        case_id(str): Alternative case id
-        variant_type(str): 'snv' or 'sv'
+        case_obj: dict
         update(bool): If existing case should be updated
     
     Returns:
         case_obj(models.Case)
     """
-    
     # Check if the case already exists in database.
     existing_case = adapter.case(case_obj)
     if existing_case:
         if not update:
             raise CaseError("Case {0} already exists in database".format(case_id))
         case_obj = update_case(case_obj, existing_case)
-    
+
     # Add the case to database
     try:
         adapter.add_case(case_obj)
     except CaseError as err:
         raise err
-    
+
     return case_obj
 
 

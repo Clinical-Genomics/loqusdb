@@ -7,20 +7,6 @@ LOG = logging.getLogger(__name__)
 
 class CaseMixin(BaseCaseMixin):
     
-    def update_case(self, case, variant_file, variant_type):
-        """Update an existing case
-        
-        If SVs/SNVs are to be added this will take care of that part.
-        Raise error if trying to add the same file again
-        
-        Args:
-            case(dict): A case dictionary
-            variant_file(str): Path to a variant file
-            variant_type(str): 'sv' or 'snv'
-        """
-        
-    
-    
     def case(self, case):
         """Get a case from the database
     

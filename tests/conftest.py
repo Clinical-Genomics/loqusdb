@@ -168,10 +168,9 @@ def sv_case_obj(request, case_lines, sv_vcf_obj, sv_vcf_path):
         pass
     _case_obj = build_case(
         case=family, 
-        vcf_individuals=vcf_individuals, 
-        vcf_path=sv_vcf_path,
-        variant_type='sv',
-        nr_variants=nr_variants,
+        sv_individuals=vcf_individuals, 
+        vcf_sv_path=sv_vcf_path,
+        nr_sv_variants=nr_variants,
         )
     return _case_obj
 

@@ -2,7 +2,7 @@ import pytest
 from pprint import pprint as pp
 from loqusdb.exceptions import CaseError
 
-from loqusdb.utils.load import update_case
+from loqusdb.utils.load import (update_case,load_case)
 
 def test_load_family(mongo_adapter, simple_case):
     ## GIVEN a adapter to an empty database
@@ -29,7 +29,7 @@ def test_load_same_family_twice(mongo_adapter, simple_case):
         
 def test_update_case(case_obj, sv_case_obj):
     ## GIVEN an existing case and a case with new info
-
+    
     ## WHEN merging the two case objs
     updated_case = update_case(sv_case_obj, case_obj)
     
@@ -53,10 +53,15 @@ def test_update_case_same_vcf(case_obj, sv_case_obj):
 
 def test_load_complete_case(mongo_adapter, complete_case_obj):
     ## GIVEN a case that includes both svs and snvs
+    db = mongo_adapter.db
     
     ## WHEN loading the case
+    case_obj = load_case(mongo_adapter,complete_case_obj)
+    ## THEN assert that all info is added
+    loaded_case = db.case.find_one()
     
-    ## THEN assert that both types of variants are added.
+    assert len(loaded_case['individuals']) == 3
+    assert len(loaded_case['sv_individuals']) == 3
+    assert loaded_case['nr_variants'] > 0
+    assert loaded_case['nr_sv_variants'] > 0
     
-    pp(complete_case_obj)
-    assert False
