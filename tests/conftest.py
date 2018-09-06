@@ -151,7 +151,6 @@ def case_obj(request, case_lines, vcf_obj, vcf_path):
         case=family, 
         vcf_individuals=vcf_individuals, 
         vcf_path=vcf_path,
-        variant_type='snv',
         nr_variants=nr_variants,
         )
     return _case_obj
