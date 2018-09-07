@@ -65,7 +65,7 @@ class TestGetVariant:
         
         #Insert without adapter
         db = mongo_client['test']
-        db.variant.insert(simplest_variant)
+        db.variant.insert_one(simplest_variant)
         
         mongo_variant = mongo_adapter.get_variant(simplest_variant)
         assert mongo_variant['_id'] == 'test'
@@ -156,7 +156,7 @@ class TestRemoveVariant:
             'observations': 1
         }
     
-        db.variant.insert(variant)
+        db.variant.insert_one(variant)
     
         mongo_adapter.delete_variant(variant)
 
@@ -173,7 +173,7 @@ class TestRemoveVariant:
             'observations': 2
         }
     
-        db.variant.insert(insert_variant)
+        db.variant.insert_one(insert_variant)
 
         variant = {
             '_id': 'test',

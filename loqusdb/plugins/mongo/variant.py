@@ -45,14 +45,13 @@ class VariantMixin(BaseVariantMixin, SVMixin):
                                 }
                             }
 
-        message = self.db.variant.update(
+        message = self.db.variant.update_one(
             {'_id': variant['_id'],},
             update,
              upsert=True
         )
-
-        if message.get('updatedExisting'):
-            LOG.debug("Variant %s was updated", message.get("upserted"))
+        if message.modified_count == 1:
+            LOG.debug("Variant %s was updated", variant.get('_id'))
         else:
             LOG.debug("Variant was added to database for first time")
         return
@@ -116,12 +115,12 @@ class VariantMixin(BaseVariantMixin, SVMixin):
                 LOG.debug("Removing variant {0}".format(
                     mongo_variant.get('_id')
                 ))
-                message = self.db.variant.remove({'_id': variant['_id']})
+                message = self.db.variant.delete_one({'_id': variant['_id']})
             else:
                 LOG.debug("Decreasing observations for {0}".format(
                     mongo_variant.get('_id')
                 ))
-                message = self.db.variant.update({
+                message = self.db.variant.update_one({
                     '_id': mongo_variant['_id']
                     },{
                         '$inc': {

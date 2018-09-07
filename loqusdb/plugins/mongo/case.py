@@ -77,7 +77,7 @@ class CaseMixin(BaseCaseMixin):
         LOG.info("Removing case {0} from database".format(
             mongo_case.get('case_id')
         ))
-        self.db.case.remove({'_id': mongo_case['_id']})
+        self.db.case.delete_one({'_id': mongo_case['_id']})
         
         return
     

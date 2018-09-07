@@ -53,13 +53,15 @@ LOG = logging.getLogger(__name__)
                 is_flag=True,
                 help='Used for testing.'
 )
-@click.option('-v', '--verbose', count=True, default=1)
+@click.option('-v', '--verbose', is_flag=True)
 @click.version_option(__version__)
 @click.pass_context
 def cli(ctx, database, username, password, port, host, uri, verbose, test):
     """loqusdb: manage a local variant count database."""
     # configure root logger to print to STDERR
-    loglevel = LEVELS.get(max(verbose,1), "INFO")
+    loglevel = "INFO"
+    if verbose:
+        loglevel = "DEBUG"
     coloredlogs.install(level=loglevel)
 
     if test:

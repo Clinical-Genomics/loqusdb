@@ -74,6 +74,7 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
     family = None
     family_id = None
     if family_file:
+        LOG.info("Loading family from %s", family_file)
         with open(family_file, 'r') as family_lines:
             family = get_case(
                 family_lines=family_lines, 
@@ -206,6 +207,6 @@ def load_variants(adapter, vcf_obj, case_obj, skip_case_id=False, gq_treshold=No
                 adapter.add_variant(variant=formated_variant)
             nr_inserted += 1
     
-    LOG.info("Inserted %s variants of type %s", (nr_inserted, variant_type))
+    LOG.info("Inserted %s variants of type %s", nr_inserted, variant_type)
     
     return nr_inserted

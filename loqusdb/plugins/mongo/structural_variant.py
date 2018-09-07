@@ -59,7 +59,7 @@ class SVMixin():
                 
             }
             # Insert variant to get a _id
-            _id = self.db.structural_variant.insert(cluster)
+            _id = self.db.structural_variant.insert_one(cluster).inserted_id
             
             cluster['_id'] = _id
         
@@ -112,7 +112,6 @@ class SVMixin():
         # If the length of SV is shorter than 500 the variant 
         # is considered precise
         # Otherwise the interval size is closest whole 100 number
-        
         res = self.db.structural_variant.find_one_and_update(
             {'_id': cluster['_id']},
             {
@@ -136,7 +135,6 @@ class SVMixin():
         # Insert an identity object to link cases to variants and clusters
         identity_obj = Identity(cluster_id=cluster['_id'], variant_id=variant['id_column'], 
                                 case_id=case_id)
-        
         self.db.identity.insert_one(identity_obj)
         
         return

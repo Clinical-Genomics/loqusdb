@@ -2,7 +2,7 @@
 from .dotdict import DotDict
 
 
-class Variant(DotDict):
+class Variant(dict):
     """Represent a Variant.
     
     snv/indels and svs differ quite a lot, we are here representing them with the same object.

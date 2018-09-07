@@ -13,7 +13,7 @@ class TestDeleteCase:
         
         assert mongo_case == None
         
-        db.case.insert(case_obj)
+        db.case.insert_one(case_obj)
     
         mongo_case = db.case.find_one()
     
@@ -60,7 +60,7 @@ class TestGetCase:
         """Test to get non existing case"""
     
         db = mongo_adapter.db
-        db.case.insert(case_obj)
+        db.case.insert_one(case_obj)
 
         mongo_case = mongo_adapter.case(case_obj)
     
@@ -91,8 +91,8 @@ class TestGetCase:
             'vcf_path': 'test2.vcf'
         }
         
-        db.case.insert(case_1)
-        db.case.insert(case_2)
+        db.case.insert_one(case_1)
+        db.case.insert_one(case_2)
 
         mongo_cases = mongo_adapter.cases()
 
