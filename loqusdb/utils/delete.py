@@ -29,6 +29,7 @@ def delete(adapter, case_obj, update=False, existing_case=False):
     for file_type in ['vcf_path','vcf_sv_path']:
         if not case_obj.get(file_type):
             continue
+        variant_file = case_obj[file_type]
         # Get a cyvcf2.VCF object
         vcf_obj = get_vcf(variant_file)
 

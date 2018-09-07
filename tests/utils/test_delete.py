@@ -20,7 +20,7 @@ def test_delete_case(mongo_adapter, simple_case):
     
 
 
-def test_delete_case_and_variants(vcf_path, ped_path, mongo_adapter, case_id):
+def test_delete_case_and_variants(vcf_path, ped_path, mongo_adapter, case_id, case_obj):
     db = mongo_adapter.db
 
     load_database(
@@ -36,9 +36,7 @@ def test_delete_case_and_variants(vcf_path, ped_path, mongo_adapter, case_id):
 
     delete(
         adapter=mongo_adapter,
-        variant_file=vcf_path,
-        family_file=ped_path,
-        family_type='ped',
+        case_obj=case_obj,
     )
 
     mongo_case = db.case.find_one()
