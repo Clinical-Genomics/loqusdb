@@ -99,8 +99,11 @@ class SVMixin():
             # We need to adapt the interval size depending on the size of the cluster
             divider = 10
             if cluster_len < 1000:
-                # We allow smaller interval to be relatively larger
-                divider = 4
+                # We allow intervals for smaller variants to be relatively larger
+                divider = 2
+            elif cluster_len < 1000:
+                # We allow intervals for smaller variants to be relatively larger
+                divider = 5
             interval_size = int(min(round(cluster_len/divider, -2), max_window))
         else:
             # We need to treat translocations as a special case.
