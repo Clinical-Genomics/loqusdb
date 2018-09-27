@@ -7,10 +7,10 @@ LOG = logging.getLogger(__name__)
 
 def get_individual_positions(individuals):
     """Return a dictionary with individual positions
-    
+
     Args:
         individuals(list): A list with vcf individuals in correct order
-    
+
     Returns:
         ind_pos(dict): Map from ind_id -> index position
     """
@@ -20,10 +20,10 @@ def get_individual_positions(individuals):
             ind_pos[ind] = i
     return ind_pos
 
-def build_case(case, vcf_individuals=None, case_id=None, vcf_path=None, sv_individuals=None, 
+def build_case(case, vcf_individuals=None, case_id=None, vcf_path=None, sv_individuals=None,
                vcf_sv_path=None, nr_variants=None, nr_sv_variants=None):
     """Build a Case from the given information
-    
+
     Args:
         case(ped_parser.Family): A family object
         vcf_individuals(list): Show the order of inds in vcf file
@@ -33,7 +33,7 @@ def build_case(case, vcf_individuals=None, case_id=None, vcf_path=None, sv_indiv
         vcf_sv_path(str)
         nr_variants(int)
         nr_sv_variants(int)
-    
+
     Returns:
         case_obj(models.Case)
     """
@@ -53,17 +53,17 @@ def build_case(case, vcf_individuals=None, case_id=None, vcf_path=None, sv_indiv
         raise CaseError
 
     case_obj = Case(
-        case_id=case_id, 
+        case_id=case_id,
     )
 
     if vcf_path:
         case_obj['vcf_path'] = vcf_path
         case_obj['nr_variants'] = nr_variants
-    
+
     if vcf_sv_path:
         case_obj['vcf_sv_path'] = vcf_sv_path
         case_obj['nr_sv_variants'] = nr_sv_variants
-        
+
     ind_objs = []
     if case:
         if individual_positions:
@@ -80,7 +80,7 @@ def build_case(case, vcf_individuals=None, case_id=None, vcf_path=None, sv_indiv
                     ind_index=_ind_pos[ind_id],
                     sex=individual.sex,
                 )
-                ind_objs.append(ind_obj)
+                ind_objs.append(dict(ind_obj))
             except KeyError:
                 raise CaseError("Ind %s in ped file does not exist in VCF", ind_id)
     else:
@@ -91,15 +91,15 @@ def build_case(case, vcf_individuals=None, case_id=None, vcf_path=None, sv_indiv
                 case_id = case_id,
                 ind_index=individual_positions[ind_id],
             )
-            ind_objs.append(ind_obj)
-    
+            ind_objs.append(dict(ind_obj))
+
     # Add individuals to the correct variant type
     for ind_obj in ind_objs:
         if vcf_sv_path:
-            case_obj['sv_individuals'].append(ind_obj)
-            case_obj['_sv_inds'][ind_obj['ind_id']] = ind_obj
+            case_obj['sv_individuals'].append(dict(ind_obj))
+            case_obj['_sv_inds'][ind_obj['ind_id']] = dict(ind_obj)
         if vcf_path:
-            case_obj['individuals'].append(ind_obj)
-            case_obj['_inds'][ind_obj['ind_id']] = ind_obj
+            case_obj['individuals'].append(dict(ind_obj))
+            case_obj['_inds'][ind_obj['ind_id']] = dict(ind_obj)
 
     return case_obj
