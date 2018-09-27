@@ -96,7 +96,7 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
         nr_sv_variants=nr_sv_variants,
     )
     # Build and load a new case, or update an existing one
-    case_id = load_case(
+    load_case(
         adapter=adapter,
         case_obj=case_obj,
     )

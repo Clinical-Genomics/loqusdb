@@ -49,15 +49,15 @@ class CaseMixin(BaseCaseMixin):
         existing_case = self.case(case)
         if existing_case and not update:
             raise CaseError("Case {} already exists".format(case['case_id']))
-        mongo_case_id = self.db.case.replace_one(
-            {
-                'case_id': case['case_id'],
-            },
-            case,
-            True
-            ).upserted_id
+        if existing_case:
+            self.db.case.find_one_and_replace(
+                {'case_id': case['case_id']},
+                case,
+            )
+        else:
+            self.db.case.insert_one(case)
 
-        return mongo_case_id
+        return case
 
     def delete_case(self, case):
         """Delete case from the database
