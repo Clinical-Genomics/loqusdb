@@ -7,14 +7,14 @@ from pprint import pprint as pp
 from datetime import datetime
 
 from loqusdb.exceptions import (CaseError, VcfError)
-from loqusdb.utils.load import load_database
+from loqusdb.utils.update import update_database
 from loqusdb.utils.vcf import (get_file_handle, check_vcf)
 
 from . import base_command
 
 LOG = logging.getLogger(__name__)
 
-@base_command.command('load', short_help="Load the variants of a family")
+@base_command.command('update', short_help="Update an existing case with a new type of variants")
 @click.option('--variant-file',
                     type=click.Path(exists=True),
                     metavar='<vcf_file>',
@@ -59,8 +59,8 @@ LOG = logging.getLogger(__name__)
     help='Specify the maximum window size for svs'
 )
 @click.pass_context
-def load(ctx, variant_file, sv_variants, family_file, family_type, skip_case_id, gq_treshold, 
-         case_id, ensure_index, max_window):
+def update(ctx, variant_file, sv_variants, family_file, family_type, skip_case_id, gq_treshold, 
+           case_id, ensure_index, max_window):
     """Load the variants of a case
 
     A variant is loaded if it is observed in any individual of a case
@@ -73,6 +73,7 @@ def load(ctx, variant_file, sv_variants, family_file, family_type, skip_case_id,
     if not (variant_file or sv_variants):
         LOG.warning("Please provide a VCF file")
         ctx.abort()
+    
 
     variant_path = None
     if variant_file:
@@ -81,13 +82,14 @@ def load(ctx, variant_file, sv_variants, family_file, family_type, skip_case_id,
     variant_sv_path = None
     if sv_variants:
         variant_sv_path = os.path.abspath(sv_variants)
-
+    
     adapter = ctx.obj['adapter']
 
     start_inserting = datetime.now()
     
+    
     try:
-        nr_inserted = load_database(
+        nr_inserted = update_database(
             adapter=adapter,
             variant_file=variant_path,
             sv_file=variant_sv_path,
@@ -98,10 +100,10 @@ def load(ctx, variant_file, sv_variants, family_file, family_type, skip_case_id,
             gq_treshold=gq_treshold,
             max_window=max_window,
         )
-    except (SyntaxError, CaseError, IOError) as error:
+    except (SyntaxError, CaseError, IOError, VcfError) as error:
         LOG.warning(error)
         ctx.abort()
-    
+
     LOG.info("Nr variants inserted: %s", nr_inserted)
     LOG.info("Time to insert variants: {0}".format(
                 datetime.now() - start_inserting))

@@ -49,27 +49,34 @@ def check_sorting(previous_chrom, previous_pos, current_chrom, current_pos):
     """docstring for check_sorting"""
     pass
 
-def check_vcf(variants):
+def check_vcf(vcf_path, expected_type='snv'):
     """Check if there are any problems with the vcf file
 
     Args:
-        variants(iterable(cyvcf2.Variant))
+        vcf_path(str)
+        expected_type(str): 'sv' or 'snv'
 
     Returns:
-        vcf_info(dict): dict like {'nr_variants':<INT>, 'variant_type': <STR>}
-                        'variant_type' in ['snv', 'sv']
+        vcf_info(dict): dict like 
+        {
+            'nr_variants':<INT>, 
+            'variant_type': <STR> in ['snv', 'sv'],
+            'individuals': <LIST> individual positions in file
+        }
     """
     LOG.info("Check if vcf is on correct format...")
-    
-    nr_variants = 0
+
+    vcf = VCF(vcf_path)
+    individuals = vcf.samples
     variant_type = None
-    
+
     previous_pos = None
     previous_chrom = None
-    
+
     posititon_variants = set()
-    
-    for variant in variants:
+
+    nr_variants = 0
+    for nr_variants,variant in enumerate(vcf,1):
 
         # Check the type of variant
         current_type = 'sv' if variant.var_type == 'sv' else 'snv'
@@ -80,13 +87,12 @@ def check_vcf(variants):
         if variant_type != current_type:
             raise VcfError("Vcf includes a mix of snvs and svs")
 
-        nr_variants += 1
-        
         current_chrom = variant.CHROM
         current_pos = variant.POS
         
         # We start with a simple id that can be used by SV:s
         variant_id = "{0}_{1}".format(current_chrom, current_pos)
+        # For SNVs we can create a proper variant id with chrom_pos_ref_alt
         if variant_type == 'snv':
             variant_id = get_variant_id(variant)
 
@@ -95,7 +101,6 @@ def check_vcf(variants):
             previous_chrom = current_chrom
             previous_pos = current_pos
             posititon_variants = set([variant_id])
-
             continue
 
         # Update variables if new chromosome
@@ -118,11 +123,21 @@ def check_vcf(variants):
                 if not current_pos >= previous_pos:
                     raise VcfError("Vcf if not sorted in a correct way")
                 previous_pos = current_pos
+                # Reset posititon_variants since we are on a new position
                 posititon_variants = set([variant_id])
+
+    if variant_type != expected_type:
+        raise VcfError("VCF file does not only include {0}s, please check vcf {1}".format(
+                        expected_type.upper(), vcf_path))
+
+    LOG.info("Vcf file %s looks fine", vcf_path)
+    LOG.info("Nr of variants in vcf: {0}".format(nr_variants))
+    LOG.info("Type of variants in vcf: {0}".format(variant_type))
     
     vcf_info = {
         'nr_variants': nr_variants,
-        'variant_type': variant_type
+        'variant_type': variant_type,
+        'individuals': individuals,
     }
 
     return vcf_info

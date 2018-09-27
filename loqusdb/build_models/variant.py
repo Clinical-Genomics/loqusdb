@@ -77,24 +77,25 @@ def is_greater(a,b):
 
 def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
     """Return a Variant object
+
+    Take a cyvcf2 formated variant line and return a models.Variant.
+
+    If criterias are not fullfilled, eg. variant have no gt call or quality
+    is below gq treshold then return None.
+
+    Args:
+        variant(cyvcf2.Variant)
+        case_obj(Case): We need the case object to check individuals sex
+        case_id(str): The case id
+        gq_treshold(int): Genotype Quality treshold
     
-        Take a cyvcf2 formated variant line and return a Variant.
-    
-        If criterias are not fullfilled, eg. variant have no gt call or quality
-        is below gq treshold then None.
-        
-        Args:
-            variant(cyvcf2.Variant)
-            case_obj(Case)
-            case_id(str): The case id
-            gq_treshold(int): Gq treshold
-        
-        Return:
-            formated_variant(dict): A variant dictionary
+    Return:
+        formated_variant(models.Variant): A variant dictionary
     """
     variant_obj = None
 
     sv = False
+    # Let cyvcf2 tell if it is a Structural Variant or not
     if variant.var_type == 'sv':
         sv = True
 
@@ -103,18 +104,23 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
         chrom = chrom[3:]
     
     pos = int(variant.POS)
+    
+    # Get the end position
+    # This will be None for non-svs
     end_pos = variant.INFO.get('END')
-
     if end_pos:
         end = int(end_pos)
     else:
         end = int(variant.end)
 
+    # chrom_pos_ref_alt
     variant_id = get_variant_id(variant)
 
     ref = variant.REF
+    # ALT is an array in cyvcf2
     alt = variant.ALT[0]
 
+    # Default end chrom is chrom
     end_chrom = chrom
 
     sv_type = variant.INFO.get('SVTYPE')
@@ -124,6 +130,7 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
     else:
         sv_len = end - pos
 
+    # Translocations will sometimes have a end chrom that differs from chrom
     if sv_type == 'BND':
         other_coordinates = alt.strip('ACGTN[]').split(':')
         end_chrom = other_coordinates[0]

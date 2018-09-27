@@ -45,7 +45,6 @@ class SVMixin():
         cluster = self.get_structural_variant(variant)
         # If there was no matcing cluster we need to create a new cluster
         if cluster is None:
-            # Insert variant to get a _id
             # The cluster will be populated with information later.
             cluster = {
                 'chrom': variant['chrom'],
@@ -53,13 +52,14 @@ class SVMixin():
                 'sv_type': variant['sv_type'],
                 'pos_sum': 0,
                 'end_sum': 0,
-                'nr_events': 0,
+                'observations': 0,
                 'length': 0,
                 'sv_type': variant['sv_type'],
                 'families': [],
                 
             }
-            _id = self.db.structural_variant.insert(cluster)
+            # Insert variant to get a _id
+            _id = self.db.structural_variant.insert_one(cluster).inserted_id
             
             cluster['_id'] = _id
         
@@ -76,7 +76,7 @@ class SVMixin():
                 cluster['families'] = cluster['families'][:50]
 
         # Update number of times we have seen the event
-        nr_events = cluster['nr_events'] + 1
+        nr_events = cluster['observations'] + 1
         
         #                             -
         #                           -   -
@@ -93,13 +93,17 @@ class SVMixin():
         end_mean = int((cluster['end_sum'] + variant['end']) // (nr_events))
         
         # We need to calculate the new cluster length
+        # Handle translocation as a special case
         if cluster['sv_type'] != 'BND':
             cluster_len = end_mean - pos_mean
             # We need to adapt the interval size depending on the size of the cluster
             divider = 10
             if cluster_len < 1000:
-                # We allow smaller interval to be relatively larger
-                divider = 4
+                # We allow intervals for smaller variants to be relatively larger
+                divider = 2
+            elif cluster_len < 1000:
+                # We allow intervals for smaller variants to be relatively larger
+                divider = 5
             interval_size = int(min(round(cluster_len/divider, -2), max_window))
         else:
             # We need to treat translocations as a special case.
@@ -111,12 +115,11 @@ class SVMixin():
         # If the length of SV is shorter than 500 the variant 
         # is considered precise
         # Otherwise the interval size is closest whole 100 number
-        
         res = self.db.structural_variant.find_one_and_update(
             {'_id': cluster['_id']},
             {
                 '$inc': {
-                    'nr_events': 1,
+                    'observations': 1,
                     'pos_sum': variant['pos'],
                     'end_sum': variant['end'],
                 },
@@ -135,21 +138,20 @@ class SVMixin():
         # Insert an identity object to link cases to variants and clusters
         identity_obj = Identity(cluster_id=cluster['_id'], variant_id=variant['id_column'], 
                                 case_id=case_id)
-        
         self.db.identity.insert_one(identity_obj)
         
         return
 
     def get_structural_variant(self, variant):
         """Check if there are any overlapping sv clusters
-    
-            Search the sv variants with chrom start end_chrom end and sv_type
-        
-            Args:
-                variant (dict): A variant dictionary
-        
-            Returns:
-                variant (dict): A variant dictionary
+
+       Search the sv variants with chrom start end_chrom end and sv_type
+
+       Args:
+           variant (dict): A variant dictionary
+
+       Returns:
+           variant (dict): A variant dictionary
         """
         # Create a query for the database
         # This will include more variants than we want
@@ -192,7 +194,10 @@ class SVMixin():
 
             # If the distance is closer than previous we choose current cluster
             if distance < closest_hit:
+                # Set match to the current closest hit
                 match = hit
+                # Update the closest distance
+                closest_hit = distance
 
         return match
 

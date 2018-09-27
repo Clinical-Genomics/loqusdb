@@ -1,31 +1,29 @@
 # -*- coding: utf-8 -*-
 """
-loqusdb.utils.load.py
+loqusdb.utils.update.py
 
-Functions to load data into the database.
+Functions to update data into the database.
 This functions take an adapter which is the communication device for the database.
 
 """
 
 import logging
-import click
-from datetime import datetime
 
 from pprint import pprint as pp
 
 from .vcf import (get_vcf, check_vcf)
 from .case import (get_case, update_case)
 from .delete import delete
+from .load import (load_case,load_variants)
 from loqusdb.build_models import (build_case, build_variant)
 from loqusdb.exceptions import (CaseError, VcfError)
 
 LOG = logging.getLogger(__name__)
 
-def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
-                  family_type='ped', skip_case_id=False, gq_treshold=None,
-                  case_id=None, max_window = 3000):
-    """Load the database with a case and its variants
-
+def update_database(adapter, variant_file=None, sv_file=None, family_file=None, family_type='ped', 
+           skip_case_id=False, gq_treshold=None, case_id=None, max_window = 3000):
+    """Update a case in the database
+            
     Args:
           adapter: Connection to database
           variant_file(str): Path to variant file
@@ -41,7 +39,6 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
           nr_inserted(int)
     """
     vcf_files = []
-
     nr_variants = None
     vcf_individuals = None
     if variant_file:
@@ -64,7 +61,7 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
     for _vcf_file in vcf_files:
         # Get a cyvcf2.VCF object
         vcf = get_vcf(_vcf_file)
-
+        
         if gq_treshold:
             if not vcf.contains('GQ'):
                 LOG.warning('Set gq-treshold to 0 or add info to vcf {0}'.format(_vcf_file))
@@ -74,19 +71,19 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
     family = None
     family_id = None
     if family_file:
-        LOG.info("Loading family from %s", family_file)
         with open(family_file, 'r') as family_lines:
             family = get_case(
-                family_lines=family_lines,
+                family_lines=family_lines, 
                 family_type=family_type
             )
             family_id = family.family_id
-
+    
     # There has to be a case_id or a family at this stage.
     case_id = case_id or family_id
+
     # Convert infromation to a loqusdb Case object
     case_obj = build_case(
-        case=family,
+        case=family, 
         case_id=case_id,
         vcf_path=variant_file,
         vcf_individuals=vcf_individuals,
@@ -95,12 +92,18 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
         sv_individuals=sv_individuals,
         nr_sv_variants=nr_sv_variants,
     )
-    # Build and load a new case, or update an existing one
-    load_case(
+
+    existing_case = adapter.case(case_obj)
+    if not existing_case:
+        raise CaseError("Case {} does not exist in database".format(case_obj['case_id']))
+
+    # Update the existing case in database
+    case_obj = load_case(
         adapter=adapter,
         case_obj=case_obj,
-    )
-
+        update=True,
+        )
+    
     nr_inserted = 0
     # If case was succesfully added we can store the variants
     for file_type in ['vcf_path','vcf_sv_path']:
@@ -112,10 +115,10 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
 
         vcf_obj = get_vcf(case_obj[file_type])
         try:
-            nr_inserted += load_variants(
+            nr_inserted += load_variants(  
                 adapter=adapter,
                 vcf_obj=vcf_obj,
-                case_obj=case_obj,
+                case_obj=case_obj, 
                 skip_case_id=skip_case_id,
                 gq_treshold=gq_treshold,
                 max_window=max_window,
@@ -127,83 +130,8 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
             delete(
                 adapter=adapter,
                 case_obj=case_obj,
+                update=True,
+                existing_case=existing_case,
             )
             raise err
-    return nr_inserted
-
-def load_case(adapter, case_obj, update=False):
-    """Load a case to the database
-
-    Args:
-        adapter: Connection to database
-        case_obj: dict
-        update(bool): If existing case should be updated
-
-    Returns:
-        case_obj(models.Case)
-    """
-    # Check if the case already exists in database.
-    existing_case = adapter.case(case_obj)
-    if existing_case:
-        if not update:
-            raise CaseError("Case {0} already exists in database".format(case_obj['case_id']))
-        case_obj = update_case(case_obj, existing_case)
-
-    # Add the case to database
-    try:
-        adapter.add_case(case_obj, update=update)
-    except CaseError as err:
-        raise err
-
-    return case_obj
-
-def load_variants(adapter, vcf_obj, case_obj, skip_case_id=False, gq_treshold=None,
-                  max_window=3000, variant_type='snv'):
-    """Load variants for a family into the database.
-
-    Args:
-        adapter (loqusdb.plugins.Adapter): initialized plugin
-        case_obj(Case): dict with case information
-        nr_variants(int)
-        skip_case_id (bool): whether to include the case id on variant level
-                             or not
-        gq_treshold(int)
-        max_window(int): Specify the max size for sv windows
-        variant_type(str): 'sv' or 'snv'
-
-    Returns:
-        nr_inserted(int)
-    """
-    if variant_type == 'snv':
-        nr_variants = case_obj['nr_variants']
-    else:
-        nr_variants = case_obj['nr_sv_variants']
-
-    nr_inserted = 0
-    case_id = case_obj['case_id']
-    if skip_case_id:
-        case_id = None
-    # Loop over the variants in the vcf
-    with click.progressbar(vcf_obj, label="Inserting variants",length=nr_variants) as bar:
-        for variant in bar:
-            #Creates a variant that is ready to insert into the database
-            formated_variant = build_variant(
-                    variant=variant,
-                    case_obj=case_obj,
-                    case_id=case_id,
-                    gq_treshold=gq_treshold,
-                )
-            # We need to check if there was any information returned
-            # The variant could be excluded based on low gq or if no individiual was called
-            # in the particular case
-            if not formated_variant:
-                continue
-            if formated_variant['is_sv']:
-                adapter.add_structural_variant(variant=formated_variant, max_window=max_window)
-            else:
-                adapter.add_variant(variant=formated_variant)
-            nr_inserted += 1
-
-    LOG.info("Inserted %s variants of type %s", nr_inserted, variant_type)
-
     return nr_inserted

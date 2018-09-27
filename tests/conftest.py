@@ -3,29 +3,31 @@ import pytest
 
 import cyvcf2
 
-from mongomock import MongoClient
-from pymongo import MongoClient as RealMongoClient
+from mongomock import MongoClient as MockClient
+from pymongo import MongoClient
 from ped_parser import FamilyParser
 
 from loqusdb.plugins import MongoAdapter
 from loqusdb.log import init_log
 from loqusdb.models import Case
-from loqusdb.build_models import build_variant, build_case
+from loqusdb.build_models import (build_variant, build_case)
+from loqusdb.utils.load import update_case
 
 logger = logging.getLogger('.')
 
 init_log(logger, loglevel='DEBUG')
 
+REAL_DATABASE = 'test'
 
 class CyvcfVariant(object):
     """Mock a cyvcf variant
-    
-    Default is to return a variant with three individuals high genotype 
+
+    Default is to return a variant with three individuals high genotype
     quality.
     """
-    def __init__(self, chrom='1', pos=80000, ref='A', alt='C', end=None, 
+    def __init__(self, chrom='1', pos=80000, ref='A', alt='C', end=None,
                  gt_quals=[60, 60, 60], gt_types=[1, 1, 0], var_type='snv',
-                 id='.', info_dict={}):
+                 var_id=None, info_dict={}):
         super(CyvcfVariant, self).__init__()
         self.CHROM = chrom
         self.POS = pos
@@ -36,12 +38,28 @@ class CyvcfVariant(object):
         self.gt_types = gt_types
         self.var_type = var_type
         self.INFO = info_dict
-        self.ID = info_dict
+        if var_id is None:
+            var_id = '.'
+        self.ID = var_id
 
 @pytest.fixture(scope='function')
 def mongo_client(request):
     """Return a mongomock client"""
+    client = MockClient()
+    return client
+
+@pytest.fixture(scope='function')
+def real_mongo_client(request):
+    """Return a mongomock client"""
     client = MongoClient()
+    def teardown():
+        print('\n')
+        logger.info("Deleting database")
+        client.drop_database(REAL_DATABASE)
+        logger.info("Database deleted")
+
+    request.addfinalizer(teardown)
+
     return client
 
 @pytest.fixture(scope='function')
@@ -49,6 +67,14 @@ def mongo_adapter(request, mongo_client):
     """Return a mongo adapter"""
     db_name = 'test'
     adapter = MongoAdapter(mongo_client, db_name)
+
+    return adapter
+
+@pytest.fixture(scope='function')
+def real_mongo_adapter(request, real_mongo_client):
+    """Return a mongo adapter"""
+    db_name = 'test'
+    adapter = MongoAdapter(real_mongo_client, db_name)
 
     return adapter
 
@@ -80,17 +106,25 @@ def vcf_path(request):
     return file_path
 
 @pytest.fixture(scope='function')
+def sv_vcf_path(request):
+    file_path = 'tests/fixtures/test.SV.vcf'
+    return file_path
+
+@pytest.fixture(scope='function')
 def double_vcf_path(request):
+    "This will return a vcf with the same variant two times"
     file_path = 'tests/fixtures/double_variant.vcf'
     return file_path
 
 @pytest.fixture(scope='function')
 def unsorted_vcf_path(request):
+    "This will return a vcf with unsorted variants"
     file_path = 'tests/fixtures/unsorted.vcf'
     return file_path
 
 @pytest.fixture(scope='function')
 def zipped_vcf_path(request):
+    "Returns a VCF that is gzipped and have a index companion"
     file_path = 'tests/fixtures/test.vcf.gz'
     return file_path
 
@@ -101,6 +135,7 @@ def ped_path(request):
 
 @pytest.fixture(scope='function')
 def funny_ped_path(request):
+    "Returns a ped file with incorrect family relations"
     file_path = 'tests/fixtures/funny_trio.ped'
     return file_path
 
@@ -114,8 +149,8 @@ def case_lines(request, ped_path):
     case = []
     with open(ped_path, 'r') as f:
         for line in f:
-            case.append(line) 
-    
+            case.append(line)
+
     return case
 
 @pytest.fixture(scope='function')
@@ -124,13 +159,50 @@ def vcf_obj(request, vcf_path):
     return cyvcf2.VCF(vcf_path)
 
 @pytest.fixture(scope='function')
+def sv_vcf_obj(request, sv_vcf_path):
+    """return a cyvcf2.VCF obj"""
+    return cyvcf2.VCF(sv_vcf_path)
+
+@pytest.fixture(scope='function')
 def case_obj(request, case_lines, vcf_obj, vcf_path):
     """Return a case obj"""
     family_parser = FamilyParser(case_lines, family_type='ped')
     families = list(family_parser.families.keys())
     family = family_parser.families[families[0]]
     vcf_individuals = vcf_obj.samples
-    _case_obj = build_case(family, vcf_individuals, vcf_path=vcf_path)
+    nr_variants = 0
+    for nr_variants,variant in enumerate(vcf_obj,1):
+        pass
+    _case_obj = build_case(
+        case=family,
+        vcf_individuals=vcf_individuals,
+        vcf_path=vcf_path,
+        nr_variants=nr_variants,
+        )
+    return _case_obj
+
+@pytest.fixture(scope='function')
+def sv_case_obj(request, case_lines, sv_vcf_obj, sv_vcf_path):
+    """Return a case obj"""
+    family_parser = FamilyParser(case_lines, family_type='ped')
+    families = list(family_parser.families.keys())
+    family = family_parser.families[families[0]]
+    vcf_individuals = sv_vcf_obj.samples
+    nr_variants = 0
+    for nr_variants,variant in enumerate(sv_vcf_obj,1):
+        pass
+    _case_obj = build_case(
+        case=family,
+        sv_individuals=vcf_individuals,
+        vcf_sv_path=sv_vcf_path,
+        nr_sv_variants=nr_variants,
+        )
+    return _case_obj
+
+@pytest.fixture(scope='function')
+def complete_case_obj(request, case_obj, sv_case_obj):
+    """Return a case obj with both sv and snv information"""
+    _case_obj = update_case(case_obj, sv_case_obj)
     return _case_obj
 
 
@@ -155,7 +227,7 @@ def case_id(request, case_lines):
 @pytest.fixture(scope='function')
 def individuals(request, case_obj):
     """Return a case obj"""
-    
+
     return case_obj.individuals
 
 @pytest.fixture(scope='function')
@@ -185,10 +257,10 @@ def two_cases(request):
 @pytest.fixture(scope='function')
 def variant_obj(request, het_variant, ind_positions, individuals):
     _variant_obj = build_variant(
-        variant=het_variant, 
-        individuals = individuals, 
-        ind_positions = ind_positions, 
-        case_id='test', 
+        variant=het_variant,
+        individuals = individuals,
+        ind_positions = ind_positions,
+        case_id='test',
         gq_treshold=None
     )
     return _variant_obj

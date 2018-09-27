@@ -2,7 +2,11 @@ import logging
 import click
 import coloredlogs
 
+from pprint import pprint as pp
+
 from mongomock import MongoClient as MockClient
+
+from pymongo import uri_parser
 
 from mongo_adapter import get_client
 from mongo_adapter.exceptions import Error as DB_Error
@@ -36,6 +40,9 @@ LOG = logging.getLogger(__name__)
                 show_default=True,
                 help='Specify the host where to look for the mongo database.'
 )
+@click.option('--uri',
+                help='Specify a mongodb uri'
+)
 # @click.option('-b', '--backend',
 #                 default='mongo',
 #                 show_default=True,
@@ -46,41 +53,33 @@ LOG = logging.getLogger(__name__)
                 is_flag=True,
                 help='Used for testing.'
 )
-@click.option('-v', '--verbose', count=True, default=1)
+@click.option('-v', '--verbose', is_flag=True)
 @click.version_option(__version__)
 @click.pass_context
-def cli(ctx, database, username, password, port, host, verbose, test):
+def cli(ctx, database, username, password, port, host, uri, verbose, test):
     """loqusdb: manage a local variant count database."""
     # configure root logger to print to STDERR
-    loglevel = LEVELS.get(max(verbose,1), "INFO")
+    loglevel = "INFO"
+    if verbose:
+        loglevel = "DEBUG"
     coloredlogs.install(level=loglevel)
+
     if test:
-        client = MockClient()
-    else:
-        try:
-            client = get_client(
-                host=host, 
-                port=port, 
-                username=username,
-                password=password,
-            )
-        except DB_Error as err:
-            LOG.warning(err)
-            ctx.abort()
+        uri = "mongomock://"
+    try:
+        client = get_client(
+            host=host, 
+            port=port, 
+            username=username,
+            password=password,
+            uri=uri,
+        )
+    except DB_Error as err:
+        LOG.warning(err)
+        ctx.abort()
 
-    # mongo uri looks like:
-    # mongodb://[username:password@]host1[:port1][,host2[:port2],...
-    # [,hostN[:portN]]][/[database][?options]]
-    if password:
-        pwd = '******'
-    else:
-        pwd = None
-    LOG.info('uri=mongodb//:{0}:{1}@{2}:{3}/{4}'.format(
-        username, pwd, host, port, database
-    ))
+    adapter = MongoAdapter(client, db_name=database)
 
-    adapter = MongoAdapter(client, db_name = database)
-    
     ctx.obj = {}
     ctx.obj['db'] = database
     ctx.obj['user'] = username

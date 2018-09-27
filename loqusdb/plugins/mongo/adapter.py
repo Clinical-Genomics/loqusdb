@@ -19,27 +19,27 @@ class MongoAdapter(BaseAdapter, VariantMixin, CaseMixin, Base):
         logger.warning("Wiping the whole database")
         self.client.drop_database(self.db_name)
         logger.debug("Database wiped")
-    
+
     def indexes(self, collection=None):
          """Return a list with the current indexes
-         
+
          Skip the mandatory _id_ indexes
-         
+
          Args:
              collection(str)
-     
+
          Returns:
              indexes(list)
          """
          indexes = []
-         for collection_name in self.db.collection_names():
+         for collection_name in self.db.list_collection_names():
              if collection and collection != collection_name:
                  continue
              for index_name in self.db[collection_name].index_information():
                  if index_name != '_id_':
                      indexes.append(index_name)
          return indexes
-    
+
     def check_indexes(self):
         """Check if the indexes exists"""
         for collection_name in INDEXES:
@@ -51,7 +51,7 @@ class MongoAdapter(BaseAdapter, VariantMixin, CaseMixin, Base):
                     logger.warning("Index {0} missing. Run command `loqusdb index`".format(index_name))
                     return
         logger.info("All indexes exists")
-        
+
     def ensure_indexes(self):
         """Update the indexes"""
         for collection_name in INDEXES:

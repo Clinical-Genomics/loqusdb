@@ -9,50 +9,35 @@ from loqusdb.build_models import (build_case, build_variant)
 LOG = logging.getLogger(__name__)
 
 
-def delete(adapter, variant_file, family_file, family_type='ped', case_id=None):
-    """Delete a case and all of it's variants from the database
+def delete(adapter, case_obj, update=False, existing_case=False):
+    """Delete a case and all of it's variants from the database.
     
     Args:
         adapter: Connection to database
-        variant_file(str): Path to variant file
-        family_file(str): Path to family file
-        family_type(str): Format of family file
-        nr_variants(int): number of variants in vcf
-        skip_case_id(bool): If no case information should be added to variants
-        gq_treshold(int): If only quality variants should be considered
-        case_id(str): If different case id than the one in family file should be used
+        case_obj(models.Case)
+        update(bool): If we are in the middle of an update
+        existing_case(models.Case): If something failed during an update we need to revert
+                                    to the original case
     
     """
-    # Get a cyvcf2.VCF object
-    vcf_obj = get_vcf(variant_file)
+    # This will overwrite the updated case with the previous one
+    if update:
+        adapter.add_case(existing_case)
+    else:
+        adapter.delete_case(case_obj)
 
-    # Parse the family file infromation
-    family = None
-    family_id = None
-    if family_file:
-        with open(family_file, 'r') as family_lines:
-            family = get_case(
-                family_lines=family_lines, 
-                family_type=family_type
-            )
-            family_id = family.family_id
+    for file_type in ['vcf_path','vcf_sv_path']:
+        if not case_obj.get(file_type):
+            continue
+        variant_file = case_obj[file_type]
+        # Get a cyvcf2.VCF object
+        vcf_obj = get_vcf(variant_file)
 
-    case_id = case_id or family_id
-
-    case_obj = build_case(
-        case=family,
-        vcf_individuals=vcf_obj.samples,
-        case_id=case_id,
-    )
-
-    adapter.delete_case(case_obj)
-    
-    delete_variants(
-        adapter=adapter,
-        vcf_obj=vcf_obj,
-        case_obj=case_obj,
-        case_id=case_id,
-    )
+        delete_variants(
+            adapter=adapter,
+            vcf_obj=vcf_obj,
+            case_obj=case_obj,
+        )
 
 def delete_variants(adapter, vcf_obj, case_obj, case_id=None):
     """Delete variants for a case in the database
@@ -64,10 +49,10 @@ def delete_variants(adapter, vcf_obj, case_obj, case_id=None):
         case_id(str)
     
     Returns:
-        nr_of_deleted (int): Number of deleted variants
+        nr_deleted (int): Number of deleted variants
     """
     case_id = case_id or case_obj['case_id']
-    nr_of_deleted = 0
+    nr_deleted = 0
     start_deleting = datetime.now()
     chrom_time = datetime.now()
     current_chrom = None
@@ -85,7 +70,7 @@ def delete_variants(adapter, vcf_obj, case_obj, case_id=None):
         
         new_chrom = formated_variant.get('chrom')
         adapter.delete_variant(formated_variant)
-        nr_of_deleted += 1
+        nr_deleted += 1
         
         if not current_chrom:
             LOG.info("Start deleting chromosome {}".format(new_chrom))
@@ -101,4 +86,4 @@ def delete_variants(adapter, vcf_obj, case_obj, case_id=None):
             current_chrom = new_chrom
 
 
-    return nr_of_deleted
+    return nr_deleted
