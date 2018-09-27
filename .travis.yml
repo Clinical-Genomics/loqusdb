@@ -31,6 +31,7 @@ install:
 
 script:
     # command to run tests and collect test coverage
+    - pip list
     - py.test -v tests/
 
 notifications:

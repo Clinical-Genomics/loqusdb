@@ -9,6 +9,6 @@ pymongo>=3.0
 pytest
 mongomock
 vcftoolbox==1.5
-cyvcf2==0.9
+cyvcf2<0.10
 coloredlogs
 mongo_adapter>=0.2

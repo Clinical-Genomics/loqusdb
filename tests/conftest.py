@@ -3,7 +3,8 @@ import pytest
 
 import cyvcf2
 
-from mongomock import MongoClient
+from mongomock import MongoClient as MockClient
+from pymongo import MongoClient
 from ped_parser import FamilyParser
 
 from loqusdb.plugins import MongoAdapter
@@ -19,11 +20,11 @@ init_log(logger, loglevel='DEBUG')
 
 class CyvcfVariant(object):
     """Mock a cyvcf variant
-    
-    Default is to return a variant with three individuals high genotype 
+
+    Default is to return a variant with three individuals high genotype
     quality.
     """
-    def __init__(self, chrom='1', pos=80000, ref='A', alt='C', end=None, 
+    def __init__(self, chrom='1', pos=80000, ref='A', alt='C', end=None,
                  gt_quals=[60, 60, 60], gt_types=[1, 1, 0], var_type='snv',
                  var_id=None, info_dict={}):
         super(CyvcfVariant, self).__init__()
@@ -43,11 +44,25 @@ class CyvcfVariant(object):
 @pytest.fixture(scope='function')
 def mongo_client(request):
     """Return a mongomock client"""
+    client = MockClient()
+    return client
+
+@pytest.fixture(scope='function')
+def real_mongo_client(request):
+    """Return a mongomock client"""
     client = MongoClient()
     return client
 
 @pytest.fixture(scope='function')
 def mongo_adapter(request, mongo_client):
+    """Return a mongo adapter"""
+    db_name = 'test'
+    adapter = MongoAdapter(mongo_client, db_name)
+
+    return adapter
+
+@pytest.fixture(scope='function')
+def real_mongo_adapter(request, real_mongo_client):
     """Return a mongo adapter"""
     db_name = 'test'
     adapter = MongoAdapter(mongo_client, db_name)
@@ -125,8 +140,8 @@ def case_lines(request, ped_path):
     case = []
     with open(ped_path, 'r') as f:
         for line in f:
-            case.append(line) 
-    
+            case.append(line)
+
     return case
 
 @pytest.fixture(scope='function')
@@ -150,8 +165,8 @@ def case_obj(request, case_lines, vcf_obj, vcf_path):
     for nr_variants,variant in enumerate(vcf_obj,1):
         pass
     _case_obj = build_case(
-        case=family, 
-        vcf_individuals=vcf_individuals, 
+        case=family,
+        vcf_individuals=vcf_individuals,
         vcf_path=vcf_path,
         nr_variants=nr_variants,
         )
@@ -168,8 +183,8 @@ def sv_case_obj(request, case_lines, sv_vcf_obj, sv_vcf_path):
     for nr_variants,variant in enumerate(sv_vcf_obj,1):
         pass
     _case_obj = build_case(
-        case=family, 
-        sv_individuals=vcf_individuals, 
+        case=family,
+        sv_individuals=vcf_individuals,
         vcf_sv_path=sv_vcf_path,
         nr_sv_variants=nr_variants,
         )
@@ -203,7 +218,7 @@ def case_id(request, case_lines):
 @pytest.fixture(scope='function')
 def individuals(request, case_obj):
     """Return a case obj"""
-    
+
     return case_obj.individuals
 
 @pytest.fixture(scope='function')
@@ -233,10 +248,10 @@ def two_cases(request):
 @pytest.fixture(scope='function')
 def variant_obj(request, het_variant, ind_positions, individuals):
     _variant_obj = build_variant(
-        variant=het_variant, 
-        individuals = individuals, 
-        ind_positions = ind_positions, 
-        case_id='test', 
+        variant=het_variant,
+        individuals = individuals,
+        ind_positions = ind_positions,
+        case_id='test',
         gq_treshold=None
     )
     return _variant_obj
