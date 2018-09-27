@@ -11,18 +11,18 @@ def test_base_command():
     assert result.exit_code == 0
 
 
-def test_load_command(vcf_path, ped_path, mongo_adapter):
+def test_load_command(vcf_path, ped_path, real_mongo_adapter):
     ## GIVEN a vcf_path a ped_path
     runner = CliRunner()
     ## WHEN inserting a case via the CLI
-    command = ['--test', '--database', 'test', 'load', '--variant-file', vcf_path, '-f', ped_path]
+    command = ['--database', 'test', 'load', '--variant-file', vcf_path, '-f', ped_path]
     result = runner.invoke(base_command, command)
     ## THEN assert that the cli exits without problems
     assert result.exit_code == 0
 
 def test_load_command_no_ped(vcf_path):
     runner = CliRunner()
-    command = ['--test', '--database', 'test', 'load', '--variant-file', vcf_path]
+    command = ['--database', 'test', 'load', '--variant-file', vcf_path]
     result = runner.invoke(base_command, command)
 
     assert result.exit_code == 1

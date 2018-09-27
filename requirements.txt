@@ -5,7 +5,7 @@
 
 click
 ped_parser
-pymongo>=3.0
+pymongo==3.7.1
 pytest
 mongomock
 vcftoolbox==1.5

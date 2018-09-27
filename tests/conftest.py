@@ -17,6 +17,7 @@ logger = logging.getLogger('.')
 
 init_log(logger, loglevel='DEBUG')
 
+REAL_DATABASE = 'test'
 
 class CyvcfVariant(object):
     """Mock a cyvcf variant
@@ -51,6 +52,14 @@ def mongo_client(request):
 def real_mongo_client(request):
     """Return a mongomock client"""
     client = MongoClient()
+    def teardown():
+        print('\n')
+        logger.info("Deleting database")
+        client.drop_database(REAL_DATABASE)
+        logger.info("Database deleted")
+
+    request.addfinalizer(teardown)
+
     return client
 
 @pytest.fixture(scope='function')
@@ -65,7 +74,7 @@ def mongo_adapter(request, mongo_client):
 def real_mongo_adapter(request, real_mongo_client):
     """Return a mongo adapter"""
     db_name = 'test'
-    adapter = MongoAdapter(mongo_client, db_name)
+    adapter = MongoAdapter(real_mongo_client, db_name)
 
     return adapter
 
