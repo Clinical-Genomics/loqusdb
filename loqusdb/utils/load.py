@@ -21,11 +21,11 @@ from loqusdb.exceptions import (CaseError, VcfError)
 
 LOG = logging.getLogger(__name__)
 
-def load_database(adapter, variant_file=None, sv_file=None, family_file=None, 
-                  family_type='ped', skip_case_id=False, gq_treshold=None, 
+def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
+                  family_type='ped', skip_case_id=False, gq_treshold=None,
                   case_id=None, max_window = 3000):
     """Load the database with a case and its variants
-            
+
     Args:
           adapter: Connection to database
           variant_file(str): Path to variant file
@@ -41,7 +41,7 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
           nr_inserted(int)
     """
     vcf_files = []
-    
+
     nr_variants = None
     vcf_individuals = None
     if variant_file:
@@ -64,7 +64,7 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
     for _vcf_file in vcf_files:
         # Get a cyvcf2.VCF object
         vcf = get_vcf(_vcf_file)
-        
+
         if gq_treshold:
             if not vcf.contains('GQ'):
                 LOG.warning('Set gq-treshold to 0 or add info to vcf {0}'.format(_vcf_file))
@@ -77,17 +77,16 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
         LOG.info("Loading family from %s", family_file)
         with open(family_file, 'r') as family_lines:
             family = get_case(
-                family_lines=family_lines, 
+                family_lines=family_lines,
                 family_type=family_type
             )
             family_id = family.family_id
-    
+
     # There has to be a case_id or a family at this stage.
     case_id = case_id or family_id
-
     # Convert infromation to a loqusdb Case object
     case_obj = build_case(
-        case=family, 
+        case=family,
         case_id=case_id,
         vcf_path=variant_file,
         vcf_individuals=vcf_individuals,
@@ -96,14 +95,12 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
         sv_individuals=sv_individuals,
         nr_sv_variants=nr_sv_variants,
     )
-    
-
     # Build and load a new case, or update an existing one
-    case_obj = load_case(
+    case_id = load_case(
         adapter=adapter,
         case_obj=case_obj,
     )
-    
+
     nr_inserted = 0
     # If case was succesfully added we can store the variants
     for file_type in ['vcf_path','vcf_sv_path']:
@@ -115,10 +112,10 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
 
         vcf_obj = get_vcf(case_obj[file_type])
         try:
-            nr_inserted += load_variants(  
+            nr_inserted += load_variants(
                 adapter=adapter,
                 vcf_obj=vcf_obj,
-                case_obj=case_obj, 
+                case_obj=case_obj,
                 skip_case_id=skip_case_id,
                 gq_treshold=gq_treshold,
                 max_window=max_window,
@@ -136,12 +133,12 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
 
 def load_case(adapter, case_obj, update=False):
     """Load a case to the database
-    
+
     Args:
         adapter: Connection to database
         case_obj: dict
         update(bool): If existing case should be updated
-    
+
     Returns:
         case_obj(models.Case)
     """
@@ -160,7 +157,7 @@ def load_case(adapter, case_obj, update=False):
 
     return case_obj
 
-def load_variants(adapter, vcf_obj, case_obj, skip_case_id=False, gq_treshold=None, 
+def load_variants(adapter, vcf_obj, case_obj, skip_case_id=False, gq_treshold=None,
                   max_window=3000, variant_type='snv'):
     """Load variants for a family into the database.
 
@@ -168,7 +165,7 @@ def load_variants(adapter, vcf_obj, case_obj, skip_case_id=False, gq_treshold=No
         adapter (loqusdb.plugins.Adapter): initialized plugin
         case_obj(Case): dict with case information
         nr_variants(int)
-        skip_case_id (bool): whether to include the case id on variant level 
+        skip_case_id (bool): whether to include the case id on variant level
                              or not
         gq_treshold(int)
         max_window(int): Specify the max size for sv windows
@@ -197,7 +194,7 @@ def load_variants(adapter, vcf_obj, case_obj, skip_case_id=False, gq_treshold=No
                     gq_treshold=gq_treshold,
                 )
             # We need to check if there was any information returned
-            # The variant could be excluded based on low gq or if no individiual was called 
+            # The variant could be excluded based on low gq or if no individiual was called
             # in the particular case
             if not formated_variant:
                 continue
@@ -206,7 +203,7 @@ def load_variants(adapter, vcf_obj, case_obj, skip_case_id=False, gq_treshold=No
             else:
                 adapter.add_variant(variant=formated_variant)
             nr_inserted += 1
-    
+
     LOG.info("Inserted %s variants of type %s", nr_inserted, variant_type)
-    
+
     return nr_inserted

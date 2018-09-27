@@ -7,10 +7,10 @@ from click.testing import CliRunner
 def test_base_command():
     runner = CliRunner()
     result = runner.invoke(base_command, [])
-    
+
     assert result.exit_code == 0
 
-    
+
 def test_load_command(vcf_path, ped_path, mongo_adapter):
     ## GIVEN a vcf_path a ped_path
     runner = CliRunner()
@@ -24,9 +24,9 @@ def test_load_command_no_ped(vcf_path):
     runner = CliRunner()
     command = ['--test', '--database', 'test', 'load', '--variant-file', vcf_path]
     result = runner.invoke(base_command, command)
-    
+
     assert result.exit_code == 1
-    
+
 # def test_delete_command(mongo_client, vcf_path, ped_path):
 #     runner = CliRunner()
 #
@@ -49,4 +49,3 @@ def test_load_command_no_ped(vcf_path):
 #     result = runner.invoke(base_command, wipe_command)
 #
 #     assert result.exit_code == 0
-
