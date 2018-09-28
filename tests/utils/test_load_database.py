@@ -3,7 +3,8 @@ import pytest
 from loqusdb.utils.load import load_database
 from loqusdb.exceptions import CaseError
 
-def test_load_database(vcf_path, ped_path, mongo_adapter, case_id):
+def test_load_database(vcf_path, ped_path, real_mongo_adapter, case_id):
+    mongo_adapter = real_mongo_adapter
     db = mongo_adapter.db
 
     load_database(
@@ -17,7 +18,8 @@ def test_load_database(vcf_path, ped_path, mongo_adapter, case_id):
 
     assert mongo_case['case_id'] == case_id
 
-def test_load_database_alternative_ped(vcf_path, ped_path, mongo_adapter, case_id):
+def test_load_database_alternative_ped(vcf_path, ped_path, real_mongo_adapter, case_id):
+    mongo_adapter = real_mongo_adapter
     db = mongo_adapter.db
 
     load_database(
@@ -34,7 +36,8 @@ def test_load_database_alternative_ped(vcf_path, ped_path, mongo_adapter, case_i
     assert mongo_case['case_id'] == 'alternative'
     assert mongo_variant['families'] == ['alternative']
 
-def test_load_database_wrong_ped(vcf_path, funny_ped_path, mongo_adapter):
+def test_load_database_wrong_ped(vcf_path, funny_ped_path, real_mongo_adapter):
+    mongo_adapter = real_mongo_adapter
     ## GIVEN a vcf and ped file with wrong individuals
     ## WHEN loading the information
     ## THEN Error should be raised since individuals is not in vcf
@@ -45,4 +48,3 @@ def test_load_database_wrong_ped(vcf_path, funny_ped_path, mongo_adapter):
             family_file=funny_ped_path,
             family_type='ped',
         )
-    
