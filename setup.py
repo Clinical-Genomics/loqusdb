@@ -1,76 +1,142 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Based on https://github.com/pypa/sampleproject/blob/master/setup.py."""
-from __future__ import unicode_literals
-# To use a consistent encoding
-import codecs
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# Note: To use the 'upload' functionality of this file, you must:
+#   $ pip install twine
+"""Based on https://github.com/kennethreitz/setup.py"""
+
+import io
 import os
-from setuptools import setup, find_packages
 import sys
+from shutil import rmtree
 
-# Shortcut for building/publishing to Pypi
-if sys.argv[-1] == 'publish':
-    os.system('python setup.py sdist bdist_wheel upload')
-    sys.exit()
+from setuptools import find_packages, setup, Command
 
+# Package meta-data.
+NAME = 'loqusdb'
+DESCRIPTION = 'Store observations of vcf variants in a mongodb'
+URL = 'https://github.com/moonso/loqusdb'
+EMAIL = 'mans.magnusson@scilifelab.com'
+AUTHOR = 'Måns Magnusson'
+REQUIRES_PYTHON = '>=3.6.0'
+VERSION = 2.0
 
-def parse_reqs(req_path='./requirements.txt'):
-    """Recursively parse requirements from nested pip files."""
-    install_requires = []
-    with codecs.open(req_path, 'r') as handle:
-        # remove comments and empty lines
-        lines = (line.strip() for line in handle
-                 if line.strip() and not line.startswith('#'))
+# What packages are required for this module to be executed?
+REQUIRED = [
+    'click',
+    'ped_parser',
+    'pymongo==3.7.1',
+    'mongomock',
+    'vcftoolbox==1.5',
+    'cyvcf2<0.10',
+    'coloredlogs',
+    'mongo_adapter>=0.2'
+]
 
-        for line in lines:
-            # check for nested requirements files
-            if line.startswith('-r'):
-                # recursively call this function
-                install_requires += parse_reqs(req_path=line[3:])
+# What packages are optional?
+EXTRAS = {
+    'tests':['pytest'],
+}
 
-            else:
-                # add the line as a new requirement
-                install_requires.append(line)
+# The rest you shouldn't have to touch too much :)
+# ------------------------------------------------
+# Except, perhaps the License and Trove Classifiers!
+# If you do change the License, remember to change the Trove Classifier for that!
 
-    return install_requires
+here = os.path.abspath(os.path.dirname(__file__))
 
-# For making things look nice on pypi:
+# Import the README and use it as the long-description.
+# Note: this will only work if 'README.md' is present in your MANIFEST.in file!
 try:
-    import pypandoc
-    long_description = pypandoc.convert('README.md', 'rst')
-except (IOError, ImportError, RuntimeError):
-    long_description = 'Tool to store observations of genetic variants.'
+    with io.open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
+        long_description = '\n' + f.read()
+except FileNotFoundError:
+    long_description = DESCRIPTION
+
+# Load the package's __version__.py module as a dictionary.
+about = {}
+if not VERSION:
+    with open(os.path.join(here, NAME, '__version__.py')) as f:
+        exec(f.read(), about)
+else:
+    about['__version__'] = VERSION
 
 
-# with open('README.txt') as file:
-#     long_description = file.read()
+class UploadCommand(Command):
+    """Support setup.py upload."""
 
-setup(name='loqusdb',
-    version='1.0',
-    description='Store frequencies of vcf variants in a mongodb',
-    author = 'Mans Magnusson',
-    author_email = 'mans.magnusson@scilifelab.se',
-    url = 'http://github.com/moonso/loqusdb',
-    license = 'MIT License',
-    install_requires=parse_reqs(),
-    
-    packages=find_packages(exclude=('tests*', 'docs', 'examples')),
-    
-    entry_points=dict(
-        console_scripts=[
-        "loqusdb = loqusdb.__main__:base_command",
-        ],
-    ),
+    description = 'Build and publish the package.'
+    user_options = []
+
+    @staticmethod
+    def status(s):
+        """Prints things in bold."""
+        print('\033[1m{0}\033[0m'.format(s))
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        try:
+            self.status('Removing previous builds…')
+            rmtree(os.path.join(here, 'dist'))
+        except OSError:
+            pass
+
+        self.status('Building Source and Wheel (universal) distribution…')
+        os.system('{0} setup.py sdist bdist_wheel --universal'.format(sys.executable))
+
+        self.status('Uploading the package to PyPI via Twine…')
+        os.system('twine upload dist/*')
+
+        self.status('Pushing git tags…')
+        os.system('git tag v{0}'.format(about['__version__']))
+        os.system('git push --tags')
+
+        sys.exit()
+
+
+# Where the magic happens:
+setup(
+    name=NAME,
+    version=about['__version__'],
+    description=DESCRIPTION,
+    long_description=long_description,
+    long_description_content_type='text/markdown',
+    author=AUTHOR,
+    author_email=EMAIL,
+    python_requires=REQUIRES_PYTHON,
+    url=URL,
+    packages=find_packages(exclude=('tests',)),
+
+    entry_points={
+        'console_scripts': ["loqusdb = loqusdb.__main__:base_command"],
+    },
+    install_requires=REQUIRED,
+    extras_require=EXTRAS,
+    include_package_data=True,
+    license='MIT',
     keywords = ['vcf', 'variants'],
-    classifiers = [
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 3.6",
-        "License :: OSI Approved :: MIT License",
-        "Development Status :: 4 - Beta",
+    classifiers=[
+        # Trove classifiers
+        # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: Implementation :: CPython',
         "Operating System :: MacOS :: MacOS X",
         "Operating System :: Unix",
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
     ],
-    long_description = long_description,
+    # $ setup.py publish support.
+    cmdclass={
+        'upload': UploadCommand,
+    },
 )
