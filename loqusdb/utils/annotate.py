@@ -7,7 +7,7 @@ The methods for annotating SNVs and SVs differs a bit so they will be handeld in
 
 """
 
-from loqusdb.build_models.variant import get_variant_id
+from loqusdb.build_models.variant import (get_variant_id, get_coords)
 
 def annotate_variant(variant, var_obj=None):
     """Annotate a cyvcf variant with observations
@@ -28,14 +28,12 @@ def annotate_variant(variant, var_obj=None):
             variant.INFO['Hem'] = var_obj['hemizygote']
     
     return variant
-    
-    
 
 def annotate_snv(adpter, variant):
     """Annotate an SNV/INDEL variant
     
     Args:
-        adapter(loqusdb/plugin/adapter)
+        adapter(loqusdb.plugin.adapter)
         variant(cyvcf2.Variant)
     """
     variant_id = get_variant_id(variant)
@@ -44,12 +42,30 @@ def annotate_snv(adpter, variant):
     annotated_variant = annotated_variant(variant, variant_obj)
     return annotated_variant
 
+def annotate_svs(adapter, vcf_obj):
+    """Annotate all SV variants in a VCF
+    
+    Args:
+        adapter(loqusdb.plugin.adapter)
+        vcf_obj(cyvcf2.VCF)
+    
+    Yields:
+        variant(cyvcf2.Variant)
+    """
+    for nr_variants, variant in enumerate(vcf_obj, 1):
+        variant_info = get_coords(variant)
+        match = adapter.get_structural_variant(variant_info)
+        if match:
+            annotate_variant(variant, match)
+        yield variant
+    
 
 def annotate_snvs(adapter, vcf_obj):
     """Annotate all variants in a VCF
     
     Args:
-        vcf_obj(pyvcf2.VCF)
+        adapter(loqusdb.plugin.adapter)
+        vcf_obj(cyvcf2.VCF)
     
     Yields:
         variant(cyvcf2.Variant): Annotated variant

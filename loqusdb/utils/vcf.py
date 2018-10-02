@@ -9,7 +9,7 @@ from loqusdb.build_models.variant import get_variant_id
 LOG = logging.getLogger(__name__)
 VALID_ENDINGS = ['.vcf', '.gz']
 
-def add_headers(vcf_obj):
+def add_headers(vcf_obj, nr_cases=None, sv=False):
     """Add loqus specific information to a VCF header
     
     Args:
@@ -23,20 +23,24 @@ def add_headers(vcf_obj):
             'Type': 'Integer', 
             'Description': "The number of observations for the variant"}
     )
-    vcf_obj.add_info_to_header(
-        {
-            'ID':"Hom", 
-            'Number': '1', 
-            'Type': 'Integer', 
-            'Description': "The number of observed homozygotes"}
-    )
-    vcf_obj.add_info_to_header(
-        {
-            'ID':"Hem", 
-            'Number': '1', 
-            'Type': 'Integer', 
-            'Description': "The number of observed hemizygotes"}
-    )
+    if not sv:
+        vcf_obj.add_info_to_header(
+            {
+                'ID':"Hom", 
+                'Number': '1', 
+                'Type': 'Integer', 
+                'Description': "The number of observed homozygotes"}
+        )
+        vcf_obj.add_info_to_header(
+            {
+                'ID':"Hem", 
+                'Number': '1', 
+                'Type': 'Integer', 
+                'Description': "The number of observed hemizygotes"}
+        )
+    if nr_cases:
+        case_header = "##NrCases={}".format(nr_cases)
+        vcf_obj.add_to_header(case_header)
     # head.add_version_tracking("loqusdb", version, datetime.now().strftime("%Y-%m-%d %H:%M"))
     return
     

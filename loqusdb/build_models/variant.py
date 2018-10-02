@@ -75,6 +75,86 @@ def is_greater(a,b):
     return False
 
 
+def get_coords(variant):
+    """Returns a dictionary with position information
+    
+    Args:
+        variant(cyvcf2.Variant)
+    
+    Returns:
+        coordinates(dict)
+    """
+    coordinates = {
+        'chrom': None,
+        'end_chrom': None,
+        'sv_length': None,
+        'sv_type': None,
+        'pos': None,
+        'end': None,
+    }
+    chrom = variant.CHROM
+    if chrom.startswith(('chr', 'CHR', 'Chr')):
+        chrom = chrom[3:]
+    coordinates['chrom'] = chrom
+    end_chrom = chrom
+    
+    pos = int(variant.POS)
+    alt = variant.ALT[0]
+
+    # Get the end position
+    # This will be None for non-svs
+    end_pos = variant.INFO.get('END')
+    if end_pos:
+        end = int(end_pos)
+    else:
+        end = int(variant.end)
+    coordinates['end'] = end
+    
+    sv_type = variant.INFO.get('SVTYPE')
+    length = variant.INFO.get('SVLEN')
+    if length:
+        sv_len = abs(length)
+    else:
+        sv_len = end - pos
+
+    # Translocations will sometimes have a end chrom that differs from chrom
+    if sv_type == 'BND':
+        other_coordinates = alt.strip('ACGTN[]').split(':')
+        end_chrom = other_coordinates[0]
+        if end_chrom.startswith(('chr', 'CHR', 'Chr')):
+            end_chrom = end_chrom[3:]
+
+        end = int(other_coordinates[1])
+
+        #Set 'infinity' to length if translocation
+        sv_len = float('inf')
+
+    # Insertions often have length 0 in VCF
+    if (sv_len == 0 and alt != '<INS>'):
+        sv_len = len(alt)
+
+    if (pos == end) and (sv_len > 0):
+        end = pos + sv_len
+
+    position = Position(chrom, pos)
+    end_position = Position(end_chrom, end)
+    
+    # If 'start' is greater than 'end', switch positions
+    if is_greater(position, end_position):
+        end_chrom = position.chrom
+        end = position.pos
+        
+        chrom = end_position.chrom
+        pos = end_position.pos
+    
+    coordinates['end_chrom'] = end_chrom
+    coordinates['pos'] = end_chrom
+    coordinates['end'] = end
+    coordinates['sv_length'] = sv_len
+    coordinates['sv_type'] = sv_type
+    
+    return coordinates
+
 def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
     """Return a Variant object
 
@@ -99,20 +179,6 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
     if variant.var_type == 'sv':
         sv = True
 
-    chrom = variant.CHROM
-    if chrom.startswith(('chr', 'CHR', 'Chr')):
-        chrom = chrom[3:]
-    
-    pos = int(variant.POS)
-    
-    # Get the end position
-    # This will be None for non-svs
-    end_pos = variant.INFO.get('END')
-    if end_pos:
-        end = int(end_pos)
-    else:
-        end = int(variant.end)
-
     # chrom_pos_ref_alt
     variant_id = get_variant_id(variant)
 
@@ -120,47 +186,7 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
     # ALT is an array in cyvcf2
     alt = variant.ALT[0]
 
-    # Default end chrom is chrom
-    end_chrom = chrom
-
     sv_type = variant.INFO.get('SVTYPE')
-    length = variant.INFO.get('SVLEN')
-    if length:
-        sv_len = abs(length)
-    else:
-        sv_len = end - pos
-
-    # Translocations will sometimes have a end chrom that differs from chrom
-    if sv_type == 'BND':
-        other_coordinates = alt.strip('ACGTN[]').split(':')
-        end_chrom = other_coordinates[0]
-        if end_chrom.startswith(('chr', 'CHR', 'Chr')):
-            end_chrom = end_chrom[3:]
-
-        end = int(other_coordinates[1])
-
-        #Set 'infinity' to length if translocation
-        sv_len = float('inf')
-        sv_type = 'BND'
-
-    # Insertions often have length 0 in VCF
-    if (sv_len == 0 and alt != '<INS>'):
-        sv_len = len(alt)
-
-    if (pos == end) and (sv_len > 0):
-        end = pos + sv_len
-
-    position = Position(chrom, pos)
-    end_position = Position(end_chrom, end)
-    
-    # If 'start' is greater than 'end', switch positions
-    if is_greater(position, end_position):
-        end_chrom = position.chrom
-        end = position.pos
-        
-        chrom = end_position.chrom
-        pos = end_position.pos
-        
 
     # These are integers that will be used when uploading
     found_homozygote = 0
@@ -197,16 +223,18 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
                     found_homozygote = 1
 
     if found_variant:
+        coordinates = get_coords(variant)
+        
         variant_obj = Variant(
             variant_id=variant_id,
-            chrom=chrom,
-            pos=pos,
-            end=end,
+            chrom=coordinates['chrom'],
+            pos=coordinates['pos'],
+            end=coordinates['end'],
             ref=ref,
             alt=alt,
-            end_chrom=end_chrom,
+            end_chrom=coordinates['end_chrom'],
             sv_type = sv_type,
-            sv_len = sv_len,
+            sv_len = coordinates['sv_length'],
             case_id = case_id,
             homozygote = found_homozygote,
             hemizygote = found_hemizygote,
