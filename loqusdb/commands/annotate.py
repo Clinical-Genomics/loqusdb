@@ -9,6 +9,7 @@ from datetime import datetime
 from loqusdb.exceptions import (VcfError)
 from loqusdb.utils.load import load_database
 from loqusdb.utils.vcf import (get_file_handle, check_vcf, add_headers)
+from loqusdb.utils.annotate import (annotate_snvs)
 
 from . import base_command
 
@@ -33,36 +34,19 @@ def annotate(ctx, variant_file):
         if len(header_line) == 0:
             continue
         click.echo(header_line)
-    ctx.abort()
-    nr_cases = adapter.cases().count()
-    LOG.info("Found {0} cases in database".format(nr_cases))
+    
+    # nr_cases = adapter.cases().count()
+    # LOG.info("Found {0} cases in database".format(nr_cases))
 
     adapter = ctx.obj['adapter']
 
     start_inserting = datetime.now()
     
-    try:
-        nr_inserted = load_database(
-            adapter=adapter,
-            variant_file=variant_path,
-            sv_file=variant_sv_path,
-            family_file=family_file,
-            family_type=family_type,
-            skip_case_id=skip_case_id,
-            case_id=case_id,
-            gq_treshold=gq_treshold,
-            max_window=max_window,
-        )
-    except (SyntaxError, CaseError, IOError) as error:
-        LOG.warning(error)
-        ctx.abort()
+    # try:
+    for variant in annotate_snvs(adapter, vcf_obj):
+        click.echo(variant)
+    # except (Exception) as error:
+    #     LOG.warning(error)
+    #     ctx.abort()
     
-    LOG.info("Nr variants inserted: %s", nr_inserted)
-    LOG.info("Time to insert variants: {0}".format(
-                datetime.now() - start_inserting))
-    
-    if ensure_index:
-        adapter.ensure_indexes()
-    else:
-        adapter.check_indexes()
     

@@ -84,7 +84,7 @@ class VariantMixin(BaseVariantMixin, SVMixin):
         """
         query = {'_id': {'$in': variant_ids}}
         
-        return self.db.find(query)
+        return self.db.variant.find(query)
     
 
     def get_variants(self, chromosome=None, start=None, end=None):

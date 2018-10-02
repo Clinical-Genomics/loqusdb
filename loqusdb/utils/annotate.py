@@ -21,11 +21,11 @@ def annotate_variant(variant, var_obj=None):
     """
     if var_obj:
     
-        variant.INFO['Obs'] = variant_obj['observations']
-        if variant_obj.get('homozygote'):
-            variant.INFO['Hom'] = variant_obj['homozygote']
-        if variant_obj.get('hemizygote'):
-            variant.INFO['Hem'] = variant_obj['hemizygote']
+        variant.INFO['Obs'] = var_obj['observations']
+        if var_obj.get('homozygote'):
+            variant.INFO['Hom'] = var_obj['homozygote']
+        if var_obj.get('hemizygote'):
+            variant.INFO['Hem'] = var_obj['hemizygote']
     
     return variant
     
