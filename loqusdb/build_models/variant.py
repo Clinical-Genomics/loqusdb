@@ -148,7 +148,7 @@ def get_coords(variant):
         pos = end_position.pos
     
     coordinates['end_chrom'] = end_chrom
-    coordinates['pos'] = end_chrom
+    coordinates['pos'] = pos
     coordinates['end'] = end
     coordinates['sv_length'] = sv_len
     coordinates['sv_type'] = sv_type
