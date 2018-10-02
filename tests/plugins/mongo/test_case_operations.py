@@ -96,4 +96,64 @@ class TestGetCase:
 
         mongo_cases = mongo_adapter.cases()
 
-        assert mongo_cases.count() == 2
+        assert sum(1 for i in mongo_cases) == 2
+
+    def test_nr_cases(self, mongo_adapter):
+        """Test to get non existing case"""
+    
+        db = mongo_adapter.db
+        case_1 = {
+            'case_id': 'test',
+            'vcf_path': 'test.vcf'
+        }
+
+        db.case.insert_one(case_1)
+
+        assert mongo_adapter.nr_cases() == 1
+        assert mongo_adapter.nr_cases(sv_cases=True) == 0
+        assert mongo_adapter.nr_cases(snv_cases=True) == 1
+
+    def test_nr_cases_sv(self, mongo_adapter):
+        """Test to get non existing case"""
+    
+        db = mongo_adapter.db
+        case_1 = {
+            'case_id': 'test',
+            'vcf_sv_path': 'test.vcf'
+        }
+
+        db.case.insert_one(case_1)
+
+        assert mongo_adapter.nr_cases() == 1
+        assert mongo_adapter.nr_cases(sv_cases=True) == 1
+        assert mongo_adapter.nr_cases(snv_cases=True) == 0
+
+    def test_get_multiple_cases(self, mongo_adapter):
+        """Test to get non existing case"""
+    
+        db = mongo_adapter.db
+        case_1 = {
+            'case_id': 'test',
+            'vcf_path': 'test.vcf',
+            'vcf_sv_path': 'test.vcf'
+        }
+
+        case_2 = {
+            'case_id': 'test2',
+            'vcf_path': 'test2.vcf'
+        }
+
+        case_3 = {
+            'case_id': 'test3',
+            'vcf_path': 'test3.vcf'
+        }
+        
+        db.case.insert_one(case_1)
+        db.case.insert_one(case_2)
+        db.case.insert_one(case_3)
+
+
+        assert mongo_adapter.nr_cases() == 3
+        assert mongo_adapter.nr_cases(snv_cases=True) == 3
+        assert mongo_adapter.nr_cases(sv_cases=True) == 1
+        assert mongo_adapter.nr_cases(sv_cases=True, snv_cases=True) == 3

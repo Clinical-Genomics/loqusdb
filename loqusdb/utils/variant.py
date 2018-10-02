@@ -49,7 +49,6 @@ def format_variant(variant, variant_type='snv'):
     
     ref = variant.get('ref')
     alt = variant.get('alt')
-    pp(variant)
     
     if variant_type == 'sv':
         pos = int((variant['pos_left'] + variant['pos_right'])/2)

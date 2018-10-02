@@ -26,11 +26,33 @@ class CaseMixin(BaseCaseMixin):
     def cases(self):
         """Get all cases from the database
 
-            Returns:
-                cases (Iterable(Case)): A iterable with mongo cases
+        Returns:
+            cases (Iterable(Case)): A iterable with mongo cases
         """
         LOG.debug("Collecting all cases from database")
         return self.db.case.find()
+
+    def nr_cases(self, snv_cases=None, sv_cases=None):
+        """Return the number of cases in the database
+
+        Args:
+            snv_cases(bool): If only snv cases should be searched
+            sv_cases(bool): If only snv cases should be searched
+
+        Returns:
+            cases (Iterable(Case)): A iterable with mongo cases
+        """
+        query = {}
+        
+        if snv_cases:
+            query = {'vcf_path': {'$exists':True}}
+        if sv_cases:
+            query = {'vcf_sv_path': {'$exists':True}}
+        if snv_cases and sv_cases:
+            query = None
+
+        return self.db.case.count_documents(query)
+
 
     def add_case(self, case, update=False):
         """Add a case to the case collection

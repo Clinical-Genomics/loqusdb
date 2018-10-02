@@ -9,6 +9,39 @@ from loqusdb.build_models.variant import get_variant_id
 LOG = logging.getLogger(__name__)
 VALID_ENDINGS = ['.vcf', '.gz']
 
+def add_headers(vcf_obj):
+    """Add loqus specific information to a VCF header
+    
+    Args:
+        vcf_obj(cyvcf2.VCF)
+    """
+
+    vcf_obj.add_info_to_header(
+        {
+            'ID':"Obs", 
+            'Number': '1', 
+            'Type': 'Integer', 
+            'Description': "The number of observations for the variant"}
+    )
+    vcf_obj.add_info_to_header(
+        {
+            'ID':"Hom", 
+            'Number': '1', 
+            'Type': 'Integer', 
+            'Description': "The number of observed homozygotes"}
+    )
+    vcf_obj.add_info_to_header(
+        {
+            'ID':"Hem", 
+            'Number': '1', 
+            'Type': 'Integer', 
+            'Description': "The number of observed hemizygotes"}
+    )
+    # head.add_version_tracking("loqusdb", version, datetime.now().strftime("%Y-%m-%d %H:%M"))
+    return
+    
+    
+
 def get_file_handle(file_path):
     """Return cyvcf2 VCF object
     

@@ -73,6 +73,20 @@ class VariantMixin(BaseVariantMixin, SVMixin):
         """
         return self.db.variant.find_one({'_id': variant.get('_id')})
 
+    def search_variants(self, variant_ids):
+        """Make a batch search for variants in the database
+        
+        Args:
+            variant_ids(list(str)): List of variant ids
+        
+        Returns:
+            res(pymngo.Cursor(variant_obj)): The result
+        """
+        query = {'_id': {'$in': variant_ids}}
+        
+        return self.db.find(query)
+    
+
     def get_variants(self, chromosome=None, start=None, end=None):
         """Return all variants in the database
         If no region is specified all variants will be returned.
