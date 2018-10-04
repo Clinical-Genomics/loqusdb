@@ -11,3 +11,5 @@ from .view import index as index_command
 from .migrate import migrate as migration_command
 from .identity import identity as identity_command
 from .annotate import annotate as annotate_command
+from .dump import dump as dump_command
+from .restore import restore as restore_command
