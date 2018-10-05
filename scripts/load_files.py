@@ -36,10 +36,16 @@ def cli(ctx, directory, uri, verbose, count):
         ctx.abort()
     
     start_time = datetime.now()
+    # Make sure that the database is indexed
+    index_call = ['loqusdb', 'index']
     base_call = ['loqusdb']
     if uri:
         base_call.append('--uri')
         base_call.append(uri)
+        index_call.append('--uri')
+        index_call.append(uri)
+    
+    subprocess.run(index_call)
     base_call.append('load')
     
     nr_files = 0
@@ -52,7 +58,16 @@ def cli(ctx, directory, uri, verbose, count):
         call.append(case_id)
         if count:
             continue
-        subprocess.run(call)
+        try:
+            subprocess.run(call, check=True)
+        except subprocess.CalledProcessError as err:
+            LOG.warning(err)
+            LOG.warning("Failed to load file %s", filename)
+            LOG.info("Continue with files...")
+        
+        if nr_files % 100:
+            LOG.info("%s files loaded", nr_files)
+        
     LOG.info("%s files inserted", nr_files)
     LOG.info("Time to insert files: {}".format(datetime.now()-start_time))
 
