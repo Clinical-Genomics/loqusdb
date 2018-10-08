@@ -184,9 +184,12 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
 
     ref = variant.REF
     # ALT is an array in cyvcf2
+    # We allways assume splitted and normalized VCFs
     alt = variant.ALT[0]
 
-    sv_type = variant.INFO.get('SVTYPE')
+    coordinates = get_coords(variant)
+    chrom = coordinates['chrom']
+    pos = coordinates['pos']
 
     # These are integers that will be used when uploading
     found_homozygote = 0
@@ -223,17 +226,16 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
                     found_homozygote = 1
 
     if found_variant:
-        coordinates = get_coords(variant)
         
         variant_obj = Variant(
             variant_id=variant_id,
-            chrom=coordinates['chrom'],
-            pos=coordinates['pos'],
+            chrom=chrom,
+            pos=pos,
             end=coordinates['end'],
             ref=ref,
             alt=alt,
             end_chrom=coordinates['end_chrom'],
-            sv_type = sv_type,
+            sv_type = coordinates['sv_type'],
             sv_len = coordinates['sv_length'],
             case_id = case_id,
             homozygote = found_homozygote,
