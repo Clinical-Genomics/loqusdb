@@ -5,7 +5,7 @@ site_author: Måns Magnusson and Jesper Eisfeldt
 
 theme:
   name: 'material'
-  logo: 'cloud_circle'
+  # logo: 'cloud_circle'
   palette:
     primary: 'blue grey'
     accent: 'cyan'
