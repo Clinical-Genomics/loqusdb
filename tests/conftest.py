@@ -17,7 +17,8 @@ logger = logging.getLogger('.')
 
 init_log(logger, loglevel='DEBUG')
 
-REAL_DATABASE = 'test'
+REAL_DATABASE = 'loqus-test'
+TEST_DATABASE = 'test'
 
 class CyvcfVariant(object):
     """Mock a cyvcf variant
@@ -43,6 +44,12 @@ class CyvcfVariant(object):
         self.ID = var_id
 
 @pytest.fixture(scope='function')
+def real_db_name(request):
+    """Return the name of the real mongo test db"""
+    return REAL_DATABASE
+
+
+@pytest.fixture(scope='function')
 def mongo_client(request):
     """Return a mongomock client"""
     client = MockClient()
@@ -65,7 +72,7 @@ def real_mongo_client(request):
 @pytest.fixture(scope='function')
 def mongo_adapter(request, mongo_client):
     """Return a mongo adapter"""
-    db_name = 'test'
+    db_name = TEST_DATABASE
     adapter = MongoAdapter(mongo_client, db_name)
 
     return adapter
@@ -73,7 +80,7 @@ def mongo_adapter(request, mongo_client):
 @pytest.fixture(scope='function')
 def real_mongo_adapter(request, real_mongo_client):
     """Return a mongo adapter"""
-    db_name = 'test'
+    db_name = REAL_DATABASE
     adapter = MongoAdapter(real_mongo_client, db_name)
 
     return adapter
@@ -152,6 +159,16 @@ def case_lines(request, ped_path):
             case.append(line)
 
     return case
+
+@pytest.fixture(scope='function')
+def case_id(request, ped_path):
+    """Return ped formated case lines"""
+    case_id = None
+    with open(ped_path, 'r') as f:
+        for line in f:
+            case_id = line.split('\t')[0]
+
+    return case_id
 
 @pytest.fixture(scope='function')
 def vcf_obj(request, vcf_path):
