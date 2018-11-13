@@ -5,24 +5,21 @@ from pprint import pprint as pp
 from loqusdb.plugins import BaseVariantMixin
 from .structural_variant import SVMixin
 
-from pymongo import (ASCENDING, DESCENDING)
+from pymongo import (ASCENDING, DESCENDING, UpdateOne)
 
 LOG = logging.getLogger(__name__)
 
 class VariantMixin(BaseVariantMixin, SVMixin):
     
-    def add_variant(self, variant):
-        """Add a variant to the variant collection
+    def _get_update(self, variant):
+        """Convert a variant to a proper update
         
-            If the variant exists we update the count else we insert a new variant object.
+        Args:
+            variant(dict)
         
-            Args:
-                variant (dict): A variant dictionary
-        
+        Returns:
+            update(dict)
         """
-        LOG.debug("Upserting variant: {0}".format(variant.get('_id')))
-        
-        
         update = {
                 '$inc': {
                     'homozygote': variant.get('homozygote', 0),
@@ -44,16 +41,59 @@ class VariantMixin(BaseVariantMixin, SVMixin):
                                 '$slice': -50
                                 }
                             }
-
+        return update
+    
+    def add_variant(self, variant):
+        """Add a variant to the variant collection
+        
+            If the variant exists we update the count else we insert a new variant object.
+        
+            Args:
+                variant (dict): A variant dictionary
+        
+        """
+        LOG.debug("Upserting variant: {0}".format(variant.get('_id')))
+        
+        update = self._get_update(variant)
+        
         message = self.db.variant.update_one(
-            {'_id': variant['_id'],},
+            {'_id': variant['_id']},
             update,
-             upsert=True
+            upsert=True
         )
         if message.modified_count == 1:
             LOG.debug("Variant %s was updated", variant.get('_id'))
         else:
             LOG.debug("Variant was added to database for first time")
+        return
+
+    def add_variants(self, variants):
+        """Add a bulk of variants
+        
+        This could be used for faster inserts
+        
+        Args:
+            variants(iterable(dict))
+        
+        """
+        
+        operations = []
+        for i,variant in enumerate(variants, 1):
+            update = self._get_update(variant)
+            operations.append(
+                UpdateOne(
+                    {'_id': variant['_id']},
+                    update,
+                    upsert=True
+                )
+            )
+            if i % 10000 == 0:
+                self.db.variant.bulk_write(operations, ordered=False)
+                operations = []
+        
+        if len(operations) > 0:
+            self.db.variant.bulk_write(operations, ordered=False)
+        
         return
 
     def get_variant(self, variant):
