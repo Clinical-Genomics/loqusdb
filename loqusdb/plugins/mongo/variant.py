@@ -78,7 +78,14 @@ class VariantMixin(BaseVariantMixin, SVMixin):
         """
         
         operations = []
+        nr_inserted = 0
         for i,variant in enumerate(variants, 1):
+            # We need to check if there was any information returned
+            # The variant could be excluded based on low gq or if no individiual was called
+            # in the particular case
+            if not variant:
+                continue
+            nr_inserted += 1
             update = self._get_update(variant)
             operations.append(
                 UpdateOne(
@@ -94,7 +101,7 @@ class VariantMixin(BaseVariantMixin, SVMixin):
         if len(operations) > 0:
             self.db.variant.bulk_write(operations, ordered=False)
         
-        return
+        return nr_inserted
 
     def get_variant(self, variant):
         """Check if a variant exists in the database and return it.

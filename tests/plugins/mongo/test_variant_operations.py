@@ -38,8 +38,6 @@ class TestInsertVariant:
         db = mongo_adapter.db
 
         mongo_variant = db.variant.find_one()
-        print(mongo_variant)
-        print(homozygous_variant)
         assert mongo_variant['_id'] == 'test'
         assert mongo_variant['observations'] == 1
         assert mongo_variant.get('homozygote', 0) == 1
@@ -128,14 +126,14 @@ class TestBulkOperations:
         adapter = real_mongo_adapter
         db = adapter.db
 
-        variants = ({'_id': 'test','homozygote': 0} for i in range(10000))
+        variants = ({'_id': 'test','homozygote': 0} for i in range(20000))
 
         adapter.add_variants(variants)
 
         mongo_variant = db.variant.find_one()
 
         assert mongo_variant['_id'] == 'test'
-        assert mongo_variant['observations'] == 10000
+        assert mongo_variant['observations'] == 20000
         assert mongo_variant.get('homozygote', 0) == 0
 
 class TestRemoveVariant:
