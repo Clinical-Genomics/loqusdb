@@ -21,13 +21,13 @@ URL = 'https://github.com/moonso/loqusdb'
 EMAIL = 'mans.magnusson@scilifelab.com'
 AUTHOR = 'Måns Magnusson'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = 2.1
+VERSION = 2.3
 
 # What packages are required for this module to be executed?
 REQUIRED = [
     'click',
     'ped_parser',
-    'pymongo==3.7.1',
+    'pymongo>=3.7.1',
     'mongomock',
     'vcftoolbox==1.5',
     'cyvcf2<0.10',
