@@ -185,24 +185,18 @@ def load_variants(adapter, vcf_obj, case_obj, skip_case_id=False, gq_treshold=No
         case_id = None
     # Loop over the variants in the vcf
     with click.progressbar(vcf_obj, label="Inserting variants",length=nr_variants) as bar:
-        for variant in bar:
-            #Creates a variant that is ready to insert into the database
-            formated_variant = build_variant(
-                    variant=variant,
-                    case_obj=case_obj,
-                    case_id=case_id,
-                    gq_treshold=gq_treshold,
-                )
-            # We need to check if there was any information returned
-            # The variant could be excluded based on low gq or if no individiual was called
-            # in the particular case
-            if not formated_variant:
+        
+        variants = (build_variant(variant,case_obj,case_id, gq_treshold) for variant in bar)
+        
+    if variant_type == 'sv':
+        for sv_variant in variants:
+            if not sv_variant:
                 continue
-            if formated_variant['is_sv']:
-                adapter.add_structural_variant(variant=formated_variant, max_window=max_window)
-            else:
-                adapter.add_variant(variant=formated_variant)
+            adapter.add_structural_variant(variant=sv_variant, max_window=max_window)
             nr_inserted += 1
+
+    if variant_type == 'snv':
+        nr_inserted = adapter.add_variants(variants)
 
     LOG.info("Inserted %s variants of type %s", nr_inserted, variant_type)
 
