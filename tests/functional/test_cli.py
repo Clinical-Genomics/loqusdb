@@ -85,6 +85,38 @@ def test_delete_command_case_id(vcf_path, case_id, real_mongo_adapter, real_db_n
     ## THEN assert that the case was deleted
     assert real_mongo_adapter.case({'case_id': case_id}) is None
 
+def test_cases_command_case_id(vcf_path, case_id, real_mongo_adapter, real_db_name):
+    ## GIVEN a vcf_path a ped_path and a empty database
+    runner = CliRunner()
+    assert real_mongo_adapter.case({'case_id': case_id}) is None
+
+    ## WHEN inserting a case via the CLI without a ped file
+    load_command = ['--database', real_db_name, 'load', '--variant-file', vcf_path, '-c', case_id]
+    result = runner.invoke(base_command, load_command)
+    ## THEN assert that the case was added
+    assert isinstance(real_mongo_adapter.case({'case_id': case_id}), dict)
+
+    ## WHEN searching for the case with CLI
+    command = ['--database', real_db_name, 'cases', '--case-id', case_id]
+    result = runner.invoke(base_command, command)
+
+    ## THEN assert that the cli exits without problems
+    assert result.exit_code == 0
+
+
+def test_cases_command_non_existing(vcf_path, case_id, real_mongo_adapter, real_db_name):
+    ## GIVEN a vcf_path a ped_path and a empty database
+    runner = CliRunner()
+    assert real_mongo_adapter.case({'case_id': case_id}) is None
+
+    ## WHEN searching for a non existing case
+    command = ['--database', real_db_name, 'cases', '--case-id', 'hello']
+    result = runner.invoke(base_command, command)
+    
+    ## THEN assert that the exit code is non zero
+    assert result.exit_code != 0
+
+
 
 # def test_wipe_command(mongo_client, vcf_path, ped_path):
 #     runner = CliRunner()

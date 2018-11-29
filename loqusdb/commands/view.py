@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
+import json
+
 import click
 
 from pprint import pprint as pp
@@ -21,25 +23,26 @@ def cases(ctx, case_id, to_json):
     cases = []
     
     if case_id:
-        case_obj = adapter.case(case_id)
+        case_obj = adapter.case({'case_id':case_id})
         if not case_obj:
             LOG.info("Case {0} does not exist in database".format(case_id))
-            return
+            ctx.abort()
+        case_obj['_id'] = str(case_obj['_id'])
         cases.append(case_obj)
     else:
         cases = adapter.cases()
         if cases.count() == 0:
             LOG.info("No cases found in database")
-            return
+            context.abort()
     
-    if not to_json:
-        click.echo("#case_id\tvcf_path")
+    if to_json:
+        click.echo(json.dumps(cases))
+        return
+
+    click.echo("#case_id\tvcf_path")
 
     for case_obj in cases:
-        if to_json:
-            click.echo(case_obj)
-        else:
-            click.echo("{0}\t{1}".format(case_obj.get('case_id'), case_obj.get('vcf_path')))
+        click.echo("{0}\t{1}".format(case_obj.get('case_id'), case_obj.get('vcf_path')))
 
 @base_command.command('variants', short_help="Display variants in database")
 @click.option('--variant-id', 
