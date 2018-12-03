@@ -4,6 +4,8 @@ import coloredlogs
 
 from pprint import pprint as pp
 
+import yaml
+
 from mongomock import MongoClient as MockClient
 
 from pymongo import uri_parser
@@ -43,41 +45,49 @@ LOG = logging.getLogger(__name__)
 @click.option('--uri',
                 help='Specify a mongodb uri'
 )
-# @click.option('-b', '--backend',
-#                 default='mongo',
-#                 show_default=True,
-#                 type=click.Choice(['mongo',]),
-#                 help='Specify what backend to use.'
-# )
+@click.option('-c', '--config',
+                type=click.File('r'),
+                help='Use a config with db information'
+)
 @click.option('-t', '--test',
                 is_flag=True,
-                help='Used for testing.'
+                help='Used for testing. This will use a mongomock database.'
 )
 @click.option('-v', '--verbose', is_flag=True)
 @click.version_option(__version__)
 @click.pass_context
-def cli(ctx, database, username, password, port, host, uri, verbose, test):
+def cli(ctx, database, username, password, port, host, uri, verbose, config, test):
     """loqusdb: manage a local variant count database."""
-    # configure root logger to print to STDERR
     loglevel = "INFO"
     if verbose:
         loglevel = "DEBUG"
     coloredlogs.install(level=loglevel)
 
+    configs = {}
+    if config:
+        try:
+            configs = yaml.safe_load(config)
+        except yaml.YAMLError as err:
+            LOG.warning(err)
+            ctx.abort()
+    
+    uri = configs.get('uri') or uri
     if test:
         uri = "mongomock://"
     try:
         client = get_client(
-            host=host, 
-            port=port, 
-            username=username,
-            password=password,
+            host=configs.get('host') or host,
+            port=configs.get('port') or port,
+            username=configs.get('username') or username,
+            password=configs.get('password') or password,
             uri=uri,
         )
     except DB_Error as err:
+        print('hej')
         LOG.warning(err)
         ctx.abort()
-
+    
+    database = configs.get('db_name') or database
     adapter = MongoAdapter(client, db_name=database)
 
     ctx.obj = {}
