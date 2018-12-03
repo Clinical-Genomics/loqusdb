@@ -32,7 +32,8 @@ REQUIRED = [
     'vcftoolbox==1.5',
     'cyvcf2<0.10',
     'coloredlogs',
-    'mongo_adapter>=0.2'
+    'mongo_adapter>=0.2',
+    'pyyaml',
 ]
 
 # What packages are optional?
