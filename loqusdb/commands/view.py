@@ -26,7 +26,7 @@ def cases(ctx, case_id, to_json):
         case_obj = adapter.case({'case_id':case_id})
         if not case_obj:
             LOG.info("Case {0} does not exist in database".format(case_id))
-            ctx.abort()
+            return
         case_obj['_id'] = str(case_obj['_id'])
         cases.append(case_obj)
     else:
@@ -85,7 +85,7 @@ def variants(ctx, variant_id, chromosome, end_chromosome, start, end, variant_ty
     if (start or end):
         if not (chromosome and start and end):
             LOG.warning("Regions must be specified with chromosome, start and end")
-            ctx.abort()
+            return
     
     if variant_id:
         variant = adapter.get_variant({'_id':variant_id})
