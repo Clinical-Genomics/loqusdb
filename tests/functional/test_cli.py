@@ -113,8 +113,9 @@ def test_cases_command_non_existing(vcf_path, case_id, real_mongo_adapter, real_
     command = ['--database', real_db_name, 'cases', '--case-id', 'hello']
     result = runner.invoke(base_command, command)
     
-    ## THEN assert that the exit code is non zero
-    assert result.exit_code != 0
+    ## THEN assert that the exit is zero
+    assert result.exit_code == 0
+    # Exit code should be 0 even if there is no result returned
 
 
 
