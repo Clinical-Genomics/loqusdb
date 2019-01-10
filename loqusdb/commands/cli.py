@@ -23,14 +23,17 @@ LOG = logging.getLogger(__name__)
 
 @click.group()
 @click.option('-db', '--database',
-                default='loqusdb',
-                show_default=True,
+                help="Defaults to 'loqusdb' if not specified",
 )
 @click.option('-u', '--username',
                 type=str
 )
 @click.option('-p', '--password',
                 type=str
+)
+@click.option('-a', '--authdb',
+                type=str,
+                help="If authentication should be done against another database than --database"
 )
 @click.option('-port', '--port',
                 default=27017,
@@ -56,12 +59,13 @@ LOG = logging.getLogger(__name__)
 @click.option('-v', '--verbose', is_flag=True)
 @click.version_option(__version__)
 @click.pass_context
-def cli(ctx, database, username, password, port, host, uri, verbose, config, test):
+def cli(ctx, database, username, password, authdb, port, host, uri, verbose, config, test):
     """loqusdb: manage a local variant count database."""
     loglevel = "INFO"
     if verbose:
         loglevel = "DEBUG"
     coloredlogs.install(level=loglevel)
+    LOG.info("Running loqusdb version %s", __version__)
 
     configs = {}
     if config:
@@ -80,14 +84,21 @@ def cli(ctx, database, username, password, port, host, uri, verbose, config, tes
             port=configs.get('port') or port,
             username=configs.get('username') or username,
             password=configs.get('password') or password,
+            authdb=authdb or database or 'loqusdb',
             uri=uri,
         )
     except DB_Error as err:
-        print('hej')
         LOG.warning(err)
         ctx.abort()
     
     database = configs.get('db_name') or database
+    
+    if not database:
+        database = 'loqusdb'
+        if uri:
+            uri_info = uri_parser.parse_uri(uri)
+            database = uri_info.get('database')
+
     adapter = MongoAdapter(client, db_name=database)
 
     ctx.obj = {}
