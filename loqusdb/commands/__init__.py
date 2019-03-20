@@ -13,3 +13,4 @@ from .identity import identity as identity_command
 from .annotate import annotate as annotate_command
 from .dump import dump as dump_command
 from .restore import restore as restore_command
+from .load_profile import load_profile as profile_command

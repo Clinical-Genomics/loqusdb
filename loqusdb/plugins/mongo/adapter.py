@@ -4,14 +4,14 @@ from pymongo import MongoClient
 from loqusdb.plugins import Base
 from mongo_adapter import MongoAdapter as BaseAdapter
 
-from . import VariantMixin, CaseMixin
+from . import VariantMixin, CaseMixin, ProfileVariantMixin
 
 from loqusdb import INDEXES
 
 logger = logging.getLogger(__name__)
 
 
-class MongoAdapter(BaseAdapter, VariantMixin, CaseMixin, Base):
+class MongoAdapter(BaseAdapter, VariantMixin, CaseMixin, ProfileVariantMixin, Base):
     """docstring for MongoAdapter"""
 
     def wipe_db(self):
