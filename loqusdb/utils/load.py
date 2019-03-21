@@ -16,8 +16,10 @@ from pprint import pprint as pp
 from .vcf import (get_vcf, check_vcf)
 from .case import (get_case, update_case)
 from .delete import delete
-from loqusdb.build_models import (build_case, build_variant)
+from .profiling import (get_profiles, profile_match)
+from loqusdb.build_models import (build_case, build_variant, build_profile_variant)
 from loqusdb.exceptions import (CaseError, VcfError)
+
 
 LOG = logging.getLogger(__name__)
 
@@ -44,6 +46,7 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
 
     nr_variants = None
     vcf_individuals = None
+    profiles = None
     if variant_file:
         vcf_info = check_vcf(variant_file)
         nr_variants = vcf_info['nr_variants']
@@ -51,6 +54,12 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
         vcf_files.append(variant_file)
         # Get the indivuduals that are present in vcf file
         vcf_individuals = vcf_info['individuals']
+
+        ###Get the profiles of the samples
+        profiles = get_profiles(adapter, variant_file)
+        ###Check if any profile already exists
+        profile_match(adapter, profiles, threshold=0.9)
+
 
     nr_sv_variants = None
     sv_individuals = None
@@ -94,6 +103,7 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
         vcf_sv_path=sv_file,
         sv_individuals=sv_individuals,
         nr_sv_variants=nr_sv_variants,
+        profiles=profiles
     )
     # Build and load a new case, or update an existing one
     load_case(
@@ -185,9 +195,9 @@ def load_variants(adapter, vcf_obj, case_obj, skip_case_id=False, gq_treshold=No
         case_id = None
     # Loop over the variants in the vcf
     with click.progressbar(vcf_obj, label="Inserting variants",length=nr_variants) as bar:
-        
+
         variants = (build_variant(variant,case_obj,case_id, gq_treshold) for variant in bar)
-        
+
     if variant_type == 'sv':
         for sv_variant in variants:
             if not sv_variant:
@@ -201,3 +211,18 @@ def load_variants(adapter, vcf_obj, case_obj, skip_case_id=False, gq_treshold=No
     LOG.info("Inserted %s variants of type %s", nr_inserted, variant_type)
 
     return nr_inserted
+
+def load_profile_variants(adapter, variant_file):
+
+    vcf_info = check_vcf(variant_file)
+    nr_variants = vcf_info['nr_variants']
+    variant_type = vcf_info['variant_type']
+
+    if variant_type != 'snv':
+        LOG.critical('Variants used for profiling must be SNVs only')
+        raise VcfError
+
+    vcf = get_vcf(variant_file)
+
+    profile_variants = [build_profile_variant(variant) for variant in vcf]
+    adapter.add_profile_variants(profile_variants)

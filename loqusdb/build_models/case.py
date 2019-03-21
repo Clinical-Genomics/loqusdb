@@ -21,7 +21,7 @@ def get_individual_positions(individuals):
     return ind_pos
 
 def build_case(case, vcf_individuals=None, case_id=None, vcf_path=None, sv_individuals=None,
-               vcf_sv_path=None, nr_variants=None, nr_sv_variants=None):
+               vcf_sv_path=None, nr_variants=None, nr_sv_variants=None, profiles=None):
     """Build a Case from the given information
 
     Args:
@@ -74,11 +74,14 @@ def build_case(case, vcf_individuals=None, case_id=None, vcf_path=None, sv_indiv
         for ind_id in case.individuals:
             individual = case.individuals[ind_id]
             try:
+                #If a profile dict exists, get the profile for ind_id
+                profile = profiles[ind_id] if profiles else None
                 ind_obj = Individual(
                     ind_id=ind_id,
                     case_id=case_id,
                     ind_index=_ind_pos[ind_id],
                     sex=individual.sex,
+                    profile=profile
                 )
                 ind_objs.append(dict(ind_obj))
             except KeyError:
@@ -86,10 +89,14 @@ def build_case(case, vcf_individuals=None, case_id=None, vcf_path=None, sv_indiv
     else:
         # If there where no family file we can create individuals from what we know
         for ind_id in individual_positions:
+
+            profile = profiles[ind_id] if profiles else None
+
             ind_obj = Individual(
                 ind_id = ind_id,
                 case_id = case_id,
                 ind_index=individual_positions[ind_id],
+                profile=profile,
             )
             ind_objs.append(dict(ind_obj))
 

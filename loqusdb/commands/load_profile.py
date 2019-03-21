@@ -1,8 +1,8 @@
 import click
 import logging
 
-from loqusdb.utils.vcf import get_file_handle
-from loqusdb.build_models import build_profile_variant
+from loqusdb.utils.load import load_profile_variants
+
 
 from . import base_command
 
@@ -15,10 +15,4 @@ def load_profile(ctx, vcf_file):
 
     adapter = ctx.obj['adapter']
 
-    vcf = get_file_handle(vcf_file)
-
-    profile_variants = [build_profile_variant(variant) for variant in vcf]
-
-    adapter.add_profile_variants(profile_variants)
-
-    
+    load_profile_variants(adapter, vcf_file)

@@ -19,7 +19,8 @@ class Case(dict):
 class Individual(dict):
     """Individual representation."""
     def __init__(self, ind_id, case_id=None, mother=None,
-                 father=None, sex=None, phenotype=None, ind_index=None):
+                 father=None, sex=None, phenotype=None, ind_index=None,
+                 profile=None):
         """Construct a individual object
 
             Args:
@@ -38,3 +39,5 @@ class Individual(dict):
             ind_index=ind_index,
             sex=sex,
         )
+
+        if profile: self['profile'] = profile

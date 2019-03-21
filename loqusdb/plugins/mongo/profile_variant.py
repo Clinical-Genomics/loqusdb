@@ -17,3 +17,12 @@ class ProfileVariantMixin():
         results = self.db.profile_variant.insert_many(profile_variants)
 
         return results
+
+    def profile_variants(self):
+        """Get all profile variants from the database
+
+        Returns:
+            profile_variants (Iterable(ProfileVariant))
+        """
+
+        return self.db.profile_variant.find()
