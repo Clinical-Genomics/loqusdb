@@ -103,7 +103,7 @@ def profile_match(adapter, profiles, threshold=0.9):
                     if similarity >= threshold:
 
                         msg = (
-                                f"individual {sample} has a {similarity} similarity"
+                                f"individual {sample} has a {similarity} similarity "
                                 f"with individual {individual['ind_id']} in case "
                                 f"{case['case_id']}"
                         )

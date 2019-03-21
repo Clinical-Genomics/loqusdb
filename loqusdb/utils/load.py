@@ -25,7 +25,8 @@ LOG = logging.getLogger(__name__)
 
 def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
                   family_type='ped', skip_case_id=False, gq_treshold=None,
-                  case_id=None, max_window = 3000):
+                  case_id=None, max_window = 3000, check_profile=False,
+                  profile_threshold=0.9):
     """Load the database with a case and its variants
 
     Args:
@@ -55,10 +56,11 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
         # Get the indivuduals that are present in vcf file
         vcf_individuals = vcf_info['individuals']
 
-        ###Get the profiles of the samples
-        profiles = get_profiles(adapter, variant_file)
-        ###Check if any profile already exists
-        profile_match(adapter, profiles, threshold=0.9)
+        if check_profile:
+            ###Get the profiles of the samples
+            profiles = get_profiles(adapter, variant_file)
+            ###Check if any profile already exists
+            profile_match(adapter, profiles, threshold=profile_threshold)
 
 
     nr_sv_variants = None
@@ -213,6 +215,17 @@ def load_variants(adapter, vcf_obj, case_obj, skip_case_id=False, gq_treshold=No
     return nr_inserted
 
 def load_profile_variants(adapter, variant_file):
+
+    """
+
+        Loads variants used for profiling
+
+        Args:
+            adapter (loqusdb.plugins.Adapter): initialized plugin
+            variant_file(str): Path to variant file
+
+
+    """
 
     vcf_info = check_vcf(variant_file)
     nr_variants = vcf_info['nr_variants']
