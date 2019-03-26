@@ -4,7 +4,7 @@ from pymongo import MongoClient
 from loqusdb.plugins import Base
 from mongo_adapter import MongoAdapter as BaseAdapter
 
-from . import VariantMixin, CaseMixin, ProfileVariantMixin
+from . import (VariantMixin, CaseMixin, ProfileVariantMixin)
 
 from loqusdb import INDEXES
 

@@ -17,8 +17,8 @@ LOG = logging.getLogger(__name__)
 def validate_profile_threshold(ctx, param, value):
     if not (0 <= value <= 1):
         raise ValueError('threshold must be between 0-1')
-    else:
-        return value
+
+    return value
 
 @base_command.command('load', short_help="Load the variants of a family")
 @click.option('--variant-file',

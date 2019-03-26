@@ -6,7 +6,8 @@ class ProfileVariantMixin():
 
     def add_profile_variants(self, profile_variants):
 
-        """Add several variants to database
+        """Add several variants to the profile_variant collection in the
+        database
 
         Args:
 

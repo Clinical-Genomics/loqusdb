@@ -9,14 +9,21 @@ LOG = logging.getLogger(__name__)
 def get_maf(variant):
     """
         if ID CAF exists in INFO column, return the allele frequency for
-        the alt allele
+        the alt allele. The CAF INFO tag from dbSNP is a Comma delimited list of
+        allele frequencies based on 1000Genomes.
+
+        Args:
+            variant (cyvcf2.Variant)
+
+        Returns:
+            maf (float): Minor allele frequency 
+
     """
 
-    if variant.INFO.get('CAF'):
-        maf_list = json.loads(variant.INFO.get('CAF'))
-        return maf_list[1]
-    else:
+    if  not variant.INFO.get('CAF'):
         return None
+    maf_list = json.loads(variant.INFO.get('CAF'))
+    return maf_list[1]
 
 
 def build_profile_variant(variant):

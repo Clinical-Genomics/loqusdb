@@ -1,6 +1,6 @@
 #Load a case
 
-Variants are loaded in a case context, this is so that we can trace back where we have observed a variation. 
+Variants are loaded in a case context, this is so that we can trace back where we have observed a variation.
 VCF files usually does not hold family information, this is why we use a [ped][ped] file.
 
 When loading a case for the first time one could do any of the following:
@@ -38,10 +38,14 @@ Options:
   --gq-treshold INTEGER           Treshold to consider variant  [default: 20]
   -m, --max-window INTEGER        Specify the maximum window size for svs
                                   [default: 2000]
+  --check-profile                 Apply sample profiling for the samples in
+                                  the vcf
+  --profile-threshold FLOAT       Threshold for profile check (0-1)
   --help                          Show this message and exit.
+
 ```
 
 loqusdb will check that the individuals in ped file exists in vcf file and then add all the variants to database.
 
 
-[ped]: http://zzz.bwh.harvard.edu/plink/data.shtml#ped 
+[ped]: http://zzz.bwh.harvard.edu/plink/data.shtml#ped
