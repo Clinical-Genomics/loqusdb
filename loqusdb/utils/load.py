@@ -26,7 +26,7 @@ LOG = logging.getLogger(__name__)
 def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
                   family_type='ped', skip_case_id=False, gq_treshold=None,
                   case_id=None, max_window = 3000, check_profile=False,
-                  profile_threshold=0.9):
+                  hard_threshold=0.95, soft_threshold=0.9):
     """Load the database with a case and its variants
 
     Args:
@@ -39,6 +39,9 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
           gq_treshold(int): If only quality variants should be considered
           case_id(str): If different case id than the one in family file should be used
           max_window(int): Specify the max size for sv windows
+          check_profile(bool): Does profile check if True
+          hard_threshold(float): Rejects load if hamming distance above this is found
+          soft_threshold(float): Stores similar samples if hamming distance above this is found
 
     Returns:
           nr_inserted(int)
@@ -48,6 +51,7 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
     nr_variants = None
     vcf_individuals = None
     profiles = None
+    matches = None
     if variant_file:
         vcf_info = check_vcf(variant_file)
         nr_variants = vcf_info['nr_variants']
@@ -60,7 +64,10 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
             ###Get the profiles of the samples
             profiles = get_profiles(adapter, variant_file)
             ###Check if any profile already exists
-            profile_match(adapter, profiles, threshold=profile_threshold)
+            matches = profile_match(adapter,
+                                    profiles,
+                                    hard_threshold=hard_threshold,
+                                    soft_threshold=soft_threshold)
 
 
     nr_sv_variants = None
@@ -105,7 +112,8 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
         vcf_sv_path=sv_file,
         sv_individuals=sv_individuals,
         nr_sv_variants=nr_sv_variants,
-        profiles=profiles
+        profiles=profiles,
+        matches=matches
     )
     # Build and load a new case, or update an existing one
     load_case(

@@ -40,9 +40,11 @@ Options:
                                   [default: 2000]
   --check-profile                 Apply sample profiling for the samples in
                                   the vcf
-  --profile-threshold FLOAT       Threshold for profile check (0-1)
+  --hard-threshold FLOAT          profile hamming distance to rejecting load
+                                  (0-1)
+  --soft-threshold FLOAT          profile hamming distance to store similar
+                                  individuals (0-1)
   --help                          Show this message and exit.
-
 ```
 
 loqusdb will check that the individuals in ped file exists in vcf file and then add all the variants to database.

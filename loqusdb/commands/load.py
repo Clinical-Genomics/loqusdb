@@ -68,15 +68,21 @@ def validate_profile_threshold(ctx, param, value):
                 is_flag=True,
                 help='Apply sample profiling for the samples in the vcf'
 )
-@click.option('--profile-threshold',
+@click.option('--hard-threshold',
                 type=float,
-                default=0.9,
+                default=0.95,
                 callback=validate_profile_threshold,
-                help='Threshold for profile check (0-1)'
+                help='profile hamming distance to rejecting load (0-1)'
+)
+@click.option('--soft-threshold',
+                type=float,
+                default=0.95,
+                callback=validate_profile_threshold,
+                help='profile hamming distance to store similar individuals (0-1)'
 )
 @click.pass_context
 def load(ctx, variant_file, sv_variants, family_file, family_type, skip_case_id, gq_treshold,
-         case_id, ensure_index, max_window, check_profile, profile_threshold):
+         case_id, ensure_index, max_window, check_profile, hard_threshold, soft_threshold):
     """Load the variants of a case
 
     A variant is loaded if it is observed in any individual of a case
@@ -114,7 +120,8 @@ def load(ctx, variant_file, sv_variants, family_file, family_type, skip_case_id,
             gq_treshold=gq_treshold,
             max_window=max_window,
             check_profile=check_profile,
-            profile_threshold=profile_threshold
+            hard_threshold=hard_threshold,
+            soft_threshold=soft_threshold
         )
     except (SyntaxError, CaseError, IOError) as error:
         LOG.warning(error)

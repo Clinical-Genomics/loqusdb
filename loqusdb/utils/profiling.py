@@ -8,7 +8,7 @@ from loqusdb.build_models.variant import get_variant_id
 
 from loqusdb.exceptions import ProfileError
 
-from loqusdb.constants import GENOTYPE_MAP
+from loqusdb.constants import (GENOTYPE_MAP, HAMMING_RANGES)
 
 LOG = logging.getLogger(__name__)
 
@@ -75,7 +75,7 @@ def get_profiles(adapter, vcf_file):
 
     return profiles
 
-def profile_match(adapter, profiles, threshold=0.9):
+def profile_match(adapter, profiles, hard_threshold=0.95, soft_threshold=0.9):
 
     """
         given a dict of profiles, searches through all the samples in the DB
@@ -84,12 +84,14 @@ def profile_match(adapter, profiles, threshold=0.9):
 
         Args:
             adapter (MongoAdapter): Adapter to mongodb
-            profiles (dict(str)): The profiles (given as strings) for each sample
-                                  in vcf.
-            threshold (float): threshold for ratio of similarity that is needed
-                               to assume that the samples are the same.
-    """
+            profiles (dict(str)): The profiles (given as strings) for each sample in vcf.
+            hard_threshold(float): Rejects load if hamming distance above this is found
+            soft_threshold(float): Stores similar samples if hamming distance above this is found
 
+        Returns:
+            matches(dict(list)): list of similar samples for each sample in vcf.
+    """
+    matches = {sample: [] for sample in profiles.keys()}
     for case in adapter.cases():
 
         for individual in case['individuals']:
@@ -102,7 +104,7 @@ def profile_match(adapter, profiles, threshold=0.9):
                         profiles[sample], individual['profile']
                     )
 
-                    if similarity >= threshold:
+                    if similarity >= hard_threshold:
 
                         msg = (
                                 f"individual {sample} has a {similarity} similarity "
@@ -113,6 +115,15 @@ def profile_match(adapter, profiles, threshold=0.9):
 
                         #Raise some exception
                         raise ProfileError
+
+                    if similarity >= soft_threshold:
+
+                        match = f"{case['case_id']}.{individual['ind_id']}"
+                        matches[sample].append(match)
+
+    return matches
+
+
 
 def compare_profiles(profile1, profile2):
 
@@ -195,24 +206,8 @@ def profile_stats(adapter, threshold = 0.9):
     profiles = []
     samples = []
 
-    #Ranges to be checked
-    ranges = {
-
-        '1': (1,1.1),
-        '[0.95, 1)': (0.95,1),
-        '[0.90, 0.95)': (0.90,0.95),
-        '[0.85, 0.90)': (0.85,0.90),
-        '[0.80, 0.85)': (0.80,0.85),
-        '[0.75, 0.80)': (0.75,0.80),
-        '[0.70, 0.75)': (0.70,0.75),
-        '[0.65, 0.70)': (0.65,0.70),
-        '[0.60, 0.65)': (0.60,0.65),
-        '[0.55, 0.60)': (0.55,0.60),
-        '[0.50, 0.55)': (0.50,0.55)
-    }
-
     #Instatiate the distance dictionary with a count 0 for all the ranges
-    distance_dict = {key: 0 for key in ranges.keys()}
+    distance_dict = {key: 0 for key in HAMMING_RANGES.keys()}
 
     for case in adapter.cases():
 
@@ -237,9 +232,13 @@ def profile_stats(adapter, threshold = 0.9):
                         LOG.warning(f"{sample_id} is {distance} similar to {sample}")
 
                 #Check number of distances in each range and add to distance_dict
-                for key,range in ranges.items():
+                for key,range in HAMMING_RANGES.items():
 
-                    distance_dict[key] += np.sum((distance_array >= range[0]) & (distance_array < range[1]))
+                    #Calculate the number of hamming distances found within the
+                    #range for current individual
+                    distance_dict[key] += np.sum(
+                        (distance_array >= range[0]) & (distance_array < range[1])
+                    )
 
                 #Append profile and sample_id for this sample for the next
                 #iteration
