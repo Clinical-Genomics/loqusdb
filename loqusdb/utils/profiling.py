@@ -174,61 +174,76 @@ def update_profiles(adapter):
 
             adapter.add_case(updated_case, update=True)
 
+
 def profile_stats(adapter, threshold = 0.9):
 
     """
-    Check for sample duplicates in the database, based on the sample profiles.
-    calculates average distances between samples, and std.
+        Compares the pairwise hamming distances for all the sample profiles in
+        the database. Returns a table of the number of distances within given
+        ranges.
 
-    Args:
-        adapter (MongoAdapter): Adapter to mongodb
-        threshold (float): threshold for ratio of similarity that is needed
-                           to assume that the samples are the same.
+        Args:
+            adapter (MongoAdapter): Adapter to mongodb
+            threshold (float): If any distance is found above this threshold
+                a warning will be given, stating the two matching samples.
+
+        Returns:
+            distance_dict (dict): dictionary with ranges as keys, and the number
+                of distances that are within these ranges as values.
 
     """
-
     profiles = []
     samples = []
-    distance_dict = {}
+
+    #Ranges to be checked
+    ranges = {
+
+        '1': (1,1.1),
+        '[0.95, 1)': (0.95,1),
+        '[0.90, 0.95)': (0.90,0.95),
+        '[0.85, 0.90)': (0.85,0.90),
+        '[0.80, 0.85)': (0.80,0.85),
+        '[0.75, 0.80)': (0.75,0.80),
+        '[0.70, 0.75)': (0.70,0.75),
+        '[0.65, 0.70)': (0.65,0.70),
+        '[0.60, 0.65)': (0.60,0.65),
+        '[0.55, 0.60)': (0.55,0.60),
+        '[0.50, 0.55)': (0.50,0.55)
+    }
+
+    #Instatiate the distance dictionary with a count 0 for all the ranges
+    distance_dict = {key: 0 for key in ranges.keys()}
 
     for case in adapter.cases():
 
         for individual in case['individuals']:
 
-            #Make sample name <case_id>.<sample_id>
-            sample = f"{case['case_id']}.{individual['ind_id']}"
-
-            #Check if sample has a profile
             if individual.get('profile'):
+                #Make sample name <case_id>.<sample_id>
+                sample_id = f"{case['case_id']}.{individual['ind_id']}"
                 ind_profile = individual['profile']
 
-                #Store sample profile and sample name in profiles resp. samples
-                profiles.append(ind_profile)
-                samples.append(sample)
+                #Numpy array to hold all the distances for this samples profile
+                distance_array = np.array([], dtype=np.float)
 
-                #The similarities for current samples agains all others
-                distance_array = []
-                for i in range(len(profiles)):
-                    distance = compare_profiles(ind_profile, profiles[i])
-                    distance_array.append(distance)
+                for sample, profile in zip(samples, profiles):
 
-                    #If the similarity is above given threshold, issue warning
+                    #Get distance and append to distance array
+                    distance = compare_profiles(ind_profile, profile)
+                    distance_array = np.append(distance_array, distance)
+
+                    #Issue warning if above threshold
                     if distance >= threshold:
-                        LOG.warning(f"{sample} is {distance} similar to {samples[i]}")
+                        LOG.warning(f"{sample_id} is {distance} similar to {sample}")
 
-                distance_dict[sample] = distance_array
+                #Check number of distances in each range and add to distance_dict
+                for key,range in ranges.items():
 
-    #Make numpy array of all similarities
-    distances = []
-    for key, value in distance_dict.items():
-        #Avoid getting last element in similarities, which is the sample
-        #matching to itseld, i.e. 1.
-        distances.extend(value[0:-1])
+                    distance_dict[key] += np.sum((distance_array >= range[0]) & (distance_array < range[1]))
 
-    distances = np.array(distances, dtype=np.float16)
+                #Append profile and sample_id for this sample for the next
+                #iteration
+                profiles.append(ind_profile)
+                samples.append(sample_id)
 
-    #Print some stats
-    LOG.info(f"Number of duplicates: {np.sum(distances >= threshold)}")
-    LOG.info(f"Average similarity between samples: {distances.mean()}")
-    LOG.info(f"Standard deviation: {distances.std()}")
-    LOG.info(f"Max similarity: {distances.max()}")
+    return distance_dict

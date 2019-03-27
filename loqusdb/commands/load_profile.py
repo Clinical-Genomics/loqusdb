@@ -55,4 +55,16 @@ def load_profile(ctx, variant_file, update, stats, profile_threshold):
 
     if stats:
 
-        similarity_matrix = profile_stats(adapter, threshold=profile_threshold)
+        distance_dict = profile_stats(adapter, threshold=profile_threshold)
+        click.echo(table_from_dict(distance_dict))
+
+def table_from_dict(dictionary):
+
+
+    table_str = "Distances within ranges:\n"
+
+    for key, value in dictionary.items():
+
+        table_str += f"{key:15} | {value}\n"
+
+    return table_str
