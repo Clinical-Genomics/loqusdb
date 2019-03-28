@@ -1,5 +1,4 @@
 import logging
-import json
 
 from loqusdb.models import ProfileVariant
 from .variant import get_variant_id
@@ -8,22 +7,18 @@ LOG = logging.getLogger(__name__)
 
 def get_maf(variant):
     """
-        if ID CAF exists in INFO column, return the allele frequency for
-        the alt allele. The CAF INFO tag from dbSNP is a Comma delimited list of
-        allele frequencies based on 1000Genomes.
+        Gets the MAF (minor allele frequency) tag from the info field for the
+        variant.
 
         Args:
             variant (cyvcf2.Variant)
 
         Returns:
-            maf (float): Minor allele frequency 
+            maf (float): Minor allele frequency
 
     """
 
-    if  not variant.INFO.get('CAF'):
-        return None
-    maf_list = json.loads(variant.INFO.get('CAF'))
-    return maf_list[1]
+    return variant.INFO.get('MAF')
 
 
 def build_profile_variant(variant):
