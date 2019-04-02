@@ -28,7 +28,7 @@ def get_profiles(adapter, vcf_file):
     """
     vcf = get_file_handle(vcf_file)
     individuals = vcf.samples
-    profiles = {individual: '' for individual in individuals}
+    profiles = {individual: [] for individual in individuals}
 
     for profile_variant in adapter.profile_variants():
 
@@ -63,14 +63,14 @@ def get_profiles(adapter, vcf_file):
                         gt_str = f"{ref}{ref}"
 
                     #Append genotype to profile string of individual
-                    profiles[individual] += gt_str
+                    profiles[individual].append(gt_str)
 
                 #Break loop if variant is found in region
                 break
 
         #If no call was found for variant, give all samples a hom ref genotype
         if not found_variant:
-            for individual in individuals: profiles[individual] += f"{ref}{ref}"
+            for individual in individuals: profiles[individual].append(f"{ref}{ref}")
 
 
     return profiles
