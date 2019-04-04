@@ -65,8 +65,8 @@ def validate_profile_threshold(ctx, param, value):
                 help='Specify the maximum window size for svs'
 )
 @click.option('--check-profile',
-                is_flag=True,
-                help='Apply sample profiling for the samples in the vcf'
+                type=click.Path(exists=True),
+                help='Apply sample profiling for the samples, using the variants in this vcf'
 )
 @click.option('--hard-threshold',
                 type=float,
@@ -104,6 +104,10 @@ def load(ctx, variant_file, sv_variants, family_file, family_type, skip_case_id,
     if sv_variants:
         variant_sv_path = os.path.abspath(sv_variants)
 
+    variant_profile_path = None
+    if check_profile:
+        variant_profile_path = os.path.abspath(check_profile)
+
     adapter = ctx.obj['adapter']
 
     start_inserting = datetime.now()
@@ -119,7 +123,7 @@ def load(ctx, variant_file, sv_variants, family_file, family_type, skip_case_id,
             case_id=case_id,
             gq_treshold=gq_treshold,
             max_window=max_window,
-            check_profile=check_profile,
+            profile_file=variant_profile_path,
             hard_threshold=hard_threshold,
             soft_threshold=soft_threshold
         )

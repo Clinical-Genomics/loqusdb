@@ -60,7 +60,7 @@ def test_load_command_check_profile(zipped_vcf_path, ped_path, real_mongo_adapte
 
     #WHEN load command with --check-profile flag
     command = ['--database', real_db_name, 'load', '--variant-file', zipped_vcf_path, '-f',
-                ped_path, '--check-profile']
+                ped_path, '--check-profile', zipped_vcf_path]
     result = runner.invoke(base_command, command)
     ## THEN assert that the cli exits without problems
     assert result.exit_code == 0
@@ -71,7 +71,7 @@ def test_load_command_check_profile(zipped_vcf_path, ped_path, real_mongo_adapte
 
     ##WHEN load the same case (change case-id with -c option)
     command = ['--database', real_db_name, 'load', '--variant-file', zipped_vcf_path, '-f',
-                ped_path, '--check-profile', '-c', 'other_case']
+                ped_path, '--check-profile', zipped_vcf_path, '-c', 'other_case']
     result = runner.invoke(base_command, command)
     ## THEN assert that exit_code is not 0 and error is raised
     assert result.exit_code != 0

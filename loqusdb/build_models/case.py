@@ -22,7 +22,7 @@ def get_individual_positions(individuals):
 
 def build_case(case, vcf_individuals=None, case_id=None, vcf_path=None, sv_individuals=None,
                vcf_sv_path=None, nr_variants=None, nr_sv_variants=None, profiles=None,
-               matches=None):
+               matches=None, profile_path=None):
     """Build a Case from the given information
 
     Args:
@@ -66,6 +66,9 @@ def build_case(case, vcf_individuals=None, case_id=None, vcf_path=None, sv_indiv
     if vcf_sv_path:
         case_obj['vcf_sv_path'] = vcf_sv_path
         case_obj['nr_sv_variants'] = nr_sv_variants
+
+    if profile_path:
+        case_obj['profile_path'] = profile_path
 
     ind_objs = []
     if case:

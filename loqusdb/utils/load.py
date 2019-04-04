@@ -25,7 +25,7 @@ LOG = logging.getLogger(__name__)
 
 def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
                   family_type='ped', skip_case_id=False, gq_treshold=None,
-                  case_id=None, max_window = 3000, check_profile=False,
+                  case_id=None, max_window = 3000, profile_file=None,
                   hard_threshold=0.95, soft_threshold=0.9):
     """Load the database with a case and its variants
 
@@ -50,8 +50,6 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
 
     nr_variants = None
     vcf_individuals = None
-    profiles = None
-    matches = None
     if variant_file:
         vcf_info = check_vcf(variant_file)
         nr_variants = vcf_info['nr_variants']
@@ -60,16 +58,6 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
         # Get the indivuduals that are present in vcf file
         vcf_individuals = vcf_info['individuals']
 
-        if check_profile:
-            ###Get the profiles of the samples
-            profiles = get_profiles(adapter, variant_file)
-            ###Check if any profile already exists
-            matches = profile_match(adapter,
-                                    profiles,
-                                    hard_threshold=hard_threshold,
-                                    soft_threshold=soft_threshold)
-
-
     nr_sv_variants = None
     sv_individuals = None
     if sv_file:
@@ -77,6 +65,16 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
         nr_sv_variants = vcf_info['nr_variants']
         vcf_files.append(sv_file)
         sv_individuals = vcf_info['individuals']
+
+    profiles = None
+    matches = None
+    if profile_file:
+        profiles = get_profiles(adapter, profile_file)
+        ###Check if any profile already exists
+        matches = profile_match(adapter,
+                                profiles,
+                                hard_threshold=hard_threshold,
+                                soft_threshold=soft_threshold)
 
     # If a gq treshold is used the variants needs to have GQ
     for _vcf_file in vcf_files:
@@ -113,7 +111,8 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
         sv_individuals=sv_individuals,
         nr_sv_variants=nr_sv_variants,
         profiles=profiles,
-        matches=matches
+        matches=matches,
+        profile_path=profile_file
     )
     # Build and load a new case, or update an existing one
     load_case(

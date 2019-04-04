@@ -38,8 +38,8 @@ Options:
   --gq-treshold INTEGER           Treshold to consider variant  [default: 20]
   -m, --max-window INTEGER        Specify the maximum window size for svs
                                   [default: 2000]
-  --check-profile                 Apply sample profiling for the samples in
-                                  the vcf
+  --check-profile PATH            Apply sample profiling for the samples,
+                                  using the variants in this vcf
   --hard-threshold FLOAT          profile hamming distance to rejecting load
                                   (0-1)
   --soft-threshold FLOAT          profile hamming distance to store similar

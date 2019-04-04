@@ -2,13 +2,16 @@
 
 class Case(dict):
     """Represent a Case."""
-    def __init__(self, case_id, vcf_path=None, vcfsv_path=None, nr_variants=None, nr_sv_variants=None):
+    def __init__(self, case_id, vcf_path=None, vcfsv_path=None, nr_variants=None,
+        nr_sv_variants=None, profile_path=None):
+
         super(Case, self).__init__(
             case_id=case_id,
             vcf_path=vcf_path,
             vcf_sv_path=vcfsv_path,
             nr_variants=nr_variants,
             nr_sv_variants=nr_sv_variants,
+            profile_path=profile_path,
         )
         self['individuals'] = []
         self['sv_individuals'] = []

@@ -165,9 +165,9 @@ def update_profiles(adapter):
 
         #If the case has a vcf_path, get the profiles and update the
         #case with new profiled individuals.
-        if case.get('vcf_path'):
+        if case.get('profile_path'):
 
-            profiles = get_profiles(adapter, case['vcf_path'])
+            profiles = get_profiles(adapter, case['profile_path'])
             profiled_individuals = deepcopy(case['individuals'])
 
             for individual in profiled_individuals:
