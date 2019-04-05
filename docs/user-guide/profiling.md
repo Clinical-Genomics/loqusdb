@@ -2,12 +2,25 @@
 
 To ensure that there are no sample duplicates in the database, the profiling
 feature can be used. Profiling of samples is based on a list of SNPs,
-having a high minor allele frequency. Each sample loaded into the database will
+having a high minor allele frequency (MAF). Each sample loaded into the database will
 assessed for its genotype on these variant positions. This list of SNPs are chosen
 and loaded to the database by the user.
 
+The user can load a custom set of high MAF SNPs that will be used in
+profiling.
+
 Upon loading a new case, the user choses to activate the profiling feature
-with the --check-profile flag when [loading](./loading.md).
+with the --check-profile option when [loading](./loading.md). Here the user
+provides a VCF file that contains variant calls for each of the predefined
+high-MAF SNPs. If no call is found for a SNP, the sample will be assumed to
+be homozygous for the reference allele at this position. The user may define
+a --hard-threshold, meaning if any existing profile has a similarity greater
+than this (based on the hamming distance between compared profiles) to any of
+the loaded samples, the case will not be loaded. Similarly a --soft-threshold
+can be set, meaning if any similarity greater than this is found, the case may
+still be loaded, but the similar samples in the database will be stated for the
+loaded samples. 
+
 
 ```
 $loqusdb profile --help
