@@ -136,6 +136,12 @@ def zipped_vcf_path(request):
     return file_path
 
 @pytest.fixture(scope='function')
+def profile_vcf_path(request):
+    "Returns a VCF containing profile variants"
+    file_path = 'tests/fixtures/profile_snv.vcf'
+    return file_path
+
+@pytest.fixture(scope='function')
 def ped_path(request):
     file_path = 'tests/fixtures/recessive_trio.ped'
     return file_path
@@ -181,7 +187,11 @@ def sv_vcf_obj(request, sv_vcf_path):
     return cyvcf2.VCF(sv_vcf_path)
 
 @pytest.fixture(scope='function')
-def case_obj(request, case_lines, vcf_obj, vcf_path):
+def profile_str(request):
+    return 'AACCGGTT'
+
+@pytest.fixture(scope='function')
+def case_obj(request, case_lines, vcf_obj, vcf_path, profile_str):
     """Return a case obj"""
     family_parser = FamilyParser(case_lines, family_type='ped')
     families = list(family_parser.families.keys())
@@ -195,6 +205,7 @@ def case_obj(request, case_lines, vcf_obj, vcf_path):
         vcf_individuals=vcf_individuals,
         vcf_path=vcf_path,
         nr_variants=nr_variants,
+        profiles={individual: profile_str for individual in vcf_individuals}
         )
     return _case_obj
 

@@ -21,7 +21,8 @@ def get_individual_positions(individuals):
     return ind_pos
 
 def build_case(case, vcf_individuals=None, case_id=None, vcf_path=None, sv_individuals=None,
-               vcf_sv_path=None, nr_variants=None, nr_sv_variants=None):
+               vcf_sv_path=None, nr_variants=None, nr_sv_variants=None, profiles=None,
+               matches=None, profile_path=None):
     """Build a Case from the given information
 
     Args:
@@ -33,6 +34,8 @@ def build_case(case, vcf_individuals=None, case_id=None, vcf_path=None, sv_indiv
         vcf_sv_path(str)
         nr_variants(int)
         nr_sv_variants(int)
+        profiles(dict): The profiles for each sample in vcf
+        matches(dict(list)): list of similar samples for each sample in vcf.
 
     Returns:
         case_obj(models.Case)
@@ -64,6 +67,9 @@ def build_case(case, vcf_individuals=None, case_id=None, vcf_path=None, sv_indiv
         case_obj['vcf_sv_path'] = vcf_sv_path
         case_obj['nr_sv_variants'] = nr_sv_variants
 
+    if profile_path:
+        case_obj['profile_path'] = profile_path
+
     ind_objs = []
     if case:
         if individual_positions:
@@ -74,11 +80,17 @@ def build_case(case, vcf_individuals=None, case_id=None, vcf_path=None, sv_indiv
         for ind_id in case.individuals:
             individual = case.individuals[ind_id]
             try:
+                #If a profile dict exists, get the profile for ind_id
+                profile = profiles[ind_id] if profiles else None
+                #If matching samples are found, get these samples for ind_id
+                similar_samples = matches[ind_id] if matches else None
                 ind_obj = Individual(
                     ind_id=ind_id,
                     case_id=case_id,
                     ind_index=_ind_pos[ind_id],
                     sex=individual.sex,
+                    profile=profile,
+                    similar_samples=similar_samples
                 )
                 ind_objs.append(dict(ind_obj))
             except KeyError:
@@ -86,10 +98,15 @@ def build_case(case, vcf_individuals=None, case_id=None, vcf_path=None, sv_indiv
     else:
         # If there where no family file we can create individuals from what we know
         for ind_id in individual_positions:
+
+            profile = profiles[ind_id] if profiles else None
+            similar_samples = matches[ind_id] if matches else None
             ind_obj = Individual(
                 ind_id = ind_id,
                 case_id = case_id,
                 ind_index=individual_positions[ind_id],
+                profile=profile,
+                similar_samples=similar_samples
             )
             ind_objs.append(dict(ind_obj))
 
