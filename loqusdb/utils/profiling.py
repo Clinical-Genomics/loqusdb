@@ -94,6 +94,9 @@ def profile_match(adapter, profiles, hard_threshold=0.95, soft_threshold=0.9):
     matches = {sample: [] for sample in profiles.keys()}
     for case in adapter.cases():
 
+        if case.get('individuals') is None:
+            continue
+
         for individual in case['individuals']:
 
             for sample in profiles.keys():
