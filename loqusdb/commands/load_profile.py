@@ -1,9 +1,13 @@
 import click
 import logging
+import json
 
 from loqusdb.utils.load import load_profile_variants
 
-from loqusdb.utils.profiling import (update_profiles, profile_stats)
+from loqusdb.utils.profiling import (update_profiles,
+                                     profile_stats,
+                                     check_duplicates,
+                                     get_profiles)
 
 
 from . import base_command
@@ -32,8 +36,11 @@ def validate_profile_threshold(ctx, param, value):
     default=0.9,
     callback=validate_profile_threshold,
     help="Used with --stats option to determine the number of matching profiles with a similarity greater than given threshold")
+@click.option('--check-vcf',
+    type=click.Path(exists=True),
+    help="A vcf for a case. The profile from this vcf will be checked against the profiles in the database")
 @click.pass_context
-def load_profile(ctx, variant_file, update, stats, profile_threshold):
+def load_profile(ctx, variant_file, update, stats, profile_threshold, check_vcf):
 
     """
         Command for profiling of samples. User may upload variants used in profiling
@@ -46,6 +53,15 @@ def load_profile(ctx, variant_file, update, stats, profile_threshold):
     """
 
     adapter = ctx.obj['adapter']
+
+    if check_vcf:
+        vcf_file = check_vcf
+        profiles = get_profiles(adapter, vcf_file)
+        duplicate = check_duplicates(adapter, profiles, profile_threshold)
+
+        if duplicate is not None:
+            duplicate = json.dumps(duplicate)
+            click.echo(duplicate)
 
     if variant_file:
         load_profile_variants(adapter, variant_file)

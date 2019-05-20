@@ -126,6 +126,45 @@ def profile_match(adapter, profiles, hard_threshold=0.95, soft_threshold=0.9):
 
     return matches
 
+def check_duplicates(adapter, profiles, hard_threshold):
+
+    """
+        Searches database for duplicates. If duplicate is found, the individual
+        is returned.
+
+        Args:
+            adapter (MongoAdapter): Adapter to mongodb
+            profiles (dict(str)): The profiles (given as strings) for each sample in vcf.
+            hard_threshold(float): Rejects load if hamming distance above this is found
+        Returns:
+            individual (dict): dictionary representation of duplicated individual
+
+    """
+
+    for case in adapter.cases():
+
+        if case.get('individuals') is None:
+            continue
+
+        for individual in case['individuals']:
+
+            for sample in profiles.keys():
+
+                if individual.get('profile'):
+
+                    similarity = compare_profiles(
+                        profiles[sample], individual['profile']
+                    )
+
+                    if similarity >= hard_threshold:
+
+                        msg = (
+                                f"individual {sample} has a {similarity} similarity "
+                                f"with individual {individual['ind_id']} in case "
+                                f"{case['case_id']}"
+                        )
+                        LOG.info(msg)
+                        return individual
 
 
 def compare_profiles(profile1, profile2):
