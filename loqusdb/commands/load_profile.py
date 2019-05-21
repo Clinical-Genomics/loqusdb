@@ -54,7 +54,10 @@ def load_profile(ctx, variant_file, update, stats, profile_threshold, check_vcf)
 
     adapter = ctx.obj['adapter']
 
+    LOG.info("Running loqusdb profile")
+
     if check_vcf:
+        LOG.info(f"Check if profile in {check_vcf} has match in database")
         vcf_file = check_vcf
         profiles = get_profiles(adapter, vcf_file)
         duplicate = check_duplicates(adapter, profiles, profile_threshold)
@@ -62,15 +65,19 @@ def load_profile(ctx, variant_file, update, stats, profile_threshold, check_vcf)
         if duplicate is not None:
             duplicate = json.dumps(duplicate)
             click.echo(duplicate)
+        else:
+            LOG.info("No duplicates found in the database")
 
     if variant_file:
+        LOG.info(f"Loads variants in {variant_file} to be used in profiling")
         load_profile_variants(adapter, variant_file)
 
     if update:
+        LOG.info("Updates profiles in database")
         update_profiles(adapter)
 
     if stats:
-
+        LOG.info("Prints profile stats")
         distance_dict = profile_stats(adapter, threshold=profile_threshold)
         click.echo(table_from_dict(distance_dict))
 
