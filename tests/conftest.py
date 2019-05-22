@@ -43,6 +43,7 @@ class CyvcfVariant(object):
             var_id = '.'
         self.ID = var_id
 
+
 @pytest.fixture(scope='function')
 def real_db_name(request):
     """Return the name of the real mongo test db"""
@@ -314,6 +315,17 @@ def par_variant(request):
 @pytest.fixture(scope='function')
 def het_variant(request):
     variant_object = CyvcfVariant()
+    return variant_object
+
+@pytest.fixture(scope='function')
+def bnd_variant(request):
+    variant_object = CyvcfVariant(chrom='1',
+                                  pos=80000,
+                                  alt='N[1:80000[',
+                                  ref='N',
+                                  end=80000,
+                                  info_dict={'SVTYPE': 'BND'})
+
     return variant_object
 
 @pytest.fixture(scope='function')
