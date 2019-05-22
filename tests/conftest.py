@@ -187,11 +187,11 @@ def sv_vcf_obj(request, sv_vcf_path):
     return cyvcf2.VCF(sv_vcf_path)
 
 @pytest.fixture(scope='function')
-def profile_str(request):
-    return 'AACCGGTT'
+def profile_list(request):
+    return ['AA', 'CC', 'GG', 'TT']
 
 @pytest.fixture(scope='function')
-def case_obj(request, case_lines, vcf_obj, vcf_path, profile_str):
+def case_obj(request, case_lines, vcf_obj, vcf_path, profile_list):
     """Return a case obj"""
     family_parser = FamilyParser(case_lines, family_type='ped')
     families = list(family_parser.families.keys())
@@ -205,7 +205,7 @@ def case_obj(request, case_lines, vcf_obj, vcf_path, profile_str):
         vcf_individuals=vcf_individuals,
         vcf_path=vcf_path,
         nr_variants=nr_variants,
-        profiles={individual: profile_str for individual in vcf_individuals}
+        profiles={individual: profile_list for individual in vcf_individuals}
         )
     return _case_obj
 
