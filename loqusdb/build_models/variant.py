@@ -3,7 +3,7 @@ import logging
 from pprint import pprint as pp
 from collections import namedtuple
 
-from loqusdb.models import Variant 
+from loqusdb.models import Variant
 from loqusdb.exceptions import CaseError
 from loqusdb.constants import (PAR,GENOTYPE_MAP,CHROM_TO_INT)
 
@@ -15,22 +15,22 @@ Position = namedtuple('Position', 'chrom pos')
 
 def check_par(chrom, pos):
     """Check if a coordinate is in the PAR region
-    
+
         Args:
             chrom(str)
             pos(int)
-    
+
         Returns:
             par(bool)
     """
     par = False
-    
+
     for interval in PAR.get(chrom,[]):
         if (pos >= interval[0] and pos <= interval[1]):
             par = True
-    
+
     return par
-    
+
 
 def get_variant_id(variant):
     """Get a variant id on the format chrom_pos_ref_alt"""
@@ -46,41 +46,41 @@ def get_variant_id(variant):
 def is_greater(a,b):
     """Check if position a is greater than position b
     This will look at chromosome and position.
-    
+
     For example a position where chrom = 2 and pos = 300 is greater than a position where
     chrom = 1 and pos = 1000
-    
+
     If any of the chromosomes is outside [1-22,X,Y,MT] we can not say which is biggest.
-    
+
     Args:
         a,b(Position)
-    
+
     Returns:
         bool: True if a is greater than b
     """
-    
+
     a_chrom = CHROM_TO_INT.get(a.chrom,0)
     b_chrom = CHROM_TO_INT.get(b.chrom,0)
-    
+
     if (a_chrom == 0 or b_chrom == 0):
         return False
-    
+
     if a_chrom > b_chrom:
         return True
-    
+
     if a_chrom == b_chrom:
         if a.pos > b.pos:
             return True
-    
+
     return False
 
 
 def get_coords(variant):
     """Returns a dictionary with position information
-    
+
     Args:
         variant(cyvcf2.Variant)
-    
+
     Returns:
         coordinates(dict)
     """
@@ -97,7 +97,7 @@ def get_coords(variant):
         chrom = chrom[3:]
     coordinates['chrom'] = chrom
     end_chrom = chrom
-    
+
     pos = int(variant.POS)
     alt = variant.ALT[0]
 
@@ -109,7 +109,7 @@ def get_coords(variant):
     else:
         end = int(variant.end)
     coordinates['end'] = end
-    
+
     sv_type = variant.INFO.get('SVTYPE')
     length = variant.INFO.get('SVLEN')
     if length:
@@ -133,26 +133,26 @@ def get_coords(variant):
     if (sv_len == 0 and alt != '<INS>'):
         sv_len = len(alt)
 
-    if (pos == end) and (sv_len > 0):
+    if (pos == end) and (sv_len > 0) and sv_len != float('inf'):
         end = pos + sv_len
 
     position = Position(chrom, pos)
     end_position = Position(end_chrom, end)
-    
+
     # If 'start' is greater than 'end', switch positions
     if is_greater(position, end_position):
         end_chrom = position.chrom
         end = position.pos
-        
+
         chrom = end_position.chrom
         pos = end_position.pos
-    
+
     coordinates['end_chrom'] = end_chrom
     coordinates['pos'] = pos
     coordinates['end'] = end
     coordinates['sv_length'] = sv_len
     coordinates['sv_type'] = sv_type
-    
+
     return coordinates
 
 def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
@@ -168,7 +168,7 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
         case_obj(Case): We need the case object to check individuals sex
         case_id(str): The case id
         gq_treshold(int): Genotype Quality treshold
-    
+
     Return:
         formated_variant(models.Variant): A variant dictionary
     """
@@ -226,7 +226,7 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
                     found_homozygote = 1
 
     if found_variant:
-        
+
         variant_obj = Variant(
             variant_id=variant_id,
             chrom=chrom,
