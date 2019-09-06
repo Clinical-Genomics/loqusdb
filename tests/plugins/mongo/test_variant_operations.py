@@ -1,4 +1,8 @@
+import copy
+
 from loqusdb.plugins import MongoAdapter
+from loqusdb.build_models import build_variant
+
 
 class TestInsertVariant:
 
@@ -186,3 +190,60 @@ class TestRemoveVariant:
         mongo_adapter.delete_variant(simplest_variant)
 
         assert db.variant.find_one() == None
+
+class TestRemoveSV:
+
+    def test_remove_one_SV(self, mongo_adapter, del_variant, case_obj):
+
+        # GIVEN a database poulated with one SV
+        db = mongo_adapter.db
+        formated_variant = build_variant(del_variant, case_obj=case_obj, case_id=case_obj['case_id'])
+        mongo_adapter.add_structural_variant(formated_variant)
+        mongo_SV = db.structural_variant.find_one()
+        mongo_identity = db.identity.find_one()
+        assert mongo_SV is not None
+        assert mongo_identity is not None
+        # WHEN deleting SV
+        mongo_adapter.delete_structural_variant(formated_variant)
+
+        # THEN there should be no remaining SVs in the database
+        mongo_SV = db.structural_variant.find_one()
+        mongo_identity = db.indentity.find_one()
+        assert mongo_SV is None
+        assert mongo_identity is None
+
+    def test_remove_one_of_two_SV(self, mongo_adapter, duptandem_variant, case_obj):
+
+        # GIVEN a database poulated with one SV
+        db = mongo_adapter.db
+        formated_variant = build_variant(duptandem_variant, case_obj=case_obj, case_id=case_obj['case_id'])
+        mongo_adapter.add_structural_variant(formated_variant)
+
+        # Add second of same variant, changing the start and end position slightly
+        formated_variant_ = copy.deepcopy(formated_variant)
+        formated_variant_['pos'] = formated_variant_['pos']+2
+        formated_variant_['end'] = formated_variant_['end']-1
+        formated_variant_['case_id'] = 'case_2'
+        mongo_adapter.add_structural_variant(formated_variant_)
+
+        # This should correspond to one structural variant document
+        mongo_svs = list(db.structural_variant.find())
+        assert len(mongo_svs) == 1
+        mongo_sv = mongo_svs[0]
+        assert mongo_sv['pos_sum'] == formated_variant['pos'] + formated_variant_['pos']
+        # And two identity documents
+        mongo_identities = list(db.identity.find())
+        assert len(mongo_identities) == 2
+
+        # WHEN deleting the variant from the first case
+        mongo_adapter.delete_structural_variant(formated_variant)
+
+        # THEN the SV document should have the pos_sum equal to the pos of the
+        # SV from the second case
+        mongo_svs = list(db.structural_variant.find())
+        assert len(mongo_svs) == 1
+        mongo_sv = mongo_svs[0]
+        assert mongo_sv['pos_sum'] == formated_variant_['pos']
+        # And one identity documents
+        mongo_identities = list(db.identity.find())
+        assert len(mongo_identities) == 1
