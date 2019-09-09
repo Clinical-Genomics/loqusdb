@@ -197,7 +197,7 @@ class SVMixin():
             if cluster_len < 1000:
                 # We allow intervals for smaller variants to be relatively larger
                 divider = 2
-            elif cluster_len < 1000:
+            elif cluster_len < 10000:
                 # We allow intervals for smaller variants to be relatively larger
                 divider = 5
             interval_size = int(min(round(cluster_len/divider, -2), max_window))
