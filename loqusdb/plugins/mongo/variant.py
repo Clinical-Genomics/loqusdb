@@ -248,7 +248,7 @@ class VariantMixin(BaseVariantMixin, SVMixin):
             )
         # Make the accumulated write operations
         if len(operations) > 0:
-            self.db.variant.bulk_write(operations)
+            self.db.variant.bulk_write(operations, ordered=False)
 
     def get_chromosomes(self, sv=False):
         """Return a list of all chromosomes found in database
