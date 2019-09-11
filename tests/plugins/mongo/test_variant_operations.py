@@ -247,3 +247,55 @@ class TestRemoveSV:
         # And one identity documents
         mongo_identities = list(db.identity.find())
         assert len(mongo_identities) == 1
+
+class TestHelperMethods:
+
+    def test_update_sv_metrics(self, mongo_adapter):
+        # GIVEN a mongo adapter
+
+        # WHEN cluster_len > 10000
+        cluster_len, interval_size = mongo_adapter._update_sv_metrics(sv_type='INV',
+                                                                      pos_mean=10000,
+                                                                      end_mean=30000,
+                                                                      max_window=3000)
+        # THEN interval_size should be the cluster_len divided by 10
+        assert cluster_len == 20000
+        assert interval_size == round(20000/10, -2)
+
+        # WHEN cluster_len <10000
+        cluster_len, interval_size = mongo_adapter._update_sv_metrics(sv_type='DUP',
+                                                                      pos_mean=10000,
+                                                                      end_mean=15000,
+                                                                      max_window=3000)
+
+        # THEN interval_size should be cluster_len divided by 5
+        assert cluster_len == 5000
+        assert interval_size == round(5000/5, -2)
+
+        # WHEN interval_size < 1000
+        cluster_len, interval_size = mongo_adapter._update_sv_metrics(sv_type='DEL',
+                                                                      pos_mean=10000,
+                                                                      end_mean=10500,
+                                                                      max_window=3000)
+
+        # THEN interval_size should be cluster_len divided by 2
+        assert cluster_len == 500
+        assert interval_size == round(500/2, -2)
+
+        # WHEN interval size is > max_window
+        cluster_len, interval_size = mongo_adapter._update_sv_metrics(sv_type='INV',
+                                                                      pos_mean=100000,
+                                                                      end_mean=200000,
+                                                                      max_window=3000)
+        # THEN interval size should be set to max_window
+        assert cluster_len == 100000
+        assert interval_size == 3000
+
+        # WHEN sv_type == BND
+        cluster_len, interval_size = mongo_adapter._update_sv_metrics(sv_type='BND',
+                                                                      pos_mean=1000,
+                                                                      end_mean=2000,
+                                                                      max_window=3000)
+        # THEN cluster_len should be 10e10 and interval_size 2*max window
+        assert cluster_len == 10e10
+        assert interval_size == 2*3000

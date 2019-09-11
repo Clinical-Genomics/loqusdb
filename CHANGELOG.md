@@ -12,6 +12,7 @@ a set of high maf variants.
 - High maf variants used in profiling is loaded into DB via CLI
 - Reject loading a case if a similar profile already exists for any of the samples
 - Statistics of the profiles in DB can be generated through CLI
+- use bulk operations when deleting variants
 
 ## [2.3]
 

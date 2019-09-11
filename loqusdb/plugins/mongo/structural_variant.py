@@ -188,6 +188,21 @@ class SVMixin():
         return
 
     def _update_sv_metrics(self, sv_type, pos_mean, end_mean, max_window):
+
+        """
+            calculates cluster length, and interval size for SV based on
+            mean start position and mean end position.
+
+            Args:
+                sv_type (str): type of structural variant
+                pos_mean (int): mean start position for cluster
+                end_mean (int): mean end position of cluster
+                max_window (int): maximum interval size given in base pairs
+
+            Returns:
+                cluster_len (int): length of cluster
+                interval_size (int): interval size around start and end positions
+        """
         # We need to calculate the new cluster length
         # Handle translocation as a special case
         if sv_type != 'BND':
