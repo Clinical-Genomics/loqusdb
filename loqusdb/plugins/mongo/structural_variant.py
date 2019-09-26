@@ -7,6 +7,7 @@ from loqusdb.models import Identity
 
 from pymongo import (ASCENDING, DESCENDING, UpdateOne)
 
+HARD_LIMIT_ACCURACY=100
 LOG = logging.getLogger(__name__)
 
 class SVMixin():
@@ -53,7 +54,7 @@ class SVMixin():
                 'pos_sum': 0,
                 'end_sum': 0,
                 'observations': 0,
-                'length': 0,
+                'length': variant['sv_len'],
                 'sv_type': variant['sv_type'],
                 'families': [],
                 
@@ -101,16 +102,25 @@ class SVMixin():
             if cluster_len < 1000:
                 # We allow intervals for smaller variants to be relatively larger
                 divider = 2
-            elif cluster_len < 1000:
+            elif cluster_len < 10000:
                 # We allow intervals for smaller variants to be relatively larger
                 divider = 5
-            interval_size = int(min(round(cluster_len/divider, -2), max_window))
+
+            if abs(variant['end'] - variant['pos'])<HARD_LIMIT_ACCURACY:
+                interval_size = 0
+            else:
+                # interval_size = int(min(round(cluster_len/divider, -2), max_window))
+                interval_size = min(cluster_len//divider, max_window)
         else:
             # We need to treat translocations as a special case.
             # Set length to a huge number that mongodb can handle, float('inf') would not work.
-            cluster_len = 10e10
+            # Force integer
+            cluster_len = int(10e10)
             # This number seems large, if compared with SV size it is fairly small.
-            interval_size = max_window * 2
+            if abs(variant['end'] - variant['pos'])<HARD_LIMIT_ACCURACY:
+                interval_size = 0
+            else:
+                interval_size = max_window * 2
         
         # If the length of SV is shorter than 500 the variant 
         # is considered precise
@@ -181,6 +191,12 @@ class SVMixin():
                 continue
             if hit['end_right'] < variant['end']:
                 continue
+
+            # Make sure that accurate variants are not clustered together with approximate variants
+            if all([abs(variant['end'] - variant['pos'])<HARD_LIMIT_ACCURACY,
+                    hit['pos_left'] != hit['pos_right'] or hit['end_left'] != hit['end_right']]):
+                continue
+            
 
             # We need to calculate the distance to see what cluster that was closest to the variant
             distance = (abs(variant['pos'] - (hit['pos_left'] + hit['pos_right'])/2) + 
