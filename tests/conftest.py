@@ -229,6 +229,25 @@ def sv_case_obj(request, case_lines, sv_vcf_obj, sv_vcf_path):
     return _case_obj
 
 @pytest.fixture(scope='function')
+def sv_case_obj2(request, case_lines, sv_vcf_obj, sv_vcf_path):
+    """Return a case obj (for testing clustering and querying of sv_case_obj)"""
+    family_parser = FamilyParser(case_lines, family_type='ped')
+    families = list(family_parser.families.keys())
+    family = family_parser.families[families[0]]
+    vcf_individuals = sv_vcf_obj.samples
+    nr_variants = 0
+    for nr_variants,variant in enumerate(sv_vcf_obj,1):
+        pass
+    _case_obj = build_case(
+        case=family,
+        case_id="secondary",
+        sv_individuals=vcf_individuals,
+        vcf_sv_path=sv_vcf_path,
+        nr_sv_variants=nr_variants,
+        )
+    return _case_obj
+
+@pytest.fixture(scope='function')
 def complete_case_obj(request, case_obj, sv_case_obj):
     """Return a case obj with both sv and snv information"""
     _case_obj = update_case(case_obj, sv_case_obj)
@@ -351,11 +370,11 @@ def del_variant(request):
         ref='G',
         alt='<DEL>',
         pos=1285001,
-        end=1287000,
+        end=1287001,
         var_type='sv',
         info_dict={
-            'END': 1287000,
-            'SVLEN': -20000,
+            'END': 1287001,
+            'SVLEN': -2000,
             'SVTYPE': 'DEL'
         }
     )
@@ -390,6 +409,40 @@ def insertion_variant(request):
         info_dict={
             'END': 3177306,
             'SVLEN': None,
+            'SVTYPE': 'INS'
+        }
+    )
+    return variant_object
+
+@pytest.fixture(scope='function')
+def insertion_variant_inaccurate(request):
+    variant_object = CyvcfVariant(
+        chrom='1',
+        ref='N',
+        alt='<INS>',
+        pos=3177306,
+        end=3177307,
+        var_type='sv',
+        info_dict={
+            'END': 3177307,
+            'SVLEN': 100,
+            'SVTYPE': 'INS'
+        }
+    )
+    return variant_object
+
+@pytest.fixture(scope='function')
+def insertion_variant_accurate(request):
+    variant_object = CyvcfVariant(
+        chrom='1',
+        ref='A',
+        alt='AGGGACGGGGGTTCTGAGATAAGCAAGCCCCCACCAGGTGAGACCGGCGGAGCTGTGGCCACCGAGGTCCCGGGAGCTGGTGCTGGGACGGGGGTTCTGAGATAAGCAAGCCCCC',
+        pos=3177315,
+        end=3177315,
+        var_type='sv',
+        info_dict={
+            'END': 3177315,
+            'SVLEN': 115,
             'SVTYPE': 'INS'
         }
     )

@@ -79,6 +79,40 @@ def test_format_insertion(insertion_variant, case_obj):
     assert formated_variant['ref'] == variant.REF
     assert formated_variant['alt'] == variant.ALT[0]
     assert formated_variant['sv_type'] == 'INS'
+
+def test_format_insertion_larger(insertion_variant_inaccurate, insertion_variant_accurate, case_obj):
+    ## GIVEN variants large than 100bp (inaccurate is not sequence resolved, accurate is sequence resolved)
+    ## Inaccurate:
+    variant = insertion_variant_inaccurate
+    case_id = case_obj['case_id']
+    ## WHEN parsing the variant
+    formated_variant = build_variant(
+        variant=variant,
+        case_obj=case_obj,
+        case_id=case_id
+        )
+    
+    ## THEN assert the sv is parsed correct
+    assert formated_variant['chrom'] == variant.CHROM
+    assert formated_variant['end_chrom'] == variant.CHROM
+    assert formated_variant['pos'] == variant.POS
+    assert formated_variant['end'] == variant.POS+variant.INFO['SVLEN']
+    assert formated_variant['sv_len'] == variant.INFO['SVLEN']
+    assert formated_variant['ref'] == variant.REF
+    assert formated_variant['alt'] == variant.ALT[0]
+    assert formated_variant['sv_type'] == 'INS'
+
+    ## Accurate
+    variant_accurate = insertion_variant_accurate
+    ## WHEN parsing the variant
+    formated_variant_accurate = build_variant(
+        variant=variant_accurate,
+        case_obj=case_obj,
+        case_id=case_id
+        )
+    ## THEN assert the sv is parsed correct
+    assert formated_variant_accurate['end'] == variant_accurate.POS+variant_accurate.INFO['SVLEN']
+    assert formated_variant_accurate['sv_len'] == variant_accurate.INFO['SVLEN']
     
 def test_format_dup_tandem(duptandem_variant, case_obj):
     ## GIVEN a small insertion (This means that the insertion is included in ALT field)
