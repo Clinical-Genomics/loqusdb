@@ -133,7 +133,8 @@ def get_coords(variant):
     if (sv_len == 0 and alt != '<INS>'):
         sv_len = len(alt)
 
-    if (pos == end) and (sv_len > 0) and sv_len != float('inf'):
+    # if (pos == end) and (sv_len > 0) and sv_len != float('inf'):
+    if (end != pos + sv_len) and (sv_len > 0) and sv_len != float('inf'):
         end = pos + sv_len
 
     position = Position(chrom, pos)
