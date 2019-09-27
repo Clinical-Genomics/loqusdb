@@ -3,23 +3,23 @@ from loqusdb.utils.load import load_variants
 from loqusdb.build_models.variant import get_variant_id
 
 
-def test_delete_variants(mongo_adapter, het_variant, case_obj):
+def test_delete_variants(real_mongo_adapter, het_variant, case_obj):
     ## GIVEN a database with one variant
-    db = mongo_adapter.db
+    db = real_mongo_adapter.db
     case_id = case_obj['case_id']
-    
+
     db.variant.insert_one({
         '_id': get_variant_id(het_variant),
         'families': [case_id],
         'observations': 1,
     })
-    
+
     mongo_variant = db.variant.find_one()
     assert mongo_variant['families'] == [case_id]
 
     ## WHEN deleting the variant
     delete_variants(
-        adapter=mongo_adapter,
+        adapter=real_mongo_adapter,
         vcf_obj=[het_variant],
         case_obj=case_obj
     )
@@ -29,11 +29,11 @@ def test_delete_variants(mongo_adapter, het_variant, case_obj):
     ## THEN assert that the variant was not found
     assert mongo_variant == None
 
-def test_delete_variant(mongo_adapter, het_variant, case_obj):
+def test_delete_variant(real_mongo_adapter, het_variant, case_obj):
     ## GIVEN a database with one variant that is observed twice
-    db = mongo_adapter.db
+    db = real_mongo_adapter.db
     case_id = case_obj['case_id']
-    
+
     db.variant.insert_one({
         '_id': get_variant_id(het_variant),
         'families': [case_id, '2'],
@@ -45,7 +45,7 @@ def test_delete_variant(mongo_adapter, het_variant, case_obj):
 
     ## WHEN deleting the variant for one case
     delete_variants(
-        adapter=mongo_adapter,
+        adapter=real_mongo_adapter,
         vcf_obj=[het_variant],
         case_obj=case_obj,
         case_id='2',

@@ -54,7 +54,7 @@ def delete(ctx, family_file, family_type, case_id):
     existing_case = adapter.case({'case_id': case_id})
     if not existing_case:
         LOG.warning("Case %s does not exist in database" %case_id)
-        context.abort
+        return
 
 
     start_deleting = datetime.now()

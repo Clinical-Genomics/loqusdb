@@ -44,6 +44,31 @@ def test_delete_case_and_variants(vcf_path, ped_path, real_mongo_adapter, case_i
 
     assert mongo_case == None
 
-    mongo_variant = db.case.find_one()
+    mongo_variant = db.variant.find_one()
 
     assert mongo_variant == None
+
+
+def test_delete_structural_variants(vcf_path, ped_path, real_mongo_adapter, case_id, sv_case_obj):
+
+    # GIVEN a mongo adapter with an inserted case with SVs
+    mongo_adapter = real_mongo_adapter
+    db = mongo_adapter.db
+
+    load_database(
+        adapter=mongo_adapter,
+        variant_file=sv_case_obj['vcf_path'],
+        family_file=ped_path,
+        family_type='ped',
+        sv_file=sv_case_obj['vcf_sv_path']
+    )
+
+    mongo_svs = db.structural_variant.find()
+    assert len(list(mongo_svs)) == 19
+
+    # WHEN deleteing the case
+    delete(adapter=mongo_adapter, case_obj=sv_case_obj)
+
+    # All structural variants should be deleted.
+    mongo_svs = db.structural_variant.find()
+    assert len(list(mongo_svs)) == 0
