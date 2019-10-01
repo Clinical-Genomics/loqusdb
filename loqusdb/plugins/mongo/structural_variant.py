@@ -8,11 +8,12 @@ from loqusdb.models import Identity
 from pymongo import (ASCENDING, DESCENDING, UpdateOne)
 
 HARD_LIMIT_ACCURACY=100
+UPDATE_CLUSTER_SIZE=False
 LOG = logging.getLogger(__name__)
 
 class SVMixin():
 
-    def add_structural_variant(self, variant, max_window = 3000):
+    def add_structural_variant(self, variant, max_window=3000):
         """Add a variant to the structural variants collection
         
         The process of adding an SV variant differs quite a bit from the 
@@ -30,7 +31,6 @@ class SVMixin():
             variant (dict): A variant dictionary
             max_window(int): Specify the maximum window size for large svs
         
-        
                                         -
                                       -   -
                                     -       -
@@ -47,6 +47,13 @@ class SVMixin():
         # If there was no matcing cluster we need to create a new cluster
         if cluster is None:
             # The cluster will be populated with information later.
+            cluster_len, interval_size = self._update_sv_metrics(sv_type=variant['sv_type'],
+                                                                 pos_mean=variant['pos'],
+                                                                 end_mean=variant['end'],
+                                                                 max_window=max_window)
+            if abs(variant['end'] - variant['pos'])<HARD_LIMIT_ACCURACY:
+                interval_size = 0
+
             cluster = {
                 'chrom': variant['chrom'],
                 'end_chrom': variant['end_chrom'],
@@ -54,16 +61,19 @@ class SVMixin():
                 'pos_sum': 0,
                 'end_sum': 0,
                 'observations': 0,
-                'length': variant['sv_len'],
+                'length': cluster_len,
                 'sv_type': variant['sv_type'],
                 'families': [],
-                
+                'pos_left': max(variant['pos'] - interval_size, 0),
+                'pos_right': variant['pos'] + interval_size,
+                'end_left': max(variant['end'] - interval_size, 0),
+                'end_right': variant['end'] + interval_size,
             }
             # Insert variant to get a _id
             _id = self.db.structural_variant.insert_one(cluster).inserted_id
             
             cluster['_id'] = _id
-        
+
         case_id = variant.get('case_id')
         if case_id:
             # If the variant is already added for this case we continue
@@ -92,39 +102,28 @@ class SVMixin():
         # i.e. the dots in the picture above
         pos_mean = int((cluster['pos_sum'] + variant['pos']) // (nr_events))
         end_mean = int((cluster['end_sum'] + variant['end']) // (nr_events))
-        
-        # We need to calculate the new cluster length
-        # Handle translocation as a special case
-        if cluster['sv_type'] != 'BND':
-            cluster_len = end_mean - pos_mean
-            # We need to adapt the interval size depending on the size of the cluster
-            divider = 10
-            if cluster_len < 1000:
-                # We allow intervals for smaller variants to be relatively larger
-                divider = 2
-            elif cluster_len < 10000:
-                # We allow intervals for smaller variants to be relatively larger
-                divider = 5
 
-            if abs(variant['end'] - variant['pos'])<HARD_LIMIT_ACCURACY:
-                interval_size = 0
-            else:
-                # interval_size = int(min(round(cluster_len/divider, -2), max_window))
-                interval_size = min(cluster_len//divider, max_window)
+        cluster_len, interval_size = self._update_sv_metrics(sv_type=cluster['sv_type'],
+                                                             pos_mean=pos_mean,
+                                                             end_mean=end_mean,
+                                                             max_window=max_window)
+        if abs(variant['end'] - variant['pos'])<HARD_LIMIT_ACCURACY:
+            interval_size = 0
+        if UPDATE_CLUSTER_SIZE:
+            set_update = {
+                'pos_left': max(pos_mean - interval_size, 0),
+                'pos_right': pos_mean + interval_size,
+                'end_left': max(end_mean - interval_size, 0),
+                'end_right': end_mean + interval_size,
+                'families': cluster['families'],
+                'length': cluster_len,
+            }
         else:
-            # We need to treat translocations as a special case.
-            # Set length to a huge number that mongodb can handle, float('inf') would not work.
-            # Force integer
-            cluster_len = int(10e10)
-            # This number seems large, if compared with SV size it is fairly small.
-            if abs(variant['end'] - variant['pos'])<HARD_LIMIT_ACCURACY:
-                interval_size = 0
-            else:
-                interval_size = max_window * 2
-        
-        # If the length of SV is shorter than 500 the variant 
-        # is considered precise
-        # Otherwise the interval size is closest whole 100 number
+            set_update = {
+                'families': cluster['families'],
+                'length': cluster_len,
+            }
+
         res = self.db.structural_variant.find_one_and_update(
             {'_id': cluster['_id']},
             {
@@ -133,24 +132,129 @@ class SVMixin():
                     'pos_sum': variant['pos'],
                     'end_sum': variant['end'],
                 },
-            
-                '$set': {
-                    'pos_left': max(pos_mean - interval_size, 0),
-                    'pos_right': pos_mean + interval_size,
-                    'end_left': max(end_mean - interval_size, 0),
-                    'end_right': end_mean + interval_size,
-                    'families': cluster['families'],
-                    'length': cluster_len,
-                }
-            }
+                '$set': set_update,
+            },
         )
-        
+
         # Insert an identity object to link cases to variants and clusters
         identity_obj = Identity(cluster_id=cluster['_id'], variant_id=variant['id_column'], 
                                 case_id=case_id)
         self.db.identity.insert_one(identity_obj)
         
         return
+
+    def delete_structural_variant(self, variant, max_window = 3000):
+
+        # This will return the cluster most similar to variant or None
+        cluster = self.get_structural_variant(variant)
+
+        if cluster is None:
+            return
+
+        case_id = variant.get('case_id')
+
+        if case_id in cluster['families']:
+            # Remove case from the array
+            cluster['families'].remove(case_id)
+
+        nr_events = cluster['observations'] - 1
+
+        if nr_events == 0:
+            # Remove SV if no observations remain
+            self.db.structural_variant.delete_one({'_id': cluster['_id']})
+
+            # remove identity
+            identity_obj = Identity(cluster_id=cluster['_id'], variant_id=variant['id_column'],
+                                    case_id=case_id)
+            self.db.identity.delete_one(dict(identity_obj))
+
+            return
+
+        pos_mean = int((cluster['pos_sum'] - variant['pos']) // (nr_events))
+        end_mean = int((cluster['end_sum'] - variant['end']) // (nr_events))
+
+        cluster_len, interval_size = self._update_sv_metrics(sv_type=cluster['sv_type'],
+                                                             pos_mean=pos_mean,
+                                                             end_mean=end_mean,
+                                                             max_window=max_window)
+        if abs(variant['end'] - variant['pos'])<HARD_LIMIT_ACCURACY:
+            interval_size = 0
+
+        if UPDATE_CLUSTER_SIZE:
+            set_update = {
+                'pos_left': max(pos_mean - interval_size, 0),
+                'pos_right': pos_mean + interval_size,
+                'end_left': max(end_mean - interval_size, 0),
+                'end_right': end_mean + interval_size,
+                'families': cluster['families'],
+                'length': cluster_len,
+            }
+        else:
+            set_update = {
+                'families': cluster['families'],
+                'length': cluster_len,
+            }
+        res = self.db.structural_variant.find_one_and_update(
+            {'_id': cluster['_id']},
+            {
+                '$inc': {
+                    'observations': -1,
+                    'pos_sum': -variant['pos'],
+                    'end_sum': -variant['end'],
+                },
+                '$set': set_update,
+            },
+        )
+
+        # Insert an identity object to link cases to variants and clusters
+        identity_obj = Identity(cluster_id=cluster['_id'], variant_id=variant['id_column'],
+                                case_id=case_id)
+        self.db.identity.delete_one(dict(identity_obj))
+
+        return
+
+    def _update_sv_metrics(self, sv_type, pos_mean, end_mean, max_window):
+
+        """
+            calculates cluster length, and interval size for SV based on
+            mean start position and mean end position.
+
+            Args:
+                sv_type (str): type of structural variant
+                pos_mean (int): mean start position for cluster
+                end_mean (int): mean end position of cluster
+                max_window (int): maximum interval size given in base pairs
+
+            Returns:
+                cluster_len (int): length of cluster
+                interval_size (int): interval size around start and end positions
+        """
+        # We need to calculate the new cluster length
+        # Handle translocation as a special case
+        if sv_type != 'BND':
+            cluster_len = end_mean - pos_mean
+
+            # We need to adapt the interval size depending on the size of the cluster
+            divider = 10
+            if cluster_len < 1000:
+                # We allow intervals for smaller variants to be relatively larger
+                divider = 2
+            elif cluster_len < 10000:
+                # We allow intervals for smaller variants to be relatively larger
+                divider = 5
+            # If the length of SV is shorter than HARD_LIMIT_ACCURACY the variant
+            # is considered precise
+            # Otherwise the interval size is closest whole 100 number
+            interval_size = int(min(round(cluster_len/divider, -2), max_window))
+            # interval_size = min(cluster_len//divider, max_window)
+        else:
+            # We need to treat translocations as a special case.
+            # Set length to a huge number that mongodb can handle, float('inf') would not work.
+            cluster_len = int(10e10)
+            # This number seems large, if compared with SV size it is fairly small.
+            interval_size = max_window * 2
+
+        return cluster_len, interval_size
 
     def get_structural_variant(self, variant):
         """Check if there are any overlapping sv clusters
