@@ -5,7 +5,8 @@ from collections import namedtuple
 
 from loqusdb.models import Variant
 from loqusdb.exceptions import CaseError
-from loqusdb.constants import (PAR,GENOTYPE_MAP,CHROM_TO_INT)
+from loqusdb.constants import (PAR,GENOTYPE_MAP,CHROM_TO_INT,GRCH37,GRCH38)
+from loqusdb.constants import global_parameters
 
 LOG = logging.getLogger(__name__)
 
@@ -25,7 +26,7 @@ def check_par(chrom, pos):
     """
     par = False
 
-    for interval in PAR.get(chrom,[]):
+    for interval in PAR[global_parameters.GENOME_BUILD].get(chrom, []):
         if (pos >= interval[0] and pos <= interval[1]):
             par = True
 
@@ -34,8 +35,11 @@ def check_par(chrom, pos):
 
 def get_variant_id(variant):
     """Get a variant id on the format chrom_pos_ref_alt"""
+    chrom = variant.CHROM
+    if chrom.lower().startswith('chr'):
+        chrom = chrom[3:]
     variant_id = '_'.join([
-            str(variant.CHROM),
+            str(chrom),
             str(variant.POS),
             str(variant.REF),
             str(variant.ALT[0])
