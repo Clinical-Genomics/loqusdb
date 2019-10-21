@@ -25,6 +25,9 @@ def validate_profile_threshold(ctx, param, value):
 @click.option('-l', '--load',
     is_flag=True,
     help = "Load variants that should be used for profiling")
+@click.option('-v', '--variant-file',
+    type=click.Path(exists=True),
+    help="Variants from file to be used in profiling. To be used in combination with the --load flag")
 @click.option('--update',
     is_flag=True,
     help = "updates the profiles of all the sample in the database")
@@ -40,7 +43,7 @@ def validate_profile_threshold(ctx, param, value):
     type=click.Path(exists=True),
     help="A vcf for a case. The profile from this vcf will be checked against the profiles in the database")
 @click.pass_context
-def load_profile(ctx, load, update, stats, profile_threshold, check_vcf):
+def load_profile(ctx, load, variant_file, update, stats, profile_threshold, check_vcf):
 
     """
         Command for profiling of samples. User may upload variants used in profiling
@@ -70,6 +73,8 @@ def load_profile(ctx, load, update, stats, profile_threshold, check_vcf):
 
     if load:
         vcf_path = MAF_PATH[global_parameters.GENOME_BUILD]
+        if variant_file is not None:
+            vcf_path = variant_file
         LOG.info(f"Loads variants in {vcf_path} to be used in profiling")
         load_profile_variants(adapter, vcf_path)
 
