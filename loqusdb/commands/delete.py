@@ -56,12 +56,13 @@ def delete(ctx, family_file, family_type, case_id):
         LOG.warning("Case %s does not exist in database" %case_id)
         return
 
-
+    genome_build = ctx.obj['genome_build']
     start_deleting = datetime.now()
     try:
         delete_command(
             adapter=adapter,
             case_obj=existing_case,
+            genome_build=genome_build
         )
     except (CaseError, IOError) as error:
         LOG.warning(error)

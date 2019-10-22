@@ -7,7 +7,6 @@ from loqusdb.utils.profiling import (update_profiles,
                                      profile_stats,
                                      check_duplicates,
                                      get_profiles)
-from loqusdb.constants import global_parameters
 from loqusdb.resources import MAF_PATH
 
 from . import base_command
@@ -72,7 +71,8 @@ def load_profile(ctx, load, variant_file, update, stats, profile_threshold, chec
             LOG.info("No duplicates found in the database")
 
     if load:
-        vcf_path = MAF_PATH[global_parameters.GENOME_BUILD]
+        genome_build = ctx.obj['genome_build']
+        vcf_path = MAF_PATH[genome_build]
         if variant_file is not None:
             vcf_path = variant_file
         LOG.info(f"Loads variants in {vcf_path} to be used in profiling")

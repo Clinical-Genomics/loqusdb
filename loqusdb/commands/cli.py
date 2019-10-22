@@ -17,7 +17,6 @@ from loqusdb.log import LEVELS, init_log
 from loqusdb import __version__
 from loqusdb.plugins import MongoAdapter
 from loqusdb.constants import GRCH37, GRCH38
-from loqusdb.constants import global_parameters
 
 LOG_LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
 
@@ -106,6 +105,8 @@ def cli(ctx, database, username, password, authdb, port, host, uri, verbose, con
 
     adapter = MongoAdapter(client, db_name=database)
 
+    genome_build = genome_build or configs.get('genome_build') or GRCH37
+
     ctx.obj = {}
     ctx.obj['db'] = database
     ctx.obj['user'] = username
@@ -114,7 +115,4 @@ def cli(ctx, database, username, password, authdb, port, host, uri, verbose, con
     ctx.obj['host'] = host
     ctx.obj['adapter'] = adapter
     ctx.obj['version'] = __version__
-
-    genome_build = genome_build or configs.get('genome_build') or GRCH37
-    global_parameters.set_genome_build(genome_build)
-    LOG.info("Using build %s", global_parameters.GENOME_BUILD)
+    ctx.obj['genome_build'] = genome_build

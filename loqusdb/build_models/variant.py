@@ -5,8 +5,7 @@ from collections import namedtuple
 
 from loqusdb.models import Variant
 from loqusdb.exceptions import CaseError
-from loqusdb.constants import (PAR,GENOTYPE_MAP,CHROM_TO_INT,GRCH37,GRCH38)
-from loqusdb.constants import global_parameters
+from loqusdb.constants import (PAR,GENOTYPE_MAP,CHROM_TO_INT,GRCH37)
 
 LOG = logging.getLogger(__name__)
 
@@ -14,7 +13,7 @@ Position = namedtuple('Position', 'chrom pos')
 
 # These are coordinate for the pseudo autosomal regions in GRCh37
 
-def check_par(chrom, pos):
+def check_par(chrom, pos, genome_build=None):
     """Check if a coordinate is in the PAR region
 
         Args:
@@ -25,8 +24,10 @@ def check_par(chrom, pos):
             par(bool)
     """
     par = False
-
-    for interval in PAR[global_parameters.GENOME_BUILD].get(chrom, []):
+    if genome_build is None:
+        genome_build=GRCH37
+    for interval in PAR[genome_build].get(chrom, []):
+        print(interval)
         if (pos >= interval[0] and pos <= interval[1]):
             par = True
 
@@ -159,7 +160,7 @@ def get_coords(variant):
 
     return coordinates
 
-def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
+def build_variant(variant, case_obj, case_id=None, gq_treshold=None, genome_build=None):
     """Return a Variant object
 
     Take a cyvcf2 formated variant line and return a models.Variant.
@@ -221,7 +222,7 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None):
                 # If variant in X or Y and individual is male,
                 # we need to check hemizygosity
                 if chrom in ['X','Y'] and ind_obj['sex'] == 1:
-                    if not check_par(chrom, pos):
+                    if not check_par(chrom, pos, genome_build=genome_build):
                         LOG.debug("Found hemizygous variant")
                         found_hemizygote = 1
 

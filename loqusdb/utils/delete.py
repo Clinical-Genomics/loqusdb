@@ -9,7 +9,7 @@ from loqusdb.build_models import (build_case, build_variant)
 LOG = logging.getLogger(__name__)
 
 
-def delete(adapter, case_obj, update=False, existing_case=False):
+def delete(adapter, case_obj, update=False, existing_case=False, genome_build=None):
     """Delete a case and all of it's variants from the database.
 
     Args:
@@ -39,6 +39,7 @@ def delete(adapter, case_obj, update=False, existing_case=False):
                 adapter=adapter,
                 vcf_obj=vcf_obj,
                 case_obj=case_obj,
+                genome_build=genome_build
             )
         if file_type == 'vcf_sv_path':
             LOG.info('deleting structural variants')
@@ -48,7 +49,7 @@ def delete(adapter, case_obj, update=False, existing_case=False):
                 case_obj=case_obj,
             )
 
-def delete_variants(adapter, vcf_obj, case_obj, case_id=None):
+def delete_variants(adapter, vcf_obj, case_obj, case_id=None, genome_build=None):
     """Delete variants for a case in the database
 
     Args:
@@ -73,6 +74,7 @@ def delete_variants(adapter, vcf_obj, case_obj, case_id=None):
             variant=variant,
             case_obj=case_obj,
             case_id=case_id,
+            genome_build=genome_build
         )
 
         if not formated_variant:
