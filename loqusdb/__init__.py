@@ -11,7 +11,7 @@ INDEXES = {
     'variant' : [
         IndexModel([
         ('chrom', ASCENDING),
-        ('pos', ASCENDING),
+        ('start', ASCENDING),
         ('end', ASCENDING),
         ], name="coordinates"),
         
