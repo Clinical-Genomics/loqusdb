@@ -174,7 +174,7 @@ class VariantMixin(BaseVariantMixin, SVMixin):
             query['start'] = {'$lte': end}
             query['end'] = {'$gte': start}
         LOG.info("Find all variants {}".format(query))
-        return self.db.variant.find(query).sort([('start', ASCENDING)])
+        return self.db.variant.find(query).sort([('pos', ASCENDING)])
 
     def delete_variant(self, variant):
         """Delete observation in database
