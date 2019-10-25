@@ -27,7 +27,6 @@ def check_par(chrom, pos, genome_build=None):
     if genome_build is None:
         genome_build=GRCH37
     for interval in PAR[genome_build].get(chrom, []):
-        print(interval)
         if (pos >= interval[0] and pos <= interval[1]):
             par = True
 
