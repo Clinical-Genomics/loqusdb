@@ -13,6 +13,7 @@ a set of high maf variants.
 - Reject loading a case if a similar profile already exists for any of the samples
 - Statistics of the profiles in DB can be generated through CLI
 - use bulk operations when deleting variants
+- Compatible with GRCh38
 
 ## [2.3]
 
