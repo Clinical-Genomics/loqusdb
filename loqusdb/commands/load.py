@@ -109,6 +109,7 @@ def load(ctx, variant_file, sv_variants, family_file, family_type, skip_case_id,
         variant_profile_path = os.path.abspath(check_profile)
 
     adapter = ctx.obj['adapter']
+    genome_build = ctx.obj['genome_build']
 
     start_inserting = datetime.now()
 
@@ -125,7 +126,8 @@ def load(ctx, variant_file, sv_variants, family_file, family_type, skip_case_id,
             max_window=max_window,
             profile_file=variant_profile_path,
             hard_threshold=hard_threshold,
-            soft_threshold=soft_threshold
+            soft_threshold=soft_threshold,
+            genome_build=genome_build
         )
     except (SyntaxError, CaseError, IOError) as error:
         LOG.warning(error)

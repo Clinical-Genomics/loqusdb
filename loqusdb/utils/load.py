@@ -26,7 +26,7 @@ LOG = logging.getLogger(__name__)
 def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
                   family_type='ped', skip_case_id=False, gq_treshold=None,
                   case_id=None, max_window = 3000, profile_file=None,
-                  hard_threshold=0.95, soft_threshold=0.9):
+                  hard_threshold=0.95, soft_threshold=0.9, genome_build=None):
     """Load the database with a case and its variants
 
     Args:
@@ -139,6 +139,7 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
                 gq_treshold=gq_treshold,
                 max_window=max_window,
                 variant_type=variant_type,
+                genome_build=genome_build
             )
         except Exception as err:
             # If something went wrong do a rollback
@@ -177,7 +178,7 @@ def load_case(adapter, case_obj, update=False):
     return case_obj
 
 def load_variants(adapter, vcf_obj, case_obj, skip_case_id=False, gq_treshold=None,
-                  max_window=3000, variant_type='snv'):
+                  max_window=3000, variant_type='snv', genome_build=None):
     """Load variants for a family into the database.
 
     Args:
@@ -205,7 +206,7 @@ def load_variants(adapter, vcf_obj, case_obj, skip_case_id=False, gq_treshold=No
     # Loop over the variants in the vcf
     with click.progressbar(vcf_obj, label="Inserting variants",length=nr_variants) as bar:
 
-        variants = (build_variant(variant,case_obj,case_id, gq_treshold) for variant in bar)
+        variants = (build_variant(variant,case_obj,case_id, gq_treshold, genome_build=genome_build) for variant in bar)
 
     if variant_type == 'sv':
         for sv_variant in variants:

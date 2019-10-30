@@ -54,7 +54,7 @@ def test_load_command_check_profile(zipped_vcf_path, ped_path, real_mongo_adapte
     NEW_CASE_NAME = 'other_case'
     #Load profile variants
     runner = CliRunner()
-    command = ['--database', real_db_name, 'profile',
+    command = ['--database', real_db_name, 'profile', '--load',
         '--variant-file', profile_vcf_path]
     result = runner.invoke(base_command, command)
 
@@ -92,7 +92,7 @@ def test_load_profile_command(profile_vcf_path, real_mongo_adapter, real_db_name
 
     runner = CliRunner()
 
-    command = ['--database', real_db_name, 'profile',
+    command = ['--database', real_db_name, 'profile', '--load',
         '--variant-file', profile_vcf_path]
     result = runner.invoke(base_command, command)
 

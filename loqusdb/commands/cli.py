@@ -16,6 +16,7 @@ from mongo_adapter.exceptions import Error as DB_Error
 from loqusdb.log import LEVELS, init_log
 from loqusdb import __version__
 from loqusdb.plugins import MongoAdapter
+from loqusdb.constants import GRCH37, GRCH38
 
 LOG_LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
 
@@ -56,10 +57,13 @@ LOG = logging.getLogger(__name__)
                 is_flag=True,
                 help='Used for testing. This will use a mongomock database.'
 )
+@click.option('-g', '--genome-build',
+              type=click.Choice([GRCH37, GRCH38]),
+              help='Specify what genome build to use')
 @click.option('-v', '--verbose', is_flag=True)
 @click.version_option(__version__)
 @click.pass_context
-def cli(ctx, database, username, password, authdb, port, host, uri, verbose, config, test):
+def cli(ctx, database, username, password, authdb, port, host, uri, verbose, config, test, genome_build):
     """loqusdb: manage a local variant count database."""
     loglevel = "INFO"
     if verbose:
@@ -74,7 +78,7 @@ def cli(ctx, database, username, password, authdb, port, host, uri, verbose, con
         except yaml.YAMLError as err:
             LOG.warning(err)
             ctx.abort()
-    
+
     uri = configs.get('uri') or uri
     if test:
         uri = "mongomock://"
@@ -90,9 +94,9 @@ def cli(ctx, database, username, password, authdb, port, host, uri, verbose, con
     except DB_Error as err:
         LOG.warning(err)
         ctx.abort()
-    
+
     database = configs.get('db_name') or database
-    
+
     if not database:
         database = 'loqusdb'
         if uri:
@@ -100,6 +104,8 @@ def cli(ctx, database, username, password, authdb, port, host, uri, verbose, con
             database = uri_info.get('database')
 
     adapter = MongoAdapter(client, db_name=database)
+
+    genome_build = genome_build or configs.get('genome_build') or GRCH37
 
     ctx.obj = {}
     ctx.obj['db'] = database
@@ -109,3 +115,4 @@ def cli(ctx, database, username, password, authdb, port, host, uri, verbose, con
     ctx.obj['host'] = host
     ctx.obj['adapter'] = adapter
     ctx.obj['version'] = __version__
+    ctx.obj['genome_build'] = genome_build
