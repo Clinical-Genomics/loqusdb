@@ -4,7 +4,7 @@ from loqusdb.utils.migrate import migrate_database
 def test_migrate_one_variant(mongo_adapter):
     ##GIVEN a adapter to an empty old database
     adapter = mongo_adapter
-    assert adapter.get_variants().count() == 0
+    assert sum(1 for i in adapter.get_variants()) == 0
     
     ##WHEN inserting a old style variant and updating the database
     chrom = '1'
