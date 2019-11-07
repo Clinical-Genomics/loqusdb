@@ -42,14 +42,17 @@ class CaseMixin(BaseCaseMixin):
         Returns:
             cases (Iterable(Case)): A iterable with mongo cases
         """
+        LOG.info("Fetch number of cases")
         query = {}
         
         if snv_cases:
-            query = {'vcf_path': {'$exists':True}}
+            LOG.info("Fetch all snv cases")
+            query = {'vcf_path': {'$ne':None}}
         if sv_cases:
-            query = {'vcf_sv_path': {'$exists':True}}
+            LOG.info("Fetch all sv cases")
+            query = {'vcf_sv_path': {'$ne':None}}
         if snv_cases and sv_cases:
-            query = None
+            query = {}
 
         return self.db.case.count_documents(query)
 

@@ -104,6 +104,22 @@ class TestGetCase:
         db = mongo_adapter.db
         case_1 = {
             'case_id': 'test',
+            'vcf_path': 'test.vcf',
+            'vcf_sv_path': None
+        }
+
+        db.case.insert_one(case_1)
+
+        assert mongo_adapter.nr_cases() == 1
+        assert mongo_adapter.nr_cases(sv_cases=True) == 0
+        assert mongo_adapter.nr_cases(snv_cases=True) == 1
+        assert mongo_adapter.nr_cases(snv_cases=True, sv_cases=True) == 1
+
+    def test_nr_cases_only_snv(self, mongo_adapter):
+        """Test to get non existing case"""
+        db = mongo_adapter.db
+        case_1 = {
+            'case_id': 'test',
             'vcf_path': 'test.vcf'
         }
 

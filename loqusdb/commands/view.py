@@ -15,12 +15,28 @@ LOG = logging.getLogger(__name__)
                 help='Search for case'
 )
 @click.option('--to-json', is_flag=True)
+@click.option('--count', is_flag=True, 
+    help="Show number of cases in database")
+@click.option('--case-type', '-t', 
+    help="Specify the type of cases", 
+    type=click.Choice(['snv', 'sv'])
+)
 @click.pass_context
-def cases(ctx, case_id, to_json):
+def cases(ctx, case_id, to_json, count, case_type):
     """Display cases in the database."""
 
     adapter = ctx.obj['adapter']
     cases = []
+    
+    if count:
+        snv_cases = None
+        sv_cases = None
+        if case_type == 'snv':
+            snv_cases = True
+        if case_type == 'sv':
+            sv_cases = True
+        click.echo(adapter.nr_cases(snv_cases=snv_cases, sv_cases=sv_cases))
+        return
 
     if case_id:
         case_obj = adapter.case({'case_id':case_id})
@@ -42,7 +58,9 @@ def cases(ctx, case_id, to_json):
     click.echo("#case_id\tvcf_path")
 
     for case_obj in cases:
-        click.echo("{0}\t{1}".format(case_obj.get('case_id'), case_obj.get('vcf_path')))
+        case_id = case_obj.get('case_id')
+        vcf_path = case_obj.get('vcf_path', case_obj.get('vcf_sv_path'))
+        click.echo("{0}\t{1}".format(case_id, vcf_path))
 
 @base_command.command('variants', short_help="Display variants in database")
 @click.option('--variant-id',
