@@ -118,16 +118,29 @@ def variants(ctx, variant_id, chromosome, end_chromosome, start, end, variant_ty
         nr_cases = adapter.nr_cases(snv_cases=snv_cases, sv_cases=sv_cases)
 
     if variant_id:
-        variant = adapter.get_variant({'_id':variant_id})
+        if variant_type == 'sv':
+            variant_query = {
+                'chrom': chromosome,
+                'end_chrom': end_chromosome or chromosome,
+                'sv_type': sv_type,
+                'pos': start,
+                'end': end
+            }
+            variant = adapter.get_structural_variant(variant_query)
+        else:
+            variant = adapter.get_variant({'_id':variant_id})
+        
         if not variant:
             LOG.info("Variant {0} does not exist in database".format(variant_id))
-            return
+            variant = {}
         
         if case_count:
             variant['total'] = nr_cases
 
         if to_json:
             LOG.info("Print in json format")
+            if '_id' in variant:
+                variant.pop('_id')
             click.echo(json.dumps(variant))
             return
 

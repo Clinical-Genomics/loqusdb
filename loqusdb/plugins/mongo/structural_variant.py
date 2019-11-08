@@ -252,7 +252,10 @@ class SVMixin():
                     {'pos_right': {'$gte': variant['pos']}},
                 ]
             }
-
+        LOG.info(query)
+        LOG.info(f"Fetching cluster closest to {variant['chrom']}:{variant['pos']}-"\
+                 f"{variant['end_chrom']}:{variant['end']} of type {variant['sv_type']}")
+    
         res = self.db.structural_variant.find(query).sort('pos_left',1)
         match = None
         distance = None
@@ -260,6 +263,7 @@ class SVMixin():
         # First we check that the coordinates are correct
         # Then we count the distance to mean on both ends to see which variant is closest
         for hit in res:
+            LOG.info("HIT:{}".format(hit))
             # We know from the query that the variants position is larger than the left most part of
             # the cluster.
             # If the right most part of the cluster is smaller than the variant position they do
@@ -285,6 +289,10 @@ class SVMixin():
                 match = hit
                 # Update the closest distance
                 closest_hit = distance
+        if match is None:
+            LOG.info("Could not find any cluster")
+        else:
+            LOG.info("Matching cluster found!")
 
         return match
 
