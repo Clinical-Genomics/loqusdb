@@ -6,6 +6,8 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+## [2.5]
+
 ### Added
 - Profiling feature added. Each sample gets a profile based on the genotypes for
 a set of high maf variants.
@@ -14,6 +16,10 @@ a set of high maf variants.
 - Statistics of the profiles in DB can be generated through CLI
 - use bulk operations when deleting variants
 - Compatible with GRCh38
+- Option to include case count when querying for a variant
+
+### Fixed
+- Use correct fields in index
 
 ## [2.3]
 
