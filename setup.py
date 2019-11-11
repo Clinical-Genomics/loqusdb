@@ -28,7 +28,7 @@ REQUIRED = [
     'click',
     'ped_parser',
     'pymongo==3.7.1',
-    'mongomock==3.12',
+    'mongomock==3.18',
     'vcftoolbox==1.5',
     'cyvcf2<0.10',
     'coloredlogs',

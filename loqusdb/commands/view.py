@@ -15,12 +15,28 @@ LOG = logging.getLogger(__name__)
                 help='Search for case'
 )
 @click.option('--to-json', is_flag=True)
+@click.option('--count', is_flag=True, 
+    help="Show number of cases in database")
+@click.option('--case-type', '-t', 
+    help="Specify the type of cases", 
+    type=click.Choice(['snv', 'sv'])
+)
 @click.pass_context
-def cases(ctx, case_id, to_json):
+def cases(ctx, case_id, to_json, count, case_type):
     """Display cases in the database."""
 
     adapter = ctx.obj['adapter']
     cases = []
+    
+    if count:
+        snv_cases = None
+        sv_cases = None
+        if case_type == 'snv':
+            snv_cases = True
+        if case_type == 'sv':
+            sv_cases = True
+        click.echo(adapter.nr_cases(snv_cases=snv_cases, sv_cases=sv_cases))
+        return
 
     if case_id:
         case_obj = adapter.case({'case_id':case_id})
@@ -42,7 +58,9 @@ def cases(ctx, case_id, to_json):
     click.echo("#case_id\tvcf_path")
 
     for case_obj in cases:
-        click.echo("{0}\t{1}".format(case_obj.get('case_id'), case_obj.get('vcf_path')))
+        case_id = case_obj.get('case_id')
+        vcf_path = case_obj.get('vcf_path', case_obj.get('vcf_sv_path'))
+        click.echo("{0}\t{1}".format(case_id, vcf_path))
 
 @base_command.command('variants', short_help="Display variants in database")
 @click.option('--variant-id',
@@ -70,12 +88,14 @@ def cases(ctx, case_id, to_json):
 @click.option('--sv-type',
                 help='Type of svs to search for',
 )
+@click.option('--to-json', is_flag=True)
+@click.option('--case-count', is_flag=True, help="If number of cases should be included")
 # @click.option('--sort-key',
 #                 help='Specify what field to sort on',
 # )
 @click.pass_context
 def variants(ctx, variant_id, chromosome, end_chromosome, start, end, variant_type,
-             sv_type):
+             sv_type, to_json, case_count):
     """Display variants in the database."""
     if sv_type:
         variant_type = 'sv'
@@ -86,13 +106,45 @@ def variants(ctx, variant_id, chromosome, end_chromosome, start, end, variant_ty
         if not (chromosome and start and end):
             LOG.warning("Regions must be specified with chromosome, start and end")
             return
+    
+    nr_cases = None
+    if case_count:
+        snv_cases = None
+        sv_cases = None
+        if variant_type == 'snv':
+            snv_cases = True
+        if variant_type == 'sv':
+            sv_cases = True
+        nr_cases = adapter.nr_cases(snv_cases=snv_cases, sv_cases=sv_cases)
 
     if variant_id:
-        variant = adapter.get_variant({'_id':variant_id})
-        if variant:
-            click.echo(variant)
+        if variant_type == 'sv':
+            variant_query = {
+                'chrom': chromosome,
+                'end_chrom': end_chromosome or chromosome,
+                'sv_type': sv_type,
+                'pos': start,
+                'end': end
+            }
+            variant = adapter.get_structural_variant(variant_query)
         else:
+            variant = adapter.get_variant({'_id':variant_id})
+        
+        if not variant:
             LOG.info("Variant {0} does not exist in database".format(variant_id))
+            variant = {}
+        
+        if case_count:
+            variant['total'] = nr_cases
+
+        if to_json:
+            LOG.info("Print in json format")
+            if '_id' in variant:
+                variant.pop('_id')
+            click.echo(json.dumps(variant))
+            return
+
+        click.echo(variant)
         return
 
     if variant_type == 'snv':
@@ -111,9 +163,11 @@ def variants(ctx, variant_id, chromosome, end_chromosome, start, end, variant_ty
             end=end
         )
 
+    if to_json:
+        json.dumps(variant)
+
     i = 0
-    for variant in result:
-        i += 1
+    for i,variant in enumerate(result,1):
         pp(variant)
 
     LOG.info("Number of variants found in database: %s", i)

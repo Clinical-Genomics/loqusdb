@@ -15,7 +15,7 @@ def migrate_database(adapter):
     """
     
     all_variants = adapter.get_variants()
-    nr_variants = all_variants.count()
+    nr_variants = adapter.nr_variants()
     nr_updated = 0
     with progressbar(all_variants, label="Updating variants", length=nr_variants) as bar:
         for variant in bar:

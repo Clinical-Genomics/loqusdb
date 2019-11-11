@@ -175,7 +175,20 @@ class VariantMixin(BaseVariantMixin, SVMixin):
             query['end'] = {'$gte': start}
         LOG.info("Find all variants {}".format(query))
         return self.db.variant.find(query).sort([('start', ASCENDING)])
-
+    
+    def nr_variants(self, chromosome=None, start=None, end=None):
+        """Return nr of variants"""
+        
+        query = {}
+        if chromosome:
+            query['chrom'] = chromosome
+        if start:
+            query['start'] = {'$lte': end}
+            query['end'] = {'$gte': start}
+        LOG.info("Find all variants {}".format(query))
+        return self.db.variant.count_documents(query)
+        
+        
     def delete_variant(self, variant):
         """Delete observation in database
 
