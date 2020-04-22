@@ -53,6 +53,7 @@ def export(ctx, outfile, variant_type):
     head = HeaderParser()
     head.add_fileformat("VCFv4.3")
     head.add_meta_line("NrCases", nr_cases)
+    head.add_info("Frq", '1', 'Float', "Observation frequency of the variant (not allele frequency)")
     head.add_info("Obs", '1', 'Integer', "The number of observations for the variant")
     head.add_info("Hom", '1', 'Integer', "The number of observed homozygotes")
     head.add_info("Hem", '1', 'Integer', "The number of observed hemizygotes")
@@ -79,7 +80,7 @@ def export(ctx, outfile, variant_type):
             variants = adapter.get_sv_variants(chromosome=chrom)
         LOG.info("{} variants found".format(variants.count()))
         for variant in variants:
-            variant_line = format_variant(variant, variant_type=variant_type)
+            variant_line = format_variant(variant, variant_type=variant_type, nr_cases=nr_cases)
             # chrom = variant['chrom']
             # pos = variant['start']
             # ref = variant['ref']
