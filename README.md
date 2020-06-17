@@ -1,8 +1,8 @@
-# loqusdb [![Build Status][travis-image]][travis-url] 
+# loqusdb [![Build Status][travis-image]][travis-url]
 
 Small tool to setup a local variant database.
 
-Right now **locusdb** uses [mongodb][mongodb] as backend for 
+Right now **locusdb** uses [mongodb][mongodb] as backend for
 storing variants but there should not be a huge difference to use another
 database manager.
 
@@ -46,34 +46,66 @@ Usage: loqusdb [OPTIONS] COMMAND [ARGS]...
   loqusdb: manage a local variant count database.
 
 Options:
-  -db, --database TEXT   [default: loqusdb]
+  -db, --database TEXT            Defaults to 'loqusdb' if not specified
   -u, --username TEXT
   -p, --password TEXT
-  -port, --port INTEGER  Specify the port where to look for the mongo
-                         database.  [default: 27017]
-  -h, --host TEXT        Specify the host where to look for the mongo
-                         database.  [default: localhost]
-  -b, --backend [mongo]  Specify what backend to use.  [default: mongo]
-  -c, --conn_host TEXT   Used for testing.  [default: mongodb://]
-  -l, --logfile PATH     Path to log file. If none logging is printed to
-                         stderr.
+  -a, --authdb TEXT               If authentication should be done against
+                                  another database than --database
+
+  -port, --port INTEGER           Specify the port where to look for the mongo
+                                  database.  [default: 27017]
+
+  -h, --host TEXT                 Specify the host where to look for the mongo
+                                  database.  [default: localhost]
+
+  --uri TEXT                      Specify a mongodb uri
+  -c, --config FILENAME           Use a config with db information
+  -t, --test                      Used for testing. This will use a mongomock
+                                  database.
+
+  -g, --genome-build [GRCh37|GRCh38]
+                                  Specify what genome build to use
   -v, --verbose
-  --version              Show the version and exit.
-  --help                 Show this message and exit.
+  --version                       Show the version and exit.
+  --help                          Show this message and exit.
 
 Commands:
+  annotate  Annotate a VCF with observations
   cases     Display cases in database
   delete    Delete the variants of a family
+  dump      Dump the database
   export    Export variants to VCF format
+  identity  Search identity collection
   index     Add indexes to database
   load      Load the variants of a family
   migrate   Migrate an old loqusdb instance
+  profile   Loads variants to be used in profiling
+  restore   Restore database from dump
+  update    Update an existing case with a new type of variants
   variants  Display variants in database
   wipe      Wipe a loqusdb instance
 ```
 
 
 ## Database ##
+
+### Connecting ###
+
+Connection can be specified on command line with `--database`, `--username`, `--password`, `--port`, `--host` and/or `--uri`. Or these options can be sent with a config file that can take the same options, looks like:
+
+```yaml
+uri: mongodb://loqusdb-username:loqusdb-pwd@localhost:27030/loqusdb-rd?authSource=admin
+db_name: loqusdb_test
+```
+or
+```yaml
+host: localhost
+port: 27030
+username: loqusdb-username
+password: loqusdb-pwd
+authdb: admin
+db_name: loqusdb_test
+```
 
 ### Mongo ###
 
