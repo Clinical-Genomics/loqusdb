@@ -3,7 +3,7 @@ import logging
 from pprint import pprint as pp
 LOG = logging.getLogger(__name__)
 
-def format_info(variant, variant_type='snv', nr_cases=None):
+def format_info(variant, variant_type='snv', nr_cases=None, add_freq=False):
     """Format the info field for SNV variants
     
     Args:
@@ -26,7 +26,7 @@ def format_info(variant, variant_type='snv', nr_cases=None):
     if hemizygotes:
         vcf_info += f";Hem={hemizygotes}"
 
-    if nr_cases and nr_cases > 0:
+    if add_freq and nr_cases and nr_cases > 0:
         frequency = observations / nr_cases
         vcf_info += f";Frq={frequency:.5f}"
 
@@ -38,7 +38,7 @@ def format_info(variant, variant_type='snv', nr_cases=None):
 
     return vcf_info
 
-def format_variant(variant, variant_type='snv', nr_cases=None):
+def format_variant(variant, variant_type='snv', nr_cases=None, add_freq=False):
     """Convert variant information to a VCF formated string
     
     Args:
@@ -62,7 +62,7 @@ def format_variant(variant, variant_type='snv', nr_cases=None):
 
     info = None
     
-    info = format_info(variant, variant_type=variant_type, nr_cases=nr_cases)
+    info = format_info(variant, variant_type=variant_type, nr_cases=nr_cases, add_freq=add_freq)
 
     variant_line = f"{chrom}\t{pos}\t.\t{ref}\t{alt}\t.\t.\t{info}"
     
