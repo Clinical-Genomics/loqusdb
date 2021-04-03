@@ -6,6 +6,9 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+### Added
+- Option to add observation frequencies to exported VCF (--freq)
+
 ## [2.5]
 
 ### Added

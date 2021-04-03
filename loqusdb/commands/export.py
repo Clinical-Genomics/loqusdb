@@ -24,8 +24,12 @@ LOG = logging.getLogger(__name__)
     show_default=True,
     help="If svs or snvs should be exported"
 )
+@click.option('-f','--freq',
+    is_flag=True,
+    help="Include observation frequencies in the exported VCF"
+)
 @click.pass_context
-def export(ctx, outfile, variant_type):
+def export(ctx, outfile, variant_type, freq):
     """Export the variants of a loqus db
         
         The variants are exported to a vcf file
@@ -53,6 +57,8 @@ def export(ctx, outfile, variant_type):
     head = HeaderParser()
     head.add_fileformat("VCFv4.3")
     head.add_meta_line("NrCases", nr_cases)
+    if freq:
+        head.add_info("Frq", '1', 'Float', "Observation frequency of the variant (not allele frequency)")
     head.add_info("Obs", '1', 'Integer', "The number of observations for the variant")
     head.add_info("Hom", '1', 'Integer', "The number of observed homozygotes")
     head.add_info("Hem", '1', 'Integer', "The number of observed hemizygotes")
@@ -79,7 +85,7 @@ def export(ctx, outfile, variant_type):
             variants = adapter.get_sv_variants(chromosome=chrom)
         LOG.info("{} variants found".format(variants.count()))
         for variant in variants:
-            variant_line = format_variant(variant, variant_type=variant_type)
+            variant_line = format_variant(variant, variant_type=variant_type, nr_cases=nr_cases, add_freq=freq)
             # chrom = variant['chrom']
             # pos = variant['start']
             # ref = variant['ref']
