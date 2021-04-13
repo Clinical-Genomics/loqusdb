@@ -68,6 +68,9 @@ site/
 # Node.js
 node_modules/
 
+# IDE
+.idea/
+
 # Local Files
 NOTES.md
 
