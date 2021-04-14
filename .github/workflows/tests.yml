@@ -32,7 +32,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install cython
         pip install numpy
-        pip install .
+        pip install -e .
         pip check
 
     - name: Dev Dependencies
@@ -45,7 +45,7 @@ jobs:
 
     - name: Test with pytest & Coveralls
       run: |
-        pytest --cov=loqusdb/
+        pytest --cov=loqusdb/ tests/
         coveralls
       env:
         GITHUB: 1
