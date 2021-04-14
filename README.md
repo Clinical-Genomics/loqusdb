@@ -1,6 +1,7 @@
 # loqusdb 
 ![Build Status - GitHub][actions-build-status]
 [![Coverage Status][coveralls-img]][coveralls-url]
+[![PyPI Version][pypi-img]][pypi-url]
 
 Small tool to setup a local variant database. If you find loqusdb useful in your work, please cite the [article][publication].
 
@@ -144,3 +145,5 @@ The collections looks like:
 [actions-build-status]: https://github.com/moonso/loqusdb/actions/workflows/tests.yml/badge.svg?branch=master
 [mongodb]: https://www.mongodb.org
 [publication]: https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-020-03609-z
+[pypi-img]: https://img.shields.io/pypi/v/loqusdb.svg?style=flat-square
+[pypi-url]: https://pypi.python.org/pypi/loqusdb/
