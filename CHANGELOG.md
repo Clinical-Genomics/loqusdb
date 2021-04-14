@@ -9,6 +9,11 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 ### Changed
 ### Fixed
 
+## [2.5.2]
+
+### Changed
+- Convert version to string
+
 ## [2.5.1]
 
 ### Added
