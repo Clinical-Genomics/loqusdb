@@ -65,6 +65,9 @@ _book
 # mkdocs
 site/
 
+# Environments
+venv/
+
 # Node.js
 node_modules/
 
