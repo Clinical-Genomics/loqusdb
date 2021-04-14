@@ -1,6 +1,6 @@
 # loqusdb 
-![Build Status - GitHub][actions-build-status]
-[![Coverage Status][coveralls-img]][coveralls-url]
+[![Publish to PyPI](https://github.com/moonso/loqusdb/actions/workflows/build_and_publish.yml/badge.svg)](https://github.com/moonso/loqusdb/actions/workflows/build_and_publish.yml)
+[![Coverage Status](https://coveralls.io/repos/github/moonso/loqusdb/badge.svg?branch=master)](https://coveralls.io/github/moonso/loqusdb?branch=master)
 [![PyPI Version][pypi-img]][pypi-url]
 
 Small tool to setup a local variant database. If you find loqusdb useful in your work, please cite the [article][publication].
@@ -140,9 +140,6 @@ The collections looks like:
 }
 ```
 
-[coverage-url]: https://coveralls.io/github/moonso/loqusdb?branch=master
-[coverage-img]: https://coveralls.io/repos/github/moonso/loqusdb/badge.svg?branch=master
-[actions-build-status]: https://github.com/moonso/loqusdb/actions/workflows/tests.yml/badge.svg?branch=master
 [mongodb]: https://www.mongodb.org
 [publication]: https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-020-03609-z
 [pypi-img]: https://img.shields.io/pypi/v/loqusdb.svg?style=flat-square
