@@ -13,6 +13,7 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
 ### Changed
 - Convert version to string
+- Use Github Actions for running CI instead of Travis
 
 ## [2.5.1]
 
