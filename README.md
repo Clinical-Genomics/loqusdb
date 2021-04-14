@@ -141,6 +141,6 @@ The collections looks like:
 
 [coverage-url]: https://coveralls.io/github/moonso/loqusdb?branch=master
 [coverage-img]: https://coveralls.io/repos/github/moonso/loqusdb/badge.svg?branch=master
-[actions-build-status]: https://github.com/moonso/loqusdb/workflows/loqusdb%20tests/badge.svg
+[actions-build-status]: https://github.com/moonso/loqusdb/actions/workflows/tests.yml/badge.svg?branch=master
 [mongodb]: https://www.mongodb.org
 [publication]: https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-020-03609-z

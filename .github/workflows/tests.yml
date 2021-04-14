@@ -1,4 +1,4 @@
-name: Run tests and publish to pypi
+name: Run tests and coverage
 
 on: ["pull_request"]
 
