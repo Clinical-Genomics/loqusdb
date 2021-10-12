@@ -29,10 +29,10 @@ def restore(ctx, filename):
         ctx.abort()
 
     call = ['mongorestore', '--gzip', '--archive={}'.format(filename), '--db', ctx.obj.get('db')]
-      if ctx.obj.get('uri'):
-          call.append(f"--uri={ctx.obj['uri']}")
-      else: # Use host and port
-          call.append(f"--host={ctx.obj['host']}:{ctx.obj['port']}")
+    if ctx.obj.get('uri'): # if db URI is available use it
+        call.append(f"--uri={ctx.obj['uri']}")
+    else: # Otherwise use host and port
+        call.append(f"--host={ctx.obj['host']}:{ctx.obj['port']}")
 
     LOG.info('Restoring database from %s', filename)
     start_time = datetime.now()
