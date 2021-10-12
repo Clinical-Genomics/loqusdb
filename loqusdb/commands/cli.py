@@ -109,10 +109,11 @@ def cli(ctx, database, username, password, authdb, port, host, uri, verbose, con
 
     ctx.obj = {}
     ctx.obj['db'] = database
-    ctx.obj['user'] = username
-    ctx.obj['password'] = password
-    ctx.obj['port'] = port
-    ctx.obj['host'] = host
+    if uri:
+        ctx.obj['uri'] = uri
+    else:
+        ctx.obj['port'] = port
+        ctx.obj['host'] = host
     ctx.obj['adapter'] = adapter
     ctx.obj['version'] = __version__
     ctx.obj['genome_build'] = genome_build
