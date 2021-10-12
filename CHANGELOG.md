@@ -7,7 +7,10 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 ## [unreleased]
 ### Added
 ### Changed
+- GitHub actions run tests using MongoDB versions 3.2, 4.4 and 5.0
 ### Fixed
+- Restore command accepts custom database name
+- Restore command uses either database URI or host:port params
 
 ## [2.5.2]
 
