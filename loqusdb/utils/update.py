@@ -9,13 +9,14 @@ This functions take an adapter which is the communication device for the databas
 
 import logging
 
-from loqusdb.build_models import build_case
+
 from loqusdb.exceptions import CaseError
 
-from .case import get_case
-from .delete import delete
-from .load import load_case, load_variants
-from .vcf import check_vcf, get_vcf
+from loqusdb.utils.case import get_case
+from loqusdb.utils.delete import delete
+from loqusdb.utils.load import load_case, load_variants
+from loqusdb.utils.vcf import check_vcf, get_vcf
+from loqusdb.build_models.case import build_case
 
 LOG = logging.getLogger(__name__)
 

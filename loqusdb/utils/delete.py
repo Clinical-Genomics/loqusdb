@@ -3,8 +3,8 @@ import logging
 from datetime import datetime
 
 
-from .vcf import get_vcf
-from ..build_models.variant import build_variant
+from loqusdb.utils.vcf import get_vcf
+from loqusdb.build_models.variant import build_variant
 
 LOG = logging.getLogger(__name__)
 

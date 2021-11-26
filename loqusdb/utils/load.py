@@ -13,13 +13,13 @@ import click
 
 from loqusdb.exceptions import CaseError, VcfError
 
-from .case import get_case, update_case
-from .delete import delete
-from .profiling import get_profiles, profile_match
-from .vcf import check_vcf, get_vcf
-from ..build_models.case import build_case
-from ..build_models.profile_variant import build_profile_variant
-from ..build_models.variant import build_variant
+from loqusdb.utils.case import get_case, update_case
+from loqusdb.utils.delete import delete
+from loqusdb.utils.profiling import get_profiles, profile_match
+from loqusdb.utils.vcf import check_vcf, get_vcf
+from loqusdb.build_models.case import build_case
+from loqusdb.build_models.profile_variant import build_profile_variant
+from loqusdb.build_models.variant import build_variant
 
 LOG = logging.getLogger(__name__)
 
