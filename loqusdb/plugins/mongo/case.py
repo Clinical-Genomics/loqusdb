@@ -1,27 +1,24 @@
 import logging
-from pprint import pprint as pp
-
-from loqusdb.plugins import BaseCaseMixin
 from loqusdb.exceptions import CaseError
 
 LOG = logging.getLogger(__name__)
 
-class CaseMixin(BaseCaseMixin):
 
+class CaseMixin:
     def case(self, case):
         """Get a case from the database
 
-            Search the cases with the case id
+        Search the cases with the case id
 
-            Args:
-                case (dict): A case dictionary
+        Args:
+            case (dict): A case dictionary
 
-            Returns:
-                mongo_case (dict): A mongo case dictionary
+        Returns:
+            mongo_case (dict): A mongo case dictionary
         """
-        LOG.debug("Getting case {0} from database".format(case.get('case_id')))
-        case_id = case['case_id']
-        return self.db.case.find_one({'case_id': case_id})
+        LOG.debug("Getting case {0} from database".format(case.get("case_id")))
+        case_id = case["case_id"]
+        return self.db.case.find_one({"case_id": case_id})
 
     def cases(self):
         """Get all cases from the database
@@ -44,18 +41,17 @@ class CaseMixin(BaseCaseMixin):
         """
         LOG.info("Fetch number of cases")
         query = {}
-        
+
         if snv_cases:
             LOG.info("Fetch all snv cases")
-            query = {'vcf_path': {'$ne':None}}
+            query = {"vcf_path": {"$ne": None}}
         if sv_cases:
             LOG.info("Fetch all sv cases")
-            query = {'vcf_sv_path': {'$ne':None}}
+            query = {"vcf_sv_path": {"$ne": None}}
         if snv_cases and sv_cases:
             query = {}
 
         return self.db.case.count_documents(query)
-
 
     def add_case(self, case, update=False):
         """Add a case to the case collection
@@ -73,10 +69,10 @@ class CaseMixin(BaseCaseMixin):
         """
         existing_case = self.case(case)
         if existing_case and not update:
-            raise CaseError("Case {} already exists".format(case['case_id']))
+            raise CaseError("Case {} already exists".format(case["case_id"]))
         if existing_case:
             self.db.case.find_one_and_replace(
-                {'case_id': case['case_id']},
+                {"case_id": case["case_id"]},
                 case,
             )
         else:
@@ -87,22 +83,20 @@ class CaseMixin(BaseCaseMixin):
     def delete_case(self, case):
         """Delete case from the database
 
-            Delete a case from the database
+        Delete a case from the database
 
-            Args:
-                case (dict): A case dictionary
+        Args:
+            case (dict): A case dictionary
 
         """
         mongo_case = self.case(case)
 
         if not mongo_case:
-            raise CaseError("Tried to delete case {0} but could not find case".format(
-                case.get('case_id')
-            ))
-        LOG.info("Removing case {0} from database".format(
-            mongo_case.get('case_id')
-        ))
-        self.db.case.delete_one({'_id': mongo_case['_id']})
+            raise CaseError(
+                "Tried to delete case {0} but could not find case".format(case.get("case_id"))
+            )
+        LOG.info("Removing case {0} from database".format(mongo_case.get("case_id")))
+        self.db.case.delete_one({"_id": mongo_case["_id"]})
 
         return
 
