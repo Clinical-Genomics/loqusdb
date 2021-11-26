@@ -5,8 +5,7 @@ from datetime import datetime
 import click
 from loqusdb.utils.annotate import annotate_snvs, annotate_svs
 from loqusdb.utils.vcf import add_headers, get_file_handle
-
-from . import base_command
+from loqusdb.commands.cli import cli as base_command
 
 LOG = logging.getLogger(__name__)
 

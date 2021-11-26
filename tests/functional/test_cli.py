@@ -1,6 +1,6 @@
 from click.testing import CliRunner
 
-from loqusdb.commands import base_command
+from loqusdb.commands.cli import cli as base_command
 from loqusdb.exceptions import ProfileError
 
 

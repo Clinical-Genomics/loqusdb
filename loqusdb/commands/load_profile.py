@@ -6,7 +6,7 @@ from loqusdb.resources import MAF_PATH
 from loqusdb.utils.load import load_profile_variants
 from loqusdb.utils.profiling import check_duplicates, get_profiles, profile_stats, update_profiles
 
-from . import base_command
+from loqusdb.commands.cli import cli as base_command
 
 LOG = logging.getLogger(__name__)
 

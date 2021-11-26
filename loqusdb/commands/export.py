@@ -6,7 +6,7 @@ from loqusdb import CHROMOSOME_ORDER
 from loqusdb.utils.variant import format_variant
 from vcftoolbox import HeaderParser, print_headers, print_variant
 
-from . import base_command
+from loqusdb.commands.cli import cli as base_command
 
 LOG = logging.getLogger(__name__)
 

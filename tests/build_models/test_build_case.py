@@ -45,14 +45,14 @@ def test_build_case_no_ped():
 
 
 def test_build_case_no_ped_no_case_id():
-    ## GIVEN some vcf individuals
-
-    vcf_individuals = ["mother", "proband"]
-
     ## WHEN building a case object
 
     ## THEN assert a CaseError is raised
     with pytest.raises(CaseError):
+        ## GIVEN some vcf individuals
+
+        vcf_individuals = ["mother", "proband"]
+
         case_obj = build_case(
             case=None,
             vcf_individuals=vcf_individuals,
@@ -106,11 +106,11 @@ def test_build_case_ped_sv(family_obj, sv_vcf_path):
         assert ind_obj["ind_id"] in vcf_inds
 
     ## THEN assert that the vcf_path was added
-    assert case_obj["vcf_path"] == None
+    assert case_obj["vcf_path"] is None
     assert case_obj["vcf_sv_path"] == sv_vcf_path
 
     ## THEN assert that the nr variants is correct
-    assert case_obj["nr_variants"] == None
+    assert case_obj["nr_variants"] is None
     assert case_obj["nr_sv_variants"] == nr_sv_variants
 
 
