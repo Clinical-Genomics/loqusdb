@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# !/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # Note: To use the 'upload' functionality of this file, you must:
@@ -9,10 +9,10 @@
 
 import io
 import os
-import sys
-from shutil import rmtree
 
-from setuptools import find_packages, setup, Command
+from pip._internal.network.session import PipSession
+from pip._internal.req import parse_requirements
+from setuptools import find_packages, setup
 
 # Package meta-data.
 NAME = "loqusdb"
@@ -20,26 +20,14 @@ DESCRIPTION = "Store observations of vcf variants in a mongodb"
 URL = "https://github.com/moonso/loqusdb"
 EMAIL = "mans.magnusson@scilifelab.com"
 AUTHOR = "Måns Magnusson"
-REQUIRES_PYTHON = ">=3.6.0"
+REQUIRES_PYTHON = ">=3.9.0"
 VERSION = "2.5.2"
 
-# What packages are required for this module to be executed?
-REQUIRED = [
-    "click",
-    "ped_parser",
-    "pymongo==3.7.1",
-    "mongomock==3.18",
-    "vcftoolbox==1.5",
-    "cyvcf2<0.10",
-    "coloredlogs",
-    "mongo_adapter>=0.2",
-    "pyyaml",
+requirements = [
+    requirement.requirement
+    for requirement in parse_requirements(filename="./requirements.txt", session=PipSession())
 ]
 
-# What packages are optional?
-EXTRAS = {
-    "tests": ["pytest"],
-}
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
@@ -65,43 +53,6 @@ else:
     about["__version__"] = VERSION
 
 
-class UploadCommand(Command):
-    """Support setup.py upload."""
-
-    description = "Build and publish the package."
-    user_options = []
-
-    @staticmethod
-    def status(s):
-        """Prints things in bold."""
-        print("\033[1m{0}\033[0m".format(s))
-
-    def initialize_options(self):
-        pass
-
-    def finalize_options(self):
-        pass
-
-    def run(self):
-        try:
-            self.status("Removing previous builds…")
-            rmtree(os.path.join(here, "dist"))
-        except OSError:
-            pass
-
-        self.status("Building Source and Wheel (universal) distribution…")
-        os.system("{0} setup.py sdist bdist_wheel --universal".format(sys.executable))
-
-        self.status("Uploading the package to PyPI via Twine…")
-        os.system("twine upload dist/*")
-
-        self.status("Pushing git tags…")
-        os.system("git tag v{0}".format(about["__version__"]))
-        os.system("git push --tags")
-
-        sys.exit()
-
-
 # Where the magic happens:
 setup(
     name=NAME,
@@ -117,8 +68,7 @@ setup(
     entry_points={
         "console_scripts": ["loqusdb = loqusdb.__main__:base_command"],
     },
-    install_requires=REQUIRED,
-    extras_require=EXTRAS,
+    install_requires=requirements,
     include_package_data=True,
     license="MIT",
     keywords=["vcf", "variants"],
@@ -135,8 +85,4 @@ setup(
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
     ],
-    # $ setup.py publish support.
-    cmdclass={
-        "upload": UploadCommand,
-    },
 )
