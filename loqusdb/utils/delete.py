@@ -38,7 +38,7 @@ def delete(adapter, case_obj, update=False, existing_case=False, genome_build=No
             delete_variants(
                 adapter=adapter, vcf_obj=vcf_obj, case_obj=case_obj, genome_build=genome_build
             )
-        if file_type == "vcf_sv_path":
+        elif file_type == "vcf_sv_path":
             LOG.info("deleting structural variants")
             delete_structural_variants(
                 adapter=adapter,
@@ -102,7 +102,7 @@ def delete_variants(adapter, vcf_obj, case_obj, case_id=None, genome_build=None)
             LOG.info("Start deleting chromosome {0}".format(new_chrom))
             current_chrom = new_chrom
 
-    if len(variant_list) > 0:
+    if variant_list:
         adapter.delete_variants(variant_list)
         variant_list.clear()
 
