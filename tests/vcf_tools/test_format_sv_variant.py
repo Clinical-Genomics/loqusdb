@@ -1,4 +1,4 @@
-from loqusdb.build_models import build_variant
+from loqusdb.build_models.variant import build_variant
 
 
 def test_format_indel(del_variant, case_obj):
