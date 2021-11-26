@@ -1,7 +1,8 @@
 import pytest
 
-from loqusdb.utils.load import load_database
 from loqusdb.exceptions import CaseError
+from loqusdb.utils.load import load_database
+
 
 def test_load_database(vcf_path, ped_path, real_mongo_adapter, case_id):
     mongo_adapter = real_mongo_adapter
@@ -11,12 +12,13 @@ def test_load_database(vcf_path, ped_path, real_mongo_adapter, case_id):
         adapter=mongo_adapter,
         variant_file=vcf_path,
         family_file=ped_path,
-        family_type='ped',
+        family_type="ped",
     )
 
     mongo_case = db.case.find_one()
 
-    assert mongo_case['case_id'] == case_id
+    assert mongo_case["case_id"] == case_id
+
 
 def test_load_database_alternative_ped(vcf_path, ped_path, real_mongo_adapter, case_id):
     mongo_adapter = real_mongo_adapter
@@ -26,15 +28,16 @@ def test_load_database_alternative_ped(vcf_path, ped_path, real_mongo_adapter, c
         adapter=mongo_adapter,
         variant_file=vcf_path,
         family_file=ped_path,
-        family_type='ped',
-        case_id='alternative'
+        family_type="ped",
+        case_id="alternative",
     )
 
     mongo_case = db.case.find_one()
     mongo_variant = db.variant.find_one()
 
-    assert mongo_case['case_id'] == 'alternative'
-    assert mongo_variant['families'] == ['alternative']
+    assert mongo_case["case_id"] == "alternative"
+    assert mongo_variant["families"] == ["alternative"]
+
 
 def test_load_database_wrong_ped(vcf_path, funny_ped_path, real_mongo_adapter):
     mongo_adapter = real_mongo_adapter
@@ -46,5 +49,5 @@ def test_load_database_wrong_ped(vcf_path, funny_ped_path, real_mongo_adapter):
             adapter=mongo_adapter,
             variant_file=vcf_path,
             family_file=funny_ped_path,
-            family_type='ped',
+            family_type="ped",
         )

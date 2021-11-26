@@ -2,8 +2,8 @@ import logging
 
 LOG = logging.getLogger(__name__)
 
-class ProfileVariantMixin():
 
+class ProfileVariantMixin:
     def add_profile_variants(self, profile_variants):
 
         """Add several variants to the profile_variant collection in the

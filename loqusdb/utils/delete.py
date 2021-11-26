@@ -2,9 +2,10 @@
 import logging
 from datetime import datetime
 
-from .vcf import get_vcf
+from loqusdb.build_models import build_case, build_variant
+
 from .case import get_case
-from loqusdb.build_models import (build_case, build_variant)
+from .vcf import get_vcf
 
 LOG = logging.getLogger(__name__)
 
@@ -26,28 +27,26 @@ def delete(adapter, case_obj, update=False, existing_case=False, genome_build=No
     else:
         adapter.delete_case(case_obj)
 
-    for file_type in ['vcf_path', 'vcf_sv_path']:
+    for file_type in ["vcf_path", "vcf_sv_path"]:
         if not case_obj.get(file_type):
             continue
         variant_file = case_obj[file_type]
         # Get a cyvcf2.VCF object
         vcf_obj = get_vcf(variant_file)
 
-        if file_type == 'vcf_path':
-            LOG.info('deleting variants')
+        if file_type == "vcf_path":
+            LOG.info("deleting variants")
             delete_variants(
-                adapter=adapter,
-                vcf_obj=vcf_obj,
-                case_obj=case_obj,
-                genome_build=genome_build
+                adapter=adapter, vcf_obj=vcf_obj, case_obj=case_obj, genome_build=genome_build
             )
-        if file_type == 'vcf_sv_path':
-            LOG.info('deleting structural variants')
+        if file_type == "vcf_sv_path":
+            LOG.info("deleting structural variants")
             delete_structural_variants(
                 adapter=adapter,
                 vcf_obj=vcf_obj,
                 case_obj=case_obj,
             )
+
 
 def delete_variants(adapter, vcf_obj, case_obj, case_id=None, genome_build=None):
     """Delete variants for a case in the database
@@ -61,7 +60,7 @@ def delete_variants(adapter, vcf_obj, case_obj, case_id=None, genome_build=None)
     Returns:
         nr_deleted (int): Number of deleted variants
     """
-    case_id = case_id or case_obj['case_id']
+    case_id = case_id or case_obj["case_id"]
     nr_deleted = 0
     start_deleting = datetime.now()
     chrom_time = datetime.now()
@@ -71,10 +70,7 @@ def delete_variants(adapter, vcf_obj, case_obj, case_id=None, genome_build=None)
     variant_list = []
     for variant in vcf_obj:
         formated_variant = build_variant(
-            variant=variant,
-            case_obj=case_obj,
-            case_id=case_id,
-            genome_build=genome_build
+            variant=variant, case_obj=case_obj, case_id=case_id, genome_build=genome_build
         )
 
         if not formated_variant:
@@ -82,7 +78,7 @@ def delete_variants(adapter, vcf_obj, case_obj, case_id=None, genome_build=None)
 
         variant_list.append(formated_variant)
 
-        new_chrom = formated_variant.get('chrom')
+        new_chrom = formated_variant.get("chrom")
         # When there are enough variants in the variant list
         # They are passed to delete_variants
         if len(variant_list) == 10000:
@@ -99,8 +95,11 @@ def delete_variants(adapter, vcf_obj, case_obj, case_id=None, genome_build=None)
 
         if new_chrom != current_chrom:
             LOG.info("Chromosome {0} done".format(current_chrom))
-            LOG.info("Time to delete chromosome {0}: {1}".format(
-                current_chrom, datetime.now()-chrom_time))
+            LOG.info(
+                "Time to delete chromosome {0}: {1}".format(
+                    current_chrom, datetime.now() - chrom_time
+                )
+            )
             LOG.info("Start deleting chromosome {0}".format(new_chrom))
             current_chrom = new_chrom
 
@@ -109,6 +108,7 @@ def delete_variants(adapter, vcf_obj, case_obj, case_id=None, genome_build=None)
         variant_list.clear()
 
     return nr_deleted
+
 
 def delete_structural_variants(adapter, vcf_obj, case_obj, case_id=None):
     """Delete structural variants for a case in the database
@@ -122,7 +122,7 @@ def delete_structural_variants(adapter, vcf_obj, case_obj, case_id=None):
     Returns:
         nr_deleted (int): Number of deleted variants"""
 
-    case_id = case_id or case_obj['case_id']
+    case_id = case_id or case_obj["case_id"]
     nr_deleted = 0
     start_deleting = datetime.now()
     chrom_time = datetime.now()
@@ -139,7 +139,7 @@ def delete_structural_variants(adapter, vcf_obj, case_obj, case_id=None):
         if not formated_variant:
             continue
 
-        new_chrom = formated_variant.get('chrom')
+        new_chrom = formated_variant.get("chrom")
         adapter.delete_structural_variant(formated_variant)
         nr_deleted += 1
 
@@ -151,8 +151,11 @@ def delete_structural_variants(adapter, vcf_obj, case_obj, case_id=None):
 
         if new_chrom != current_chrom:
             LOG.info("Chromosome {0} done".format(current_chrom))
-            LOG.info("Time to delete chromosome {0}: {1}".format(
-                current_chrom, datetime.now()-chrom_time))
+            LOG.info(
+                "Time to delete chromosome {0}: {1}".format(
+                    current_chrom, datetime.now() - chrom_time
+                )
+            )
             LOG.info("Start deleting chromosome {0}".format(new_chrom))
             current_chrom = new_chrom
 
