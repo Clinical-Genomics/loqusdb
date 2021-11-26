@@ -1,0 +1,11 @@
+numpy
+cython
+click
+ped_parser
+pymongo
+mongomock
+vcftoolbox
+cyvcf2
+coloredlogs
+mongo_adapter
+pyyaml

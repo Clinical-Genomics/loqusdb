@@ -1,9 +1,10 @@
 name: Publish to PyPI
 
 on:
- push:
-  tags:
-   - '*'
+ release:
+  types:
+   - created
+
 
 jobs:
  build-n-publish:
@@ -13,10 +14,10 @@ jobs:
    - name: Check out git repository
      uses: actions/checkout@v2
 
-   - name: Set up Python 3.7
+   - name: Set up Python 3.9
      uses: actions/setup-python@v2
      with:
-      python-version: 3.7
+      python-version: 3.9
 
    - name: Install build tools
      run: >-
