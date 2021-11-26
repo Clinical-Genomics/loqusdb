@@ -4,7 +4,9 @@ from mongo_adapter import MongoAdapter as BaseAdapter
 
 from loqusdb import INDEXES
 
-from loqusdb.plugins.mongo import CaseMixin, ProfileVariantMixin, VariantMixin
+from loqusdb.plugins.mongo.case import CaseMixin
+from loqusdb.plugins.mongo.profile_variant import ProfileVariantMixin
+from loqusdb.plugins.mongo.variant import VariantMixin
 
 logger = logging.getLogger(__name__)
 
