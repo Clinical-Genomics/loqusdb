@@ -2,14 +2,13 @@ import logging
 
 from pymongo import ASCENDING, DESCENDING, DeleteOne, UpdateOne
 
-from loqusdb.plugins import BaseVariantMixin
 
-from .structural_variant import SVMixin
+from loqusdb.plugins.mongo.structural_variant import SVMixin
 
 LOG = logging.getLogger(__name__)
 
 
-class VariantMixin(BaseVariantMixin, SVMixin):
+class VariantMixin(SVMixin):
     def _get_update(self, variant):
         """Convert a variant to a proper update
 
