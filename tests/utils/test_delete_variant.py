@@ -24,7 +24,7 @@ def test_delete_variants(real_mongo_adapter, het_variant, case_obj):
     mongo_variant = db.variant.find_one()
 
     ## THEN assert that the variant was not found
-    assert mongo_variant == None
+    assert mongo_variant is None
 
 
 def test_delete_variant(real_mongo_adapter, het_variant, case_obj):

@@ -1,5 +1,6 @@
-from loqusdb.plugins import MongoAdapter
 from mongomock import MongoClient
+
+from loqusdb.plugins.mongo.adapter import MongoAdapter
 
 
 class MockFlaskApp(object):

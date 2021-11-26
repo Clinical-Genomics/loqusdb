@@ -17,14 +17,14 @@ def test_delete_family(mongo_adapter):
     ## THEN assert that the case was deleted
     mongo_case = db.case.find_one()
 
-    assert mongo_case == None
+    assert mongo_case is None
 
 
 def test_delete_non_existing_family(mongo_adapter):
-    ## GIVEN a mongo adapter and a empty database
-    case = {"case_id": "1", "vcf_path": "path_to_vcf"}
-
     ## WHEN deleting a non existing case
     with pytest.raises(CaseError):
+        ## GIVEN a mongo adapter and a empty database
+        case = {"case_id": "1", "vcf_path": "path_to_vcf"}
+
         ## THEN assert a CaseError is raised
         mongo_adapter.delete_case(case)

@@ -17,7 +17,7 @@ def test_delete_case(mongo_adapter, simple_case):
 
     mongo_case = db.case.find_one()
 
-    assert mongo_case == None
+    assert mongo_case is None
 
 
 def test_delete_case_and_variants(vcf_path, ped_path, real_mongo_adapter, case_id, case_obj):
@@ -42,11 +42,11 @@ def test_delete_case_and_variants(vcf_path, ped_path, real_mongo_adapter, case_i
 
     mongo_case = db.case.find_one()
 
-    assert mongo_case == None
+    assert mongo_case is None
 
     mongo_variant = db.variant.find_one()
 
-    assert mongo_variant == None
+    assert mongo_variant is None
 
 
 def test_delete_structural_variants(vcf_path, ped_path, real_mongo_adapter, case_id, sv_case_obj):

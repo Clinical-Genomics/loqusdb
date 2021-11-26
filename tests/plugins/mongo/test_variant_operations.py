@@ -1,6 +1,6 @@
 import copy
 
-from loqusdb.build_models import build_variant
+from loqusdb.build_models.variant import build_variant
 
 
 class TestInsertVariant:
@@ -48,7 +48,7 @@ class TestInsertVariant:
     def test_insert_many(self, mongo_adapter, simplest_variant):
         """Test to insert a homozygote variant"""
 
-        for i in range(10000):
+        for _ in range(10000):
             mongo_adapter.add_variant(simplest_variant)
 
         db = mongo_adapter.db
@@ -75,7 +75,7 @@ class TestGetVariant:
 
         mongo_variant = mongo_adapter.get_variant(simplest_variant)
 
-        assert mongo_variant == None
+        assert mongo_variant is None
 
 
 class TestBulkOperations:
@@ -99,9 +99,10 @@ class TestBulkOperations:
         adapter = real_mongo_adapter
         db = adapter.db
 
-        variants = []
-        variants.append({"_id": "test", "homozygote": 0})
-        variants.append({"_id": "test_1", "homozygote": 1})
+        variants = [
+            {"_id": "test", "homozygote": 0},
+            {"_id": "test_1", "homozygote": 1},
+        ]
 
         adapter.add_variants(variants)
 
@@ -143,7 +144,7 @@ class TestRemoveVariant:
 
         mongo_adapter.delete_variant(variant)
 
-        assert db.variant.find_one() == None
+        assert db.variant.find_one() is None
 
     def test_downcount_one_variant(self, mongo_adapter):
         """Test to update one variant"""
@@ -168,7 +169,7 @@ class TestRemoveVariant:
 
         mongo_adapter.delete_variant(simplest_variant)
 
-        assert db.variant.find_one() == None
+        assert db.variant.find_one() is None
 
 
 class TestRemoveSV:

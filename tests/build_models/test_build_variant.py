@@ -1,5 +1,4 @@
-from loqusdb.build_models import build_variant
-from loqusdb.build_models.variant import get_coords
+from loqusdb.build_models.variant import get_coords, build_variant
 
 
 def test_build_het_variant(het_variant, case_obj):
