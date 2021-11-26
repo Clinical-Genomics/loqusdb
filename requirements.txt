@@ -1,3 +1,5 @@
+numpy
+cython
 click
 ped_parser
 pymongo

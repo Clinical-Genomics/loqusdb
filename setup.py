@@ -23,7 +23,10 @@ AUTHOR = "Måns Magnusson"
 REQUIRES_PYTHON = ">=3.6.0"
 VERSION = "2.5.2"
 
-requirements = parse_requirements(filename="./requirements.txt", session=PipSession())
+requirements = [
+    requirement.requirement
+    for requirement in parse_requirements(filename="./requirements.txt", session=PipSession())
+]
 
 
 # The rest you shouldn't have to touch too much :)
