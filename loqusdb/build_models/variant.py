@@ -1,33 +1,31 @@
 import logging
-
-from pprint import pprint as pp
 from collections import namedtuple
 
+from loqusdb.constants import CHROM_TO_INT, GENOTYPE_MAP, GRCH37, PAR
 from loqusdb.models import Variant
-from loqusdb.exceptions import CaseError
-from loqusdb.constants import (PAR,GENOTYPE_MAP,CHROM_TO_INT,GRCH37)
 
 LOG = logging.getLogger(__name__)
 
-Position = namedtuple('Position', 'chrom pos')
+Position = namedtuple("Position", "chrom pos")
 
 # These are coordinate for the pseudo autosomal regions in GRCh37
+
 
 def check_par(chrom, pos, genome_build=None):
     """Check if a coordinate is in the PAR region
 
-        Args:
-            chrom(str)
-            pos(int)
+    Args:
+        chrom(str)
+        pos(int)
 
-        Returns:
-            par(bool)
+    Returns:
+        par(bool)
     """
     par = False
     if genome_build is None:
-        genome_build=GRCH37
+        genome_build = GRCH37
     for interval in PAR[genome_build].get(chrom, []):
-        if (pos >= interval[0] and pos <= interval[1]):
+        if pos >= interval[0] and pos <= interval[1]:
             par = True
 
     return par
@@ -36,18 +34,13 @@ def check_par(chrom, pos, genome_build=None):
 def get_variant_id(variant):
     """Get a variant id on the format chrom_pos_ref_alt"""
     chrom = variant.CHROM
-    if chrom.lower().startswith('chr'):
+    if chrom.lower().startswith("chr"):
         chrom = chrom[3:]
-    variant_id = '_'.join([
-            str(chrom),
-            str(variant.POS),
-            str(variant.REF),
-            str(variant.ALT[0])
-        ]
-    )
+    variant_id = "_".join([str(chrom), str(variant.POS), str(variant.REF), str(variant.ALT[0])])
     return variant_id
 
-def is_greater(a,b):
+
+def is_greater(a, b):
     """Check if position a is greater than position b
     This will look at chromosome and position.
 
@@ -63,10 +56,10 @@ def is_greater(a,b):
         bool: True if a is greater than b
     """
 
-    a_chrom = CHROM_TO_INT.get(a.chrom,0)
-    b_chrom = CHROM_TO_INT.get(b.chrom,0)
+    a_chrom = CHROM_TO_INT.get(a.chrom, 0)
+    b_chrom = CHROM_TO_INT.get(b.chrom, 0)
 
-    if (a_chrom == 0 or b_chrom == 0):
+    if a_chrom == 0 or b_chrom == 0:
         return False
 
     if a_chrom > b_chrom:
@@ -89,17 +82,17 @@ def get_coords(variant):
         coordinates(dict)
     """
     coordinates = {
-        'chrom': None,
-        'end_chrom': None,
-        'sv_length': None,
-        'sv_type': None,
-        'pos': None,
-        'end': None,
+        "chrom": None,
+        "end_chrom": None,
+        "sv_length": None,
+        "sv_type": None,
+        "pos": None,
+        "end": None,
     }
     chrom = variant.CHROM
-    if chrom.startswith(('chr', 'CHR', 'Chr')):
+    if chrom.startswith(("chr", "CHR", "Chr")):
         chrom = chrom[3:]
-    coordinates['chrom'] = chrom
+    coordinates["chrom"] = chrom
     end_chrom = chrom
 
     pos = int(variant.POS)
@@ -107,37 +100,37 @@ def get_coords(variant):
 
     # Get the end position
     # This will be None for non-svs
-    end_pos = variant.INFO.get('END')
+    end_pos = variant.INFO.get("END")
     if end_pos:
         end = int(end_pos)
     else:
         end = int(variant.end)
-    coordinates['end'] = end
+    coordinates["end"] = end
 
-    sv_type = variant.INFO.get('SVTYPE')
-    length = variant.INFO.get('SVLEN')
+    sv_type = variant.INFO.get("SVTYPE")
+    length = variant.INFO.get("SVLEN")
     if length:
         sv_len = abs(length)
     else:
         sv_len = end - pos
 
     # Translocations will sometimes have a end chrom that differs from chrom
-    if sv_type == 'BND':
-        other_coordinates = alt.strip('ACGTN[]').split(':')
+    if sv_type == "BND":
+        other_coordinates = alt.strip("ACGTN[]").split(":")
         end_chrom = other_coordinates[0]
-        if end_chrom.startswith(('chr', 'CHR', 'Chr')):
+        if end_chrom.startswith(("chr", "CHR", "Chr")):
             end_chrom = end_chrom[3:]
 
         end = int(other_coordinates[1])
 
-        #Set 'infinity' to length if translocation
-        sv_len = float('inf')
+        # Set 'infinity' to length if translocation
+        sv_len = float("inf")
 
     # Insertions often have length 0 in VCF
-    if (sv_len == 0 and alt != '<INS>'):
+    if sv_len == 0 and alt != "<INS>":
         sv_len = len(alt)
 
-    if (pos == end) and (sv_len > 0) and sv_len != float('inf'):
+    if (pos == end) and (sv_len > 0) and sv_len != float("inf"):
         end = pos + sv_len
 
     position = Position(chrom, pos)
@@ -151,13 +144,14 @@ def get_coords(variant):
         chrom = end_position.chrom
         pos = end_position.pos
 
-    coordinates['end_chrom'] = end_chrom
-    coordinates['pos'] = pos
-    coordinates['end'] = end
-    coordinates['sv_length'] = sv_len
-    coordinates['sv_type'] = sv_type
+    coordinates["end_chrom"] = end_chrom
+    coordinates["pos"] = pos
+    coordinates["end"] = end
+    coordinates["sv_length"] = sv_len
+    coordinates["sv_type"] = sv_type
 
     return coordinates
+
 
 def build_variant(variant, case_obj, case_id=None, gq_treshold=None, genome_build=None):
     """Return a Variant object
@@ -180,7 +174,7 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None, genome_buil
 
     sv = False
     # Let cyvcf2 tell if it is a Structural Variant or not
-    if variant.var_type == 'sv':
+    if variant.var_type == "sv":
         sv = True
 
     # chrom_pos_ref_alt
@@ -192,8 +186,8 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None, genome_buil
     alt = variant.ALT[0]
 
     coordinates = get_coords(variant)
-    chrom = coordinates['chrom']
-    pos = coordinates['pos']
+    chrom = coordinates["chrom"]
+    pos = coordinates["pos"]
 
     # These are integers that will be used when uploading
     found_homozygote = 0
@@ -204,28 +198,28 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None, genome_buil
         found_variant = True
     else:
         found_variant = False
-        for ind_obj in case_obj['individuals']:
-            ind_id = ind_obj['ind_id']
+        for ind_obj in case_obj["individuals"]:
+            ind_id = ind_obj["ind_id"]
             # Get the index position for the individual in the VCF
-            ind_pos = ind_obj['ind_index']
+            ind_pos = ind_obj["ind_index"]
             gq = int(variant.gt_quals[ind_pos])
-            if (gq_treshold and gq < gq_treshold):
+            if gq_treshold and gq < gq_treshold:
                 continue
 
             genotype = GENOTYPE_MAP[variant.gt_types[ind_pos]]
 
-            if genotype in ['het', 'hom_alt']:
+            if genotype in ["het", "hom_alt"]:
                 LOG.debug("Found variant")
                 found_variant = True
 
                 # If variant in X or Y and individual is male,
                 # we need to check hemizygosity
-                if chrom in ['X','Y'] and ind_obj['sex'] == 1:
+                if chrom in ["X", "Y"] and ind_obj["sex"] == 1:
                     if not check_par(chrom, pos, genome_build=genome_build):
                         LOG.debug("Found hemizygous variant")
                         found_hemizygote = 1
 
-                if genotype == 'hom_alt':
+                if genotype == "hom_alt":
                     LOG.debug("Found homozygote alternative variant")
                     found_homozygote = 1
 
@@ -235,17 +229,17 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None, genome_buil
             variant_id=variant_id,
             chrom=chrom,
             pos=pos,
-            end=coordinates['end'],
+            end=coordinates["end"],
             ref=ref,
             alt=alt,
-            end_chrom=coordinates['end_chrom'],
-            sv_type = coordinates['sv_type'],
-            sv_len = coordinates['sv_length'],
-            case_id = case_id,
-            homozygote = found_homozygote,
-            hemizygote = found_hemizygote,
-            is_sv = sv,
-            id_column = variant.ID,
+            end_chrom=coordinates["end_chrom"],
+            sv_type=coordinates["sv_type"],
+            sv_len=coordinates["sv_length"],
+            case_id=case_id,
+            homozygote=found_homozygote,
+            hemizygote=found_hemizygote,
+            is_sv=sv,
+            id_column=variant.ID,
         )
 
     return variant_obj

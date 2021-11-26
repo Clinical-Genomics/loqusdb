@@ -8,25 +8,34 @@ This functions take an adapter which is the communication device for the databas
 """
 
 import logging
+
 import click
-from datetime import datetime
+from loqusdb.build_models import build_case, build_profile_variant, build_variant
+from loqusdb.exceptions import CaseError, VcfError
 
-from pprint import pprint as pp
-
-from .vcf import (get_vcf, check_vcf)
-from .case import (get_case, update_case)
+from .case import get_case, update_case
 from .delete import delete
-from .profiling import (get_profiles, profile_match)
-from loqusdb.build_models import (build_case, build_variant, build_profile_variant)
-from loqusdb.exceptions import (CaseError, VcfError)
-
+from .profiling import get_profiles, profile_match
+from .vcf import check_vcf, get_vcf
 
 LOG = logging.getLogger(__name__)
 
-def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
-                  family_type='ped', skip_case_id=False, gq_treshold=None,
-                  case_id=None, max_window = 3000, profile_file=None,
-                  hard_threshold=0.95, soft_threshold=0.9, genome_build=None):
+
+def load_database(
+    adapter,
+    variant_file=None,
+    sv_file=None,
+    family_file=None,
+    family_type="ped",
+    skip_case_id=False,
+    gq_treshold=None,
+    case_id=None,
+    max_window=3000,
+    profile_file=None,
+    hard_threshold=0.95,
+    soft_threshold=0.9,
+    genome_build=None,
+):
     """Load the database with a case and its variants
 
     Args:
@@ -52,29 +61,28 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
     vcf_individuals = None
     if variant_file:
         vcf_info = check_vcf(variant_file)
-        nr_variants = vcf_info['nr_variants']
-        variant_type = vcf_info['variant_type']
+        nr_variants = vcf_info["nr_variants"]
+        variant_type = vcf_info["variant_type"]
         vcf_files.append(variant_file)
         # Get the indivuduals that are present in vcf file
-        vcf_individuals = vcf_info['individuals']
+        vcf_individuals = vcf_info["individuals"]
 
     nr_sv_variants = None
     sv_individuals = None
     if sv_file:
-        vcf_info = check_vcf(sv_file, 'sv')
-        nr_sv_variants = vcf_info['nr_variants']
+        vcf_info = check_vcf(sv_file, "sv")
+        nr_sv_variants = vcf_info["nr_variants"]
         vcf_files.append(sv_file)
-        sv_individuals = vcf_info['individuals']
+        sv_individuals = vcf_info["individuals"]
 
     profiles = None
     matches = None
     if profile_file:
         profiles = get_profiles(adapter, profile_file)
         ###Check if any profile already exists
-        matches = profile_match(adapter,
-                                profiles,
-                                hard_threshold=hard_threshold,
-                                soft_threshold=soft_threshold)
+        matches = profile_match(
+            adapter, profiles, hard_threshold=hard_threshold, soft_threshold=soft_threshold
+        )
 
     # If a gq treshold is used the variants needs to have GQ
     for _vcf_file in vcf_files:
@@ -82,20 +90,17 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
         vcf = get_vcf(_vcf_file)
 
         if gq_treshold:
-            if not vcf.contains('GQ'):
-                LOG.warning('Set gq-treshold to 0 or add info to vcf {0}'.format(_vcf_file))
-                raise SyntaxError('GQ is not defined in vcf header')
+            if not vcf.contains("GQ"):
+                LOG.warning("Set gq-treshold to 0 or add info to vcf {0}".format(_vcf_file))
+                raise SyntaxError("GQ is not defined in vcf header")
 
     # Get a ped_parser.Family object from family file
     family = None
     family_id = None
     if family_file:
         LOG.info("Loading family from %s", family_file)
-        with open(family_file, 'r') as family_lines:
-            family = get_case(
-                family_lines=family_lines,
-                family_type=family_type
-            )
+        with open(family_file, "r") as family_lines:
+            family = get_case(family_lines=family_lines, family_type=family_type)
             family_id = family.family_id
 
     # There has to be a case_id or a family at this stage.
@@ -112,7 +117,7 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
         nr_sv_variants=nr_sv_variants,
         profiles=profiles,
         matches=matches,
-        profile_path=profile_file
+        profile_path=profile_file,
     )
     # Build and load a new case, or update an existing one
     load_case(
@@ -122,10 +127,10 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
 
     nr_inserted = 0
     # If case was succesfully added we can store the variants
-    for file_type in ['vcf_path','vcf_sv_path']:
-        variant_type = 'snv'
-        if file_type == 'vcf_sv_path':
-            variant_type = 'sv'
+    for file_type in ["vcf_path", "vcf_sv_path"]:
+        variant_type = "snv"
+        if file_type == "vcf_sv_path":
+            variant_type = "sv"
         if case_obj.get(file_type) is None:
             continue
 
@@ -139,7 +144,7 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
                 gq_treshold=gq_treshold,
                 max_window=max_window,
                 variant_type=variant_type,
-                genome_build=genome_build
+                genome_build=genome_build,
             )
         except Exception as err:
             # If something went wrong do a rollback
@@ -150,6 +155,7 @@ def load_database(adapter, variant_file=None, sv_file=None, family_file=None,
             )
             raise err
     return nr_inserted
+
 
 def load_case(adapter, case_obj, update=False):
     """Load a case to the database
@@ -166,7 +172,7 @@ def load_case(adapter, case_obj, update=False):
     existing_case = adapter.case(case_obj)
     if existing_case:
         if not update:
-            raise CaseError("Case {0} already exists in database".format(case_obj['case_id']))
+            raise CaseError("Case {0} already exists in database".format(case_obj["case_id"]))
         case_obj = update_case(case_obj, existing_case)
 
     # Add the case to database
@@ -177,8 +183,17 @@ def load_case(adapter, case_obj, update=False):
 
     return case_obj
 
-def load_variants(adapter, vcf_obj, case_obj, skip_case_id=False, gq_treshold=None,
-                  max_window=3000, variant_type='snv', genome_build=None):
+
+def load_variants(
+    adapter,
+    vcf_obj,
+    case_obj,
+    skip_case_id=False,
+    gq_treshold=None,
+    max_window=3000,
+    variant_type="snv",
+    genome_build=None,
+):
     """Load variants for a family into the database.
 
     Args:
@@ -194,53 +209,57 @@ def load_variants(adapter, vcf_obj, case_obj, skip_case_id=False, gq_treshold=No
     Returns:
         nr_inserted(int)
     """
-    if variant_type == 'snv':
-        nr_variants = case_obj['nr_variants']
+    if variant_type == "snv":
+        nr_variants = case_obj["nr_variants"]
     else:
-        nr_variants = case_obj['nr_sv_variants']
+        nr_variants = case_obj["nr_sv_variants"]
 
     nr_inserted = 0
-    case_id = case_obj['case_id']
+    case_id = case_obj["case_id"]
     if skip_case_id:
         case_id = None
     # Loop over the variants in the vcf
-    with click.progressbar(vcf_obj, label="Inserting variants",length=nr_variants) as bar:
+    with click.progressbar(vcf_obj, label="Inserting variants", length=nr_variants) as bar:
 
-        variants = (build_variant(variant,case_obj,case_id, gq_treshold, genome_build=genome_build) for variant in bar)
+        variants = (
+            build_variant(variant, case_obj, case_id, gq_treshold, genome_build=genome_build)
+            for variant in bar
+        )
 
-    if variant_type == 'sv':
+    if variant_type == "sv":
         for sv_variant in variants:
             if not sv_variant:
                 continue
             adapter.add_structural_variant(variant=sv_variant, max_window=max_window)
             nr_inserted += 1
 
-    if variant_type == 'snv':
+    if variant_type == "snv":
         nr_inserted = adapter.add_variants(variants)
 
     LOG.info("Inserted %s variants of type %s", nr_inserted, variant_type)
 
     return nr_inserted
 
+
 def load_profile_variants(adapter, variant_file):
 
     """
 
-        Loads variants used for profiling
+    Loads variants used for profiling
 
-        Args:
-            adapter (loqusdb.plugins.Adapter): initialized plugin
-            variant_file(str): Path to variant file
+    Args:
+        adapter (loqusdb.plugins.Adapter): initialized plugin
+        variant_file(str): Path to variant file
 
 
     """
 
     vcf_info = check_vcf(variant_file)
-    nr_variants = vcf_info['nr_variants']
-    variant_type = vcf_info['variant_type']
+    nr_variants = vcf_info["nr_variants"]
+    variant_type = vcf_info["variant_type"]
 
-    if variant_type != 'snv':
-        LOG.critical('Variants used for profiling must be SNVs only')
+    if variant_type != "snv":
+        LOG.critical("Variants used for profiling must be SNVs only")
         raise VcfError
 
     vcf = get_vcf(variant_file)

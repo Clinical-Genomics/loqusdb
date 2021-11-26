@@ -1,21 +1,23 @@
 # -*- coding: utf-8 -*-
-import os
 import logging
+import os
 import subprocess
-
 from datetime import datetime
 
 import click
+from loqusdb.resources import background_path
 
 from . import base_command
-from loqusdb.resources import background_path
 
 LOG = logging.getLogger(__name__)
 
-@base_command.command('restore', short_help="Restore database from dump")
-@click.option('-f' ,'--filename',
-                help='If custom named file is to be used',
-                type=click.Path(exists=True),
+
+@base_command.command("restore", short_help="Restore database from dump")
+@click.option(
+    "-f",
+    "--filename",
+    help="If custom named file is to be used",
+    type=click.Path(exists=True),
 )
 @click.pass_context
 def restore(ctx, filename):
@@ -28,13 +30,13 @@ def restore(ctx, filename):
         LOG.warning("File {} does not exist. Please point to a valid file".format(filename))
         ctx.abort()
 
-    call = ['mongorestore', '--gzip', '--archive={}'.format(filename), '--db', ctx.obj.get('db')]
-    if ctx.obj.get('uri'): # if db URI is available use it
+    call = ["mongorestore", "--gzip", "--archive={}".format(filename), "--db", ctx.obj.get("db")]
+    if ctx.obj.get("uri"):  # if db URI is available use it
         call.append(f"--uri={ctx.obj['uri']}")
-    else: # Otherwise use host and port
+    else:  # Otherwise use host and port
         call.append(f"--host={ctx.obj['host']}:{ctx.obj['port']}")
 
-    LOG.info('Restoring database from %s', filename)
+    LOG.info("Restoring database from %s", filename)
     start_time = datetime.now()
     try:
         completed = subprocess.run(call, check=True)
@@ -42,5 +44,5 @@ def restore(ctx, filename):
         LOG.warning(err)
         ctx.abort()
 
-    LOG.info('Database restored succesfully')
-    LOG.info('Time to restore database: {0}'.format(datetime.now()-start_time))
+    LOG.info("Database restored succesfully")
+    LOG.info("Time to restore database: {0}".format(datetime.now() - start_time))

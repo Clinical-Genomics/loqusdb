@@ -1,11 +1,10 @@
-import os
-import sys
 import logging
 
 LEVELS = {
-    1 : 'INFO',
-    2 : 'DEBUG',
+    1: "INFO",
+    2: "DEBUG",
 }
+
 
 def init_log(logger, filename=None, loglevel=None):
     """
@@ -17,7 +16,7 @@ def init_log(logger, filename=None, loglevel=None):
                          be disabled.
         loglevel (str): Determines the level of the log output.
     """
-    template = '[%(asctime)s] %(levelname)-5s: %(name)-30s: %(message)s'
+    template = "[%(asctime)s] %(levelname)-5s: %(name)-30s: %(message)s"
     formatter = logging.Formatter(template)
 
     if loglevel:
@@ -25,11 +24,11 @@ def init_log(logger, filename=None, loglevel=None):
 
     # We will always print warnings and higher to stderr
     console = logging.StreamHandler()
-    console.setLevel('WARNING')
+    console.setLevel("WARNING")
     console.setFormatter(formatter)
 
     if filename:
-        file_handler = logging.FileHandler(filename, encoding='utf-8')
+        file_handler = logging.FileHandler(filename, encoding="utf-8")
         if loglevel:
             file_handler.setLevel(getattr(logging, loglevel))
         file_handler.setFormatter(formatter)
@@ -40,6 +39,7 @@ def init_log(logger, filename=None, loglevel=None):
         console.setLevel(getattr(logging, loglevel))
 
     logger.addHandler(console)
+
 
 def get_log_stream(logger):
     """

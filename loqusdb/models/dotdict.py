@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
+
 class DotDict(dict):
     """
     Example:
     test = DotDict(last_name='Pool', age=24, sports=['Soccer'])
     """
+
     def __init__(self, *args, **kwargs):
         super(DotDict, self).__init__(*args, **kwargs)
         for arg in args:
