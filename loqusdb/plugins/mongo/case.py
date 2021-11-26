@@ -1,8 +1,8 @@
 import logging
 from pprint import pprint as pp
 
-from loqusdb.plugins import BaseCaseMixin
 from loqusdb.exceptions import CaseError
+from loqusdb.plugins import BaseCaseMixin
 
 LOG = logging.getLogger(__name__)
 

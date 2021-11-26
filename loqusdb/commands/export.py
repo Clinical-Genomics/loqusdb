@@ -1,9 +1,8 @@
 import logging
-import click
 import tempfile
-
 from datetime import datetime
 
+import click
 from vcftoolbox import HeaderParser, print_headers, print_variant
 
 from loqusdb import CHROMOSOME_ORDER

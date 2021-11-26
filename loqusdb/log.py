@@ -1,6 +1,6 @@
+import logging
 import os
 import sys
-import logging
 
 LEVELS = {
     1: "INFO",

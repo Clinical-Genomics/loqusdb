@@ -1,7 +1,7 @@
 import logging
 
-from loqusdb.models import Case, Individual
 from loqusdb.exceptions import CaseError
+from loqusdb.models import Case, Individual
 
 LOG = logging.getLogger(__name__)
 

@@ -1,7 +1,7 @@
 import logging
-from pkg_resources import get_distribution
 
-from pymongo import IndexModel, ASCENDING, DESCENDING
+from pkg_resources import get_distribution
+from pymongo import ASCENDING, DESCENDING, IndexModel
 
 logger = logging.getLogger(__name__)
 

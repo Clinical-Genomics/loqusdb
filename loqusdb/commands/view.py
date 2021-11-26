@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-import logging
 import json
+import logging
+from pprint import pprint as pp
 
 import click
-
-from pprint import pprint as pp
 
 from . import base_command
 

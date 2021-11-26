@@ -1,15 +1,14 @@
-import os
 import logging
-import click
-
+import os
+from datetime import datetime
 from pprint import pprint as pp
 
-from datetime import datetime
+import click
 
 from loqusdb.exceptions import VcfError
-from loqusdb.utils.load import load_database
-from loqusdb.utils.vcf import get_file_handle, check_vcf, add_headers
 from loqusdb.utils.annotate import annotate_snvs, annotate_svs
+from loqusdb.utils.load import load_database
+from loqusdb.utils.vcf import add_headers, check_vcf, get_file_handle
 
 from . import base_command
 

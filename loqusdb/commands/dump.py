@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-import os
 import logging
+import os
 import subprocess
-
 from datetime import datetime
 
 import click

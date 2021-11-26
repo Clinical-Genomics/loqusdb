@@ -8,18 +8,18 @@ This functions take an adapter which is the communication device for the databas
 """
 
 import logging
-import click
 from datetime import datetime
-
 from pprint import pprint as pp
 
-from .vcf import get_vcf, check_vcf
+import click
+
+from loqusdb.build_models import build_case, build_profile_variant, build_variant
+from loqusdb.exceptions import CaseError, VcfError
+
 from .case import get_case, update_case
 from .delete import delete
 from .profiling import get_profiles, profile_match
-from loqusdb.build_models import build_case, build_variant, build_profile_variant
-from loqusdb.exceptions import CaseError, VcfError
-
+from .vcf import check_vcf, get_vcf
 
 LOG = logging.getLogger(__name__)
 

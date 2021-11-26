@@ -1,14 +1,13 @@
 import logging
-import numpy as np
 from copy import deepcopy
 
-from .vcf import get_file_handle
+import numpy as np
 
 from loqusdb.build_models.variant import get_variant_id
-
+from loqusdb.constants import GENOTYPE_MAP, HAMMING_RANGES
 from loqusdb.exceptions import ProfileError
 
-from loqusdb.constants import GENOTYPE_MAP, HAMMING_RANGES
+from .vcf import get_file_handle
 
 LOG = logging.getLogger(__name__)
 

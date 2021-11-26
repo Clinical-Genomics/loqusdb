@@ -2,7 +2,6 @@ import pkg_resources
 
 from loqusdb.constants import GRCH37, GRCH38
 
-
 ###### Files ######
 
 # Background data

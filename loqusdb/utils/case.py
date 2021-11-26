@@ -1,5 +1,4 @@
 import logging
-
 from copy import deepcopy
 
 from ped_parser import FamilyParser

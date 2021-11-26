@@ -1,6 +1,7 @@
 import logging
 
 from loqusdb.models import ProfileVariant
+
 from .variant import get_variant_id
 
 LOG = logging.getLogger(__name__)

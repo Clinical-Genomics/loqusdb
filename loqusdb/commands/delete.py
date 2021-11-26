@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import logging
-import click
 from datetime import datetime
 
+import click
+
 from loqusdb.exceptions import CaseError
-from loqusdb.utils.delete import delete as delete_command
 from loqusdb.utils.case import get_case
+from loqusdb.utils.delete import delete as delete_command
+
 from . import base_command
 
 LOG = logging.getLogger(__name__)

@@ -1,11 +1,10 @@
 import logging
-
 from pprint import pprint as pp
 
-from loqusdb.plugins import BaseVariantMixin
-from loqusdb.models import Identity
-
 from pymongo import ASCENDING, DESCENDING, UpdateOne
+
+from loqusdb.models import Identity
+from loqusdb.plugins import BaseVariantMixin
 
 LOG = logging.getLogger(__name__)
 

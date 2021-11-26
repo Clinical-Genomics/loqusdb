@@ -1,5 +1,4 @@
 import logging
-
 from pprint import pprint as pp
 
 LOG = logging.getLogger(__name__)

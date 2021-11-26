@@ -1,11 +1,10 @@
 import logging
-
-from pprint import pprint as pp
 from collections import namedtuple
+from pprint import pprint as pp
 
-from loqusdb.models import Variant
+from loqusdb.constants import CHROM_TO_INT, GENOTYPE_MAP, GRCH37, PAR
 from loqusdb.exceptions import CaseError
-from loqusdb.constants import PAR, GENOTYPE_MAP, CHROM_TO_INT, GRCH37
+from loqusdb.models import Variant
 
 LOG = logging.getLogger(__name__)
 
