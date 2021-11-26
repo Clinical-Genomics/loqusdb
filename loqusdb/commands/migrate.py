@@ -2,7 +2,6 @@ import logging
 from datetime import datetime
 
 import click
-
 from loqusdb.utils.migrate import migrate_database
 
 from . import base_command

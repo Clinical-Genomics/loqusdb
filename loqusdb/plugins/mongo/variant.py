@@ -1,9 +1,7 @@
 import logging
 
-from pymongo import ASCENDING, DESCENDING, DeleteOne, UpdateOne
-
-
 from loqusdb.plugins.mongo.structural_variant import SVMixin
+from pymongo import ASCENDING, DESCENDING, DeleteOne, UpdateOne
 
 LOG = logging.getLogger(__name__)
 

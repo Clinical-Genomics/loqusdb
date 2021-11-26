@@ -1,5 +1,3 @@
-from pprint import pprint as pp
-
 import pytest
 
 from loqusdb.build_models.case import build_case, get_individual_positions

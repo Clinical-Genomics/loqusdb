@@ -1,10 +1,7 @@
-import gzip
-from pprint import pprint as pp
-
 import pytest
 from cyvcf2 import VCF
 
-from loqusdb.utils.vcf import check_vcf, get_file_handle, get_vcf
+from loqusdb.utils.vcf import check_vcf, get_file_handle
 
 
 def test_get_file_handle(vcf_path):

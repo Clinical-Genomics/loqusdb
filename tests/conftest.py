@@ -2,15 +2,14 @@ import logging
 
 import cyvcf2
 import pytest
-from mongomock import MongoClient as MockClient
-from ped_parser import FamilyParser
-from pymongo import MongoClient
-
 from loqusdb.build_models import build_case, build_variant
 from loqusdb.log import init_log
 from loqusdb.models import Case
 from loqusdb.plugins import MongoAdapter
 from loqusdb.utils.load import update_case
+from mongomock import MongoClient as MockClient
+from ped_parser import FamilyParser
+from pymongo import MongoClient
 
 logger = logging.getLogger(".")
 

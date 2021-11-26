@@ -9,7 +9,5 @@ from .load_profile import load_profile as profile_command
 from .migrate import migrate as migration_command
 from .restore import restore as restore_command
 from .update import update as update_command
-from .view import cases as cases_command
-from .view import index as index_command
-from .view import variants as variants_command
+from .view import cases as cases_command, index as index_command, variants as variants_command
 from .wipe import wipe as wipe_command

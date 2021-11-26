@@ -1,16 +1,11 @@
 import logging
 import os
 from datetime import datetime
-from pprint import pprint as pp
 
 import click
-
-from loqusdb.exceptions import VcfError
+from loqusdb.commands import base_command
 from loqusdb.utils.annotate import annotate_snvs, annotate_svs
-from loqusdb.utils.load import load_database
-from loqusdb.utils.vcf import add_headers, check_vcf, get_file_handle
-
-from . import base_command
+from loqusdb.utils.vcf import add_headers, get_file_handle
 
 LOG = logging.getLogger(__name__)
 
@@ -53,9 +48,6 @@ def annotate(ctx, variant_file, sv):
         annotated_variants = annotate_svs(adapter, vcf_obj)
     else:
         annotated_variants = annotate_snvs(adapter, vcf_obj)
-    # try:
+
     for variant in annotated_variants:
         click.echo(str(variant).rstrip())
-    # except (Exception) as error:
-    #     LOG.warning(error)
-    #     ctx.abort()

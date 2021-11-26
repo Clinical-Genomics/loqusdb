@@ -1,5 +1,3 @@
-from pprint import pprint as pp
-
 import pytest
 
 from loqusdb.exceptions import CaseError

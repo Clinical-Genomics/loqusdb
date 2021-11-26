@@ -1,5 +1,3 @@
-import pytest
-
 from loqusdb.build_models.variant import GENOTYPE_MAP, build_variant
 
 

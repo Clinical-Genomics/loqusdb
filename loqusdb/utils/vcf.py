@@ -2,7 +2,6 @@ import logging
 import os
 
 from cyvcf2 import VCF
-
 from loqusdb.build_models.variant import get_variant_id
 from loqusdb.exceptions import VcfError
 

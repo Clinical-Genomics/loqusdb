@@ -1,5 +1,3 @@
-from pprint import pprint as pp
-
 from loqusdb.build_models import build_variant
 
 

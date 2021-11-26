@@ -1,12 +1,10 @@
 import logging
-import tempfile
 from datetime import datetime
 
 import click
-from vcftoolbox import HeaderParser, print_headers, print_variant
-
 from loqusdb import CHROMOSOME_ORDER
 from loqusdb.utils.variant import format_variant
+from vcftoolbox import HeaderParser, print_headers, print_variant
 
 from . import base_command
 

@@ -1,7 +1,6 @@
 import copy
 
 from loqusdb.build_models import build_variant
-from loqusdb.plugins import MongoAdapter
 
 
 class TestInsertVariant:

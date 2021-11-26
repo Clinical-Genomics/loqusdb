@@ -1,7 +1,6 @@
 import pytest
 
 from loqusdb.exceptions import CaseError
-from loqusdb.models import Case
 
 
 def test_delete_family(mongo_adapter):

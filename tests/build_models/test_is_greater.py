@@ -1,5 +1,4 @@
 from loqusdb.build_models.variant import Position, is_greater
-from loqusdb.constants import CHROM_TO_INT
 
 
 def test_is_greater_different_chrom():

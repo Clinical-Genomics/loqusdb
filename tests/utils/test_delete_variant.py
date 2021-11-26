@@ -1,6 +1,5 @@
 from loqusdb.build_models.variant import get_variant_id
 from loqusdb.utils.delete import delete_variants
-from loqusdb.utils.load import load_variants
 
 
 def test_delete_variants(real_mongo_adapter, het_variant, case_obj):

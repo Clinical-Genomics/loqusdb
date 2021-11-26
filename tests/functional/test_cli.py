@@ -1,6 +1,3 @@
-from pprint import pprint as pp
-
-import pytest
 from click.testing import CliRunner
 
 from loqusdb.commands import base_command
@@ -204,15 +201,3 @@ def test_cases_command_non_existing(vcf_path, case_id, real_mongo_adapter, real_
     ## THEN assert that the exit is zero
     assert result.exit_code == 0
     # Exit code should be 0 even if there is no result returned
-
-
-# def test_wipe_command(mongo_client, vcf_path, ped_path):
-#     runner = CliRunner()
-#
-#     load_command = ['-c', 'mongomock://', '--database', 'test', 'load', vcf_path, '-f', ped_path]
-#     runner.invoke(base_command, load_command)
-#
-#     wipe_command = ['-c', 'mongomock://', '--database', 'test', 'wipe', '--yes']
-#     result = runner.invoke(base_command, wipe_command)
-#
-#     assert result.exit_code == 0
