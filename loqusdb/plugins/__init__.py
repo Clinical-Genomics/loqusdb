@@ -1,1 +1,1 @@
-from loqusdb.plugins.mongo import MongoAdapter
+from loqusdb.plugins.mongo.adapter import MongoAdapter
