@@ -7,7 +7,8 @@ from loqusdb.exceptions import VcfError
 from loqusdb.build_models.variant import get_variant_id
 
 LOG = logging.getLogger(__name__)
-VALID_ENDINGS = ['.vcf', '.gz', '.bcf']
+VALID_ENDINGS = [".vcf", ".gz", ".bcf"]
+
 
 def add_headers(vcf_obj, nr_cases=None, sv=False):
     """Add loqus specific information to a VCF header
@@ -18,32 +19,34 @@ def add_headers(vcf_obj, nr_cases=None, sv=False):
 
     vcf_obj.add_info_to_header(
         {
-            'ID':"Obs",
-            'Number': '1',
-            'Type': 'Integer',
-            'Description': "The number of observations for the variant"}
+            "ID": "Obs",
+            "Number": "1",
+            "Type": "Integer",
+            "Description": "The number of observations for the variant",
+        }
     )
     if not sv:
         vcf_obj.add_info_to_header(
             {
-                'ID':"Hom",
-                'Number': '1',
-                'Type': 'Integer',
-                'Description': "The number of observed homozygotes"}
+                "ID": "Hom",
+                "Number": "1",
+                "Type": "Integer",
+                "Description": "The number of observed homozygotes",
+            }
         )
         vcf_obj.add_info_to_header(
             {
-                'ID':"Hem",
-                'Number': '1',
-                'Type': 'Integer',
-                'Description': "The number of observed hemizygotes"}
+                "ID": "Hem",
+                "Number": "1",
+                "Type": "Integer",
+                "Description": "The number of observed hemizygotes",
+            }
         )
     if nr_cases:
         case_header = "##NrCases={}".format(nr_cases)
         vcf_obj.add_to_header(case_header)
     # head.add_version_tracking("loqusdb", version, datetime.now().strftime("%Y-%m-%d %H:%M"))
     return
-
 
 
 def get_file_handle(file_path):
@@ -67,6 +70,7 @@ def get_file_handle(file_path):
 
     return vcf_obj
 
+
 def get_vcf(file_path):
     """Yield variants from a vcf file
 
@@ -82,11 +86,13 @@ def get_vcf(file_path):
 
     return vcf_obj
 
+
 def check_sorting(previous_chrom, previous_pos, current_chrom, current_pos):
     """docstring for check_sorting"""
     pass
 
-def check_vcf(vcf_path, expected_type='snv'):
+
+def check_vcf(vcf_path, expected_type="snv"):
     """Check if there are any problems with the vcf file
 
     Args:
@@ -113,10 +119,10 @@ def check_vcf(vcf_path, expected_type='snv'):
     posititon_variants = set()
 
     nr_variants = 0
-    for nr_variants,variant in enumerate(vcf,1):
+    for nr_variants, variant in enumerate(vcf, 1):
 
         # Check the type of variant
-        current_type = 'sv' if variant.var_type == 'sv' else 'snv'
+        current_type = "sv" if variant.var_type == "sv" else "snv"
         if not variant_type:
             variant_type = current_type
 
@@ -130,7 +136,7 @@ def check_vcf(vcf_path, expected_type='snv'):
         # We start with a simple id that can be used by SV:s
         variant_id = "{0}_{1}".format(current_chrom, current_pos)
         # For SNVs we can create a proper variant id with chrom_pos_ref_alt
-        if variant_type == 'snv':
+        if variant_type == "snv":
             variant_id = get_variant_id(variant)
 
         # Initiate variables
@@ -147,12 +153,11 @@ def check_vcf(vcf_path, expected_type='snv'):
             posititon_variants = set([variant_id])
             continue
 
-        if variant_type == 'snv':
+        if variant_type == "snv":
             # Check if variant is unique
             if current_pos == previous_pos:
                 if variant_id in posititon_variants:
-                    raise VcfError("Variant {0} occurs several times"\
-                                   " in vcf".format(variant_id))
+                    raise VcfError("Variant {0} occurs several times" " in vcf".format(variant_id))
                 else:
                     posititon_variants.add(variant_id)
             # Check if vcf is sorted
@@ -164,17 +169,20 @@ def check_vcf(vcf_path, expected_type='snv'):
                 posititon_variants = set([variant_id])
 
     if variant_type != expected_type:
-        raise VcfError("VCF file does not only include {0}s, please check vcf {1}".format(
-                        expected_type.upper(), vcf_path))
+        raise VcfError(
+            "VCF file does not only include {0}s, please check vcf {1}".format(
+                expected_type.upper(), vcf_path
+            )
+        )
 
     LOG.info("Vcf file %s looks fine", vcf_path)
     LOG.info("Nr of variants in vcf: {0}".format(nr_variants))
     LOG.info("Type of variants in vcf: {0}".format(variant_type))
 
     vcf_info = {
-        'nr_variants': nr_variants,
-        'variant_type': variant_type,
-        'individuals': individuals,
+        "nr_variants": nr_variants,
+        "variant_type": variant_type,
+        "individuals": individuals,
     }
 
     return vcf_info

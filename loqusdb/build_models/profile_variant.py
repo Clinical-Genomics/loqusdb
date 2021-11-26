@@ -5,20 +5,21 @@ from .variant import get_variant_id
 
 LOG = logging.getLogger(__name__)
 
+
 def get_maf(variant):
     """
-        Gets the MAF (minor allele frequency) tag from the info field for the
-        variant.
+    Gets the MAF (minor allele frequency) tag from the info field for the
+    variant.
 
-        Args:
-            variant (cyvcf2.Variant)
+    Args:
+        variant (cyvcf2.Variant)
 
-        Returns:
-            maf (float): Minor allele frequency
+    Returns:
+        maf (float): Minor allele frequency
 
     """
 
-    return variant.INFO.get('MAF')
+    return variant.INFO.get("MAF")
 
 
 def build_profile_variant(variant):
@@ -32,7 +33,7 @@ def build_profile_variant(variant):
     """
 
     chrom = variant.CHROM
-    if chrom.startswith(('chr', 'CHR', 'Chr')):
+    if chrom.startswith(("chr", "CHR", "Chr")):
         chrom = chrom[3:]
 
     pos = int(variant.POS)
@@ -45,13 +46,7 @@ def build_profile_variant(variant):
     maf = get_maf(variant)
 
     profile_variant = ProfileVariant(
-        variant_id=variant_id,
-        chrom=chrom,
-        pos=pos,
-        ref=ref,
-        alt=alt,
-        maf=maf,
-        id_column = variant.ID
+        variant_id=variant_id, chrom=chrom, pos=pos, ref=ref, alt=alt, maf=maf, id_column=variant.ID
     )
 
     return profile_variant
