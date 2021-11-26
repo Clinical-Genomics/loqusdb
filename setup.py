@@ -9,10 +9,10 @@
 
 import io
 import os
-from pip._internal.req import parse_requirements
-from pip._internal.network.session import PipSession
 
-from setuptools import find_packages, setup, Command
+from pip._internal.network.session import PipSession
+from pip._internal.req import parse_requirements
+from setuptools import Command, find_packages, setup
 
 # Package meta-data.
 NAME = "loqusdb"

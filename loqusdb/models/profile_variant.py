@@ -1,5 +1,3 @@
-
-
 class ProfileVariant(dict):
     """Represent a profile variant
 
@@ -9,11 +7,5 @@ class ProfileVariant(dict):
 
     def __init__(self, variant_id, chrom, pos, ref, alt, maf, id_column=None):
         super(ProfileVariant, self).__init__(
-            _id=variant_id,
-            chrom=chrom,
-            pos=pos,
-            ref=ref,
-            alt=alt,
-            maf=maf,
-            id_column = id_column
+            _id=variant_id, chrom=chrom, pos=pos, ref=ref, alt=alt, maf=maf, id_column=id_column
         )

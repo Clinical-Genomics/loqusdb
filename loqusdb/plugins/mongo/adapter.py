@@ -1,11 +1,11 @@
 import logging
 
-from loqusdb.plugins import Base
 from mongo_adapter import MongoAdapter as BaseAdapter
 
-from . import VariantMixin, CaseMixin, ProfileVariantMixin
-
 from loqusdb import INDEXES
+from loqusdb.plugins import Base
+
+from . import CaseMixin, ProfileVariantMixin, VariantMixin
 
 logger = logging.getLogger(__name__)
 

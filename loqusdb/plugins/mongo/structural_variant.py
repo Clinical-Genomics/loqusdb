@@ -1,8 +1,8 @@
 import logging
 
-from loqusdb.models import Identity
-
 from pymongo import ASCENDING, DESCENDING, UpdateOne
+
+from loqusdb.models import Identity
 
 LOG = logging.getLogger(__name__)
 

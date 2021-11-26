@@ -8,22 +8,32 @@ This functions take an adapter which is the communication device for the databas
 """
 
 import logging
-
 from pprint import pprint as pp
 
-from .vcf import (get_vcf, check_vcf)
-from .case import (get_case, update_case)
+from loqusdb.build_models import build_case, build_variant
+from loqusdb.exceptions import CaseError, VcfError
+
+from .case import get_case, update_case
 from .delete import delete
-from .load import (load_case,load_variants)
-from loqusdb.build_models import (build_case, build_variant)
-from loqusdb.exceptions import (CaseError, VcfError)
+from .load import load_case, load_variants
+from .vcf import check_vcf, get_vcf
 
 LOG = logging.getLogger(__name__)
 
-def update_database(adapter, variant_file=None, sv_file=None, family_file=None, family_type='ped', 
-           skip_case_id=False, gq_treshold=None, case_id=None, max_window = 3000):
+
+def update_database(
+    adapter,
+    variant_file=None,
+    sv_file=None,
+    family_file=None,
+    family_type="ped",
+    skip_case_id=False,
+    gq_treshold=None,
+    case_id=None,
+    max_window=3000,
+):
     """Update a case in the database
-            
+
     Args:
           adapter: Connection to database
           variant_file(str): Path to variant file
@@ -43,47 +53,44 @@ def update_database(adapter, variant_file=None, sv_file=None, family_file=None, 
     vcf_individuals = None
     if variant_file:
         vcf_info = check_vcf(variant_file)
-        nr_variants = vcf_info['nr_variants']
-        variant_type = vcf_info['variant_type']
+        nr_variants = vcf_info["nr_variants"]
+        variant_type = vcf_info["variant_type"]
         vcf_files.append(variant_file)
         # Get the indivuduals that are present in vcf file
-        vcf_individuals = vcf_info['individuals']
+        vcf_individuals = vcf_info["individuals"]
 
     nr_sv_variants = None
     sv_individuals = None
     if sv_file:
-        vcf_info = check_vcf(sv_file, 'sv')
-        nr_sv_variants = vcf_info['nr_variants']
+        vcf_info = check_vcf(sv_file, "sv")
+        nr_sv_variants = vcf_info["nr_variants"]
         vcf_files.append(sv_file)
-        sv_individuals = vcf_info['individuals']
+        sv_individuals = vcf_info["individuals"]
 
     # If a gq treshold is used the variants needs to have GQ
     for _vcf_file in vcf_files:
         # Get a cyvcf2.VCF object
         vcf = get_vcf(_vcf_file)
-        
+
         if gq_treshold:
-            if not vcf.contains('GQ'):
-                LOG.warning('Set gq-treshold to 0 or add info to vcf {0}'.format(_vcf_file))
-                raise SyntaxError('GQ is not defined in vcf header')
+            if not vcf.contains("GQ"):
+                LOG.warning("Set gq-treshold to 0 or add info to vcf {0}".format(_vcf_file))
+                raise SyntaxError("GQ is not defined in vcf header")
 
     # Get a ped_parser.Family object from family file
     family = None
     family_id = None
     if family_file:
-        with open(family_file, 'r') as family_lines:
-            family = get_case(
-                family_lines=family_lines, 
-                family_type=family_type
-            )
+        with open(family_file, "r") as family_lines:
+            family = get_case(family_lines=family_lines, family_type=family_type)
             family_id = family.family_id
-    
+
     # There has to be a case_id or a family at this stage.
     case_id = case_id or family_id
 
     # Convert infromation to a loqusdb Case object
     case_obj = build_case(
-        case=family, 
+        case=family,
         case_id=case_id,
         vcf_path=variant_file,
         vcf_individuals=vcf_individuals,
@@ -95,30 +102,30 @@ def update_database(adapter, variant_file=None, sv_file=None, family_file=None, 
 
     existing_case = adapter.case(case_obj)
     if not existing_case:
-        raise CaseError("Case {} does not exist in database".format(case_obj['case_id']))
+        raise CaseError("Case {} does not exist in database".format(case_obj["case_id"]))
 
     # Update the existing case in database
     case_obj = load_case(
         adapter=adapter,
         case_obj=case_obj,
         update=True,
-        )
-    
+    )
+
     nr_inserted = 0
     # If case was succesfully added we can store the variants
-    for file_type in ['vcf_path','vcf_sv_path']:
-        variant_type = 'snv'
-        if file_type == 'vcf_sv_path':
-            variant_type = 'sv'
+    for file_type in ["vcf_path", "vcf_sv_path"]:
+        variant_type = "snv"
+        if file_type == "vcf_sv_path":
+            variant_type = "sv"
         if case_obj.get(file_type) is None:
             continue
 
         vcf_obj = get_vcf(case_obj[file_type])
         try:
-            nr_inserted += load_variants(  
+            nr_inserted += load_variants(
                 adapter=adapter,
                 vcf_obj=vcf_obj,
-                case_obj=case_obj, 
+                case_obj=case_obj,
                 skip_case_id=skip_case_id,
                 gq_treshold=gq_treshold,
                 max_window=max_window,

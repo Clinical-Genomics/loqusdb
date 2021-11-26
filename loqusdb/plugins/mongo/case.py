@@ -1,4 +1,5 @@
 import logging
+
 from loqusdb.exceptions import CaseError
 
 LOG = logging.getLogger(__name__)
