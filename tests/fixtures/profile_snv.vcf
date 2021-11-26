@@ -1,5 +1,31 @@
 ##fileformat=VCFv4.2
-#CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT    SAMPLE
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##contig=<ID=2,length=243199373>
+##contig=<ID=3,length=198022430>
+##contig=<ID=4,length=191154276>
+##contig=<ID=5,length=180915260>
+##contig=<ID=6,length=171115067>
+##contig=<ID=7,length=159138663>
+##contig=<ID=8,length=146364022>
+##contig=<ID=9,length=141213431>
+##contig=<ID=10,length=135534747>
+##contig=<ID=11,length=135006516>
+##contig=<ID=12,length=133851895>
+##contig=<ID=13,length=115169878>
+##contig=<ID=14,length=107349540>
+##contig=<ID=15,length=102531392>
+##contig=<ID=16,length=90354753>
+##contig=<ID=17,length=81195210>
+##contig=<ID=18,length=78077248>
+##contig=<ID=19,length=59128983>
+##contig=<ID=20,length=63025520>
+##contig=<ID=21,length=48129895>
+##contig=<ID=22,length=51304566>
+##contig=<ID=X,length=155270560>
+##contig=<ID=Y,length=59373566>
+##contig=<ID=MT,length=16569>
+##reference=file:///humgen/gsa-hpprojects/GATK/bundle/current/b37/human_g1k_v37.fasta
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT  proband_2
 1	44072018	rs1065772	C	T	.	.	CAF=[0.7121,0.2879];COMMON=1;G5;GNO;HD;KGPROD;KGPhase1;OTHERKG;PH3;REF;RS=1065772;RSPOS=44072018;SAO=0;SLO;SSR=0;SYN;VC=SNV;VLD;VP=0x050100000301150517000100;WGT=1;dbSNPBuildID=86 GT  ./.
 1	183072590	rs2296288	T	C	.	.	CAF=[0.4656,0.5344];COMMON=1;G5;G5A;GNO;HD;KGPROD;KGPhase1;KGPilot123;OTHERKG;PH3;REF;RS=2296288;RSPOS=183072590;SAO=0;SLO;SSR=0;SYN;VC=SNV;VLD;VP=0x05010000030117051f000100;WGT=1;dbSNPBuildID=100 GT  ./.
 1	212619339	rs4804	T	C	.	.	CAF=[0.5069,0.4931];COMMON=1;G5;G5A;GNO;HD;KGPROD;KGPhase1;KGPilot123;OTHERKG;PH3;REF;RS=4804;RSPOS=212619339;SAO=0;SLO;SSR=0;SYN;VC=SNV;VLD;VP=0x05010000030117051f000101;WGT=1;dbSNPBuildID=52 GT  ./.
