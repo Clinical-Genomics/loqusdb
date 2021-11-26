@@ -135,7 +135,7 @@ def test_delete_command_family_file(vcf_path, ped_path, real_mongo_adapter, real
     load_command = ["--database", real_db_name, "load", "--variant-file", vcf_path, "-f", ped_path]
     result = runner.invoke(base_command, load_command)
     ## THEN assert that the case was added
-    assert sum([1 for case in real_mongo_adapter.cases()]) == 1
+    assert sum(1 for case in real_mongo_adapter.cases()) == 1
 
     ## WHEN deleting the case a case via the CLI without a ped file
     delete_command = ["--database", real_db_name, "delete", "-f", ped_path]
@@ -144,7 +144,7 @@ def test_delete_command_family_file(vcf_path, ped_path, real_mongo_adapter, real
     ## THEN assert that the cli exits without problems
     assert result.exit_code == 0
     ## THEN assert that the case was deleted
-    assert sum([1 for case in real_mongo_adapter.cases()]) == 0
+    assert sum(1 for case in real_mongo_adapter.cases()) == 0
 
 
 def test_delete_command_case_id(vcf_path, case_id, real_mongo_adapter, real_db_name):
