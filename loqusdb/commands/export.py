@@ -1,15 +1,12 @@
 import logging
-import click
-import tempfile
-
 from datetime import datetime
 
-from vcftoolbox import HeaderParser, print_headers, print_variant
-
+import click
 from loqusdb import CHROMOSOME_ORDER
 from loqusdb.utils.variant import format_variant
+from vcftoolbox import HeaderParser, print_headers, print_variant
 
-from . import base_command
+from loqusdb.commands.cli import cli as base_command
 
 LOG = logging.getLogger(__name__)
 
@@ -93,18 +90,4 @@ def export(ctx, outfile, variant_type, freq):
             variant_line = format_variant(
                 variant, variant_type=variant_type, nr_cases=nr_cases, add_freq=freq
             )
-            # chrom = variant['chrom']
-            # pos = variant['start']
-            # ref = variant['ref']
-            # alt = variant['alt']
-            # observations = variant['observations']
-            # homozygotes = variant['homozygote']
-            # hemizygotes = variant['hemizygote']
-            # info = "Obs={0}".format(observations)
-            # if homozygotes:
-            #     info += ";Hom={0}".format(homozygotes)
-            # if hemizygotes:
-            #     info += ";Hem={0}".format(hemizygotes)
-            # variant_line = "{0}\t{1}\t.\t{2}\t{3}\t.\t.\t{4}\n".format(
-            #     chrom, pos, ref, alt, info)
             print_variant(variant_line=variant_line, outfile=outfile)

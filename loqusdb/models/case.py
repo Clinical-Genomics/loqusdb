@@ -13,7 +13,6 @@ class Case(dict):
         nr_sv_variants=None,
         profile_path=None,
     ):
-
         super(Case, self).__init__(
             case_id=case_id,
             vcf_path=vcf_path,

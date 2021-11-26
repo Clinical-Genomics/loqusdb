@@ -7,7 +7,7 @@ The methods for annotating SNVs and SVs differs a bit so they will be handeld in
 
 """
 
-from loqusdb.build_models.variant import get_variant_id, get_coords
+from loqusdb.build_models.variant import get_coords, get_variant_id
 
 
 def annotate_variant(variant, var_obj=None):

@@ -9,14 +9,14 @@ This functions take an adapter which is the communication device for the databas
 
 import logging
 
-from pprint import pprint as pp
 
-from .vcf import get_vcf, check_vcf
-from .case import get_case, update_case
-from .delete import delete
-from .load import load_case, load_variants
-from loqusdb.build_models import build_case, build_variant
-from loqusdb.exceptions import CaseError, VcfError
+from loqusdb.exceptions import CaseError
+
+from loqusdb.utils.case import get_case
+from loqusdb.utils.delete import delete
+from loqusdb.utils.load import load_case, load_variants
+from loqusdb.utils.vcf import check_vcf, get_vcf
+from loqusdb.build_models.case import build_case
 
 LOG = logging.getLogger(__name__)
 

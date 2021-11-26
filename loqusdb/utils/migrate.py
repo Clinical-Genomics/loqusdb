@@ -1,4 +1,5 @@
 import logging
+
 from click import progressbar
 
 LOG = logging.getLogger(__name__)

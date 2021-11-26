@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-import logging
 import json
+import logging
+from pprint import pprint as pp
 
 import click
 
-from pprint import pprint as pp
-
-from . import base_command
+from loqusdb.commands.cli import cli as base_command
 
 LOG = logging.getLogger(__name__)
 
@@ -30,7 +29,7 @@ def cases(ctx, case_id, to_json, count, case_type):
         sv_cases = None
         if case_type == "snv":
             snv_cases = True
-        if case_type == "sv":
+        elif case_type == "sv":
             sv_cases = True
         click.echo(adapter.nr_cases(snv_cases=snv_cases, sv_cases=sv_cases))
         return
@@ -100,7 +99,7 @@ def variants(
         variant_type = "sv"
 
     adapter = ctx.obj["adapter"]
-
+    variant = {}
     if start or end:
         if not (chromosome and start and end):
             LOG.warning("Regions must be specified with chromosome, start and end")
@@ -131,7 +130,6 @@ def variants(
 
         if not variant:
             LOG.info("Variant {0} does not exist in database".format(variant_id))
-            variant = {}
 
         if case_count:
             variant["total"] = nr_cases

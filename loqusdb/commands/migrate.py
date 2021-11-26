@@ -1,10 +1,10 @@
 import logging
-import click
-
 from datetime import datetime
 
+import click
 from loqusdb.utils.migrate import migrate_database
-from . import base_command
+
+from loqusdb.commands.cli import cli as base_command
 
 LOG = logging.getLogger(__name__)
 

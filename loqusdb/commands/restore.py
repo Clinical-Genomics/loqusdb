@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
-import os
 import logging
+import os
 import subprocess
-
 from datetime import datetime
 
 import click
-
-from . import base_command
 from loqusdb.resources import background_path
+
+from loqusdb.commands.cli import cli as base_command
 
 LOG = logging.getLogger(__name__)
 

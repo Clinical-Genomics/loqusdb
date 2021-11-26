@@ -1,17 +1,11 @@
-import os
 import logging
-import click
-
-from pprint import pprint as pp
-
+import os
 from datetime import datetime
 
-from loqusdb.exceptions import VcfError
-from loqusdb.utils.load import load_database
-from loqusdb.utils.vcf import get_file_handle, check_vcf, add_headers
+import click
 from loqusdb.utils.annotate import annotate_snvs, annotate_svs
-
-from . import base_command
+from loqusdb.utils.vcf import add_headers, get_file_handle
+from loqusdb.commands.cli import cli as base_command
 
 LOG = logging.getLogger(__name__)
 
@@ -30,14 +24,9 @@ def annotate(ctx, variant_file, sv):
 
     variant_path = os.path.abspath(variant_file)
 
-    expected_type = "snv"
-    if sv:
-        expected_type = "sv"
+    expected_type = "sv" if sv else "snv"
 
-    if "sv":
-        nr_cases = adapter.nr_cases(sv_cases=True)
-    else:
-        nr_cases = adapter.nr_cases(snv_cases=True)
+    nr_cases = adapter.nr_cases(sv_cases=True)
     LOG.info("Found {0} {1} cases in database".format(nr_cases, expected_type))
 
     vcf_obj = get_file_handle(variant_path)
@@ -57,6 +46,3 @@ def annotate(ctx, variant_file, sv):
     # try:
     for variant in annotated_variants:
         click.echo(str(variant).rstrip())
-    # except (Exception) as error:
-    #     LOG.warning(error)
-    #     ctx.abort()

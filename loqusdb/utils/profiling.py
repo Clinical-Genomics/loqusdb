@@ -1,20 +1,17 @@
 import logging
-import numpy as np
 from copy import deepcopy
 
-from .vcf import get_file_handle
-
+import numpy as np
 from loqusdb.build_models.variant import get_variant_id
-
+from loqusdb.constants import GENOTYPE_MAP, HAMMING_RANGES
 from loqusdb.exceptions import ProfileError
 
-from loqusdb.constants import GENOTYPE_MAP, HAMMING_RANGES
+from .vcf import get_file_handle
 
 LOG = logging.getLogger(__name__)
 
 
 def get_profiles(adapter, vcf_file):
-
     """Given a vcf, get a profile string for each sample in the vcf
     based on the profile variants in the database
 
@@ -78,7 +75,6 @@ def get_profiles(adapter, vcf_file):
 
 
 def profile_match(adapter, profiles, hard_threshold=0.95, soft_threshold=0.9):
-
     """
     given a dict of profiles, searches through all the samples in the DB
     for a match. If a matching sample is found an exception is raised,
@@ -108,7 +104,6 @@ def profile_match(adapter, profiles, hard_threshold=0.95, soft_threshold=0.9):
                     similarity = compare_profiles(profiles[sample], individual["profile"])
 
                     if similarity >= hard_threshold:
-
                         msg = (
                             f"individual {sample} has a {similarity} similarity "
                             f"with individual {individual['ind_id']} in case "
@@ -120,7 +115,6 @@ def profile_match(adapter, profiles, hard_threshold=0.95, soft_threshold=0.9):
                         raise ProfileError
 
                     if similarity >= soft_threshold:
-
                         match = f"{case['case_id']}.{individual['ind_id']}"
                         matches[sample].append(match)
 
@@ -128,7 +122,6 @@ def profile_match(adapter, profiles, hard_threshold=0.95, soft_threshold=0.9):
 
 
 def check_duplicates(adapter, profiles, hard_threshold):
-
     """
     Searches database for duplicates. If duplicate is found, the individual
     is returned.
@@ -156,7 +149,6 @@ def check_duplicates(adapter, profiles, hard_threshold):
                     similarity = compare_profiles(profiles[sample], individual["profile"])
 
                     if similarity >= hard_threshold:
-
                         msg = (
                             f"individual {sample} has a {similarity} similarity "
                             f"with individual {individual['ind_id']} in case "
@@ -167,7 +159,6 @@ def check_duplicates(adapter, profiles, hard_threshold):
 
 
 def compare_profiles(profile1, profile2):
-
     """
     Given two profiles, determine the ratio of similarity, i.e.
     the hamming distance between the strings.
@@ -193,7 +184,6 @@ def compare_profiles(profile1, profile2):
 
 
 def update_profiles(adapter):
-
     """
     For all cases having vcf_path, update the profile string for the samples
 
@@ -228,7 +218,6 @@ def update_profiles(adapter):
 
 
 def profile_stats(adapter, threshold=0.9):
-
     """
     Compares the pairwise hamming distances for all the sample profiles in
     the database. Returns a table of the number of distances within given
@@ -274,7 +263,6 @@ def profile_stats(adapter, threshold=0.9):
 
                 # Check number of distances in each range and add to distance_dict
                 for key, range in HAMMING_RANGES.items():
-
                     # Calculate the number of hamming distances found within the
                     # range for current individual
                     distance_dict[key] += np.sum(

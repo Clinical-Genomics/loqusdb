@@ -1,6 +1,7 @@
 from loqusdb.utils.delete import delete
 from loqusdb.utils.load import load_database
 
+
 def test_delete_case(mongo_adapter, simple_case):
     ## GIVEN a mongoadapter with a inserted case
     db = mongo_adapter.db
@@ -16,8 +17,7 @@ def test_delete_case(mongo_adapter, simple_case):
 
     mongo_case = db.case.find_one()
 
-    assert mongo_case == None
-
+    assert mongo_case is None
 
 
 def test_delete_case_and_variants(vcf_path, ped_path, real_mongo_adapter, case_id, case_obj):
@@ -28,12 +28,12 @@ def test_delete_case_and_variants(vcf_path, ped_path, real_mongo_adapter, case_i
         adapter=mongo_adapter,
         variant_file=vcf_path,
         family_file=ped_path,
-        family_type='ped',
+        family_type="ped",
     )
 
     mongo_case = db.case.find_one()
 
-    assert mongo_case['case_id'] == case_id
+    assert mongo_case["case_id"] == case_id
 
     delete(
         adapter=mongo_adapter,
@@ -42,25 +42,24 @@ def test_delete_case_and_variants(vcf_path, ped_path, real_mongo_adapter, case_i
 
     mongo_case = db.case.find_one()
 
-    assert mongo_case == None
+    assert mongo_case is None
 
     mongo_variant = db.variant.find_one()
 
-    assert mongo_variant == None
+    assert mongo_variant is None
 
 
 def test_delete_structural_variants(vcf_path, ped_path, real_mongo_adapter, case_id, sv_case_obj):
-
     # GIVEN a mongo adapter with an inserted case with SVs
     mongo_adapter = real_mongo_adapter
     db = mongo_adapter.db
 
     load_database(
         adapter=mongo_adapter,
-        variant_file=sv_case_obj['vcf_path'],
+        variant_file=sv_case_obj["vcf_path"],
         family_file=ped_path,
-        family_type='ped',
-        sv_file=sv_case_obj['vcf_sv_path']
+        family_type="ped",
+        sv_file=sv_case_obj["vcf_sv_path"],
     )
 
     mongo_svs = db.structural_variant.find()

@@ -1,10 +1,8 @@
 import logging
-
 from copy import deepcopy
 
-from ped_parser import FamilyParser
-
 from loqusdb.exceptions import CaseError
+from ped_parser import FamilyParser
 
 LOG = logging.getLogger(__name__)
 

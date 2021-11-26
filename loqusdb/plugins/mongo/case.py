@@ -1,13 +1,11 @@
 import logging
-from pprint import pprint as pp
 
-from loqusdb.plugins import BaseCaseMixin
 from loqusdb.exceptions import CaseError
 
 LOG = logging.getLogger(__name__)
 
 
-class CaseMixin(BaseCaseMixin):
+class CaseMixin:
     def case(self, case):
         """Get a case from the database
 
@@ -100,8 +98,6 @@ class CaseMixin(BaseCaseMixin):
             )
         LOG.info("Removing case {0} from database".format(mongo_case.get("case_id")))
         self.db.case.delete_one({"_id": mongo_case["_id"]})
-
-        return
 
     def case_count(self):
         """Returns the total number of cases in the database

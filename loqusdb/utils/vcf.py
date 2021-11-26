@@ -1,10 +1,9 @@
-import os
 import logging
+import os
 
 from cyvcf2 import VCF
-
-from loqusdb.exceptions import VcfError
 from loqusdb.build_models.variant import get_variant_id
+from loqusdb.exceptions import VcfError
 
 LOG = logging.getLogger(__name__)
 VALID_ENDINGS = [".vcf", ".gz", ".bcf"]

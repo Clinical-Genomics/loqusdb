@@ -1,17 +1,16 @@
 import logging
-from pymongo import MongoClient
-
-from loqusdb.plugins import Base
-from mongo_adapter import MongoAdapter as BaseAdapter
-
-from . import VariantMixin, CaseMixin, ProfileVariantMixin
 
 from loqusdb import INDEXES
+from mongo_adapter import MongoAdapter as BaseAdapter
+
+from loqusdb.plugins.mongo.case import CaseMixin
+from loqusdb.plugins.mongo.profile_variant import ProfileVariantMixin
+from loqusdb.plugins.mongo.variant import VariantMixin
 
 logger = logging.getLogger(__name__)
 
 
-class MongoAdapter(BaseAdapter, VariantMixin, CaseMixin, ProfileVariantMixin, Base):
+class MongoAdapter(BaseAdapter, VariantMixin, CaseMixin, ProfileVariantMixin):
     """docstring for MongoAdapter"""
 
     def wipe_db(self):
@@ -47,7 +46,7 @@ class MongoAdapter(BaseAdapter, VariantMixin, CaseMixin, ProfileVariantMixin, Ba
             indexes = INDEXES[collection_name]
             for index in indexes:
                 index_name = index.document.get("name")
-                if not index_name in existing_indexes:
+                if index_name not in existing_indexes:
                     logger.warning(
                         "Index {0} missing. Run command `loqusdb index`".format(index_name)
                     )
@@ -67,7 +66,8 @@ class MongoAdapter(BaseAdapter, VariantMixin, CaseMixin, ProfileVariantMixin, Ba
             logger.info(
                 "creating indexes for collection {0}: {1}".format(
                     collection_name,
-                    ", ".join([index.document.get("name") for index in indexes]),
+                    ", ".join(index.document.get("name") for index in indexes),
                 )
             )
+
             self.db[collection_name].create_indexes(indexes)

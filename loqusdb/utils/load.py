@@ -8,18 +8,18 @@ This functions take an adapter which is the communication device for the databas
 """
 
 import logging
+
 import click
-from datetime import datetime
 
-from pprint import pprint as pp
-
-from .vcf import get_vcf, check_vcf
-from .case import get_case, update_case
-from .delete import delete
-from .profiling import get_profiles, profile_match
-from loqusdb.build_models import build_case, build_variant, build_profile_variant
 from loqusdb.exceptions import CaseError, VcfError
 
+from loqusdb.utils.case import get_case, update_case
+from loqusdb.utils.delete import delete
+from loqusdb.utils.profiling import get_profiles, profile_match
+from loqusdb.utils.vcf import check_vcf, get_vcf
+from loqusdb.build_models.case import build_case
+from loqusdb.build_models.profile_variant import build_profile_variant
+from loqusdb.build_models.variant import build_variant
 
 LOG = logging.getLogger(__name__)
 
@@ -179,10 +179,8 @@ def load_case(adapter, case_obj, update=False):
         case_obj = update_case(case_obj, existing_case)
 
     # Add the case to database
-    try:
-        adapter.add_case(case_obj, update=update)
-    except CaseError as err:
-        raise err
+
+    adapter.add_case(case_obj, update=update)
 
     return case_obj
 
@@ -245,7 +243,6 @@ def load_variants(
 
 
 def load_profile_variants(adapter, variant_file):
-
     """
 
     Loads variants used for profiling

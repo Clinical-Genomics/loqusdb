@@ -1,22 +1,15 @@
 import logging
+
 import click
 import coloredlogs
-
-from pprint import pprint as pp
-
 import yaml
-
-from mongomock import MongoClient as MockClient
-
-from pymongo import uri_parser
-
+from loqusdb import __version__
+from loqusdb.constants import GRCH37, GRCH38
 from mongo_adapter import get_client
 from mongo_adapter.exceptions import Error as DB_Error
+from pymongo import uri_parser
 
-from loqusdb.log import LEVELS, init_log
-from loqusdb import __version__
-from loqusdb.plugins import MongoAdapter
-from loqusdb.constants import GRCH37, GRCH38
+from loqusdb.plugins.mongo.adapter import MongoAdapter
 
 LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
