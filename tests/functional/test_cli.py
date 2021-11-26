@@ -1,12 +1,8 @@
-import pytest
-
-from pprint import pprint as pp
-
 from loqusdb.commands import base_command
 
+from loqusdb.commands import base_command
 from loqusdb.exceptions import ProfileError
 
-from click.testing import CliRunner
 
 def test_base_command():
     runner = CliRunner()

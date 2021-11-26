@@ -1,5 +1,4 @@
 import logging
-from pprint import pprint as pp
 
 from loqusdb.exceptions import CaseError
 from loqusdb.plugins import BaseCaseMixin

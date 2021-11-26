@@ -2,9 +2,8 @@
 import logging
 from datetime import datetime
 
-from loqusdb.build_models import build_case, build_variant
+from loqusdb.build_models import build_variant
 
-from .case import get_case
 from .vcf import get_vcf
 
 LOG = logging.getLogger(__name__)

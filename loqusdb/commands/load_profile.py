@@ -2,7 +2,6 @@ import json
 import logging
 
 import click
-
 from loqusdb.resources import MAF_PATH
 from loqusdb.utils.load import load_profile_variants
 from loqusdb.utils.profiling import check_duplicates, get_profiles, profile_stats, update_profiles

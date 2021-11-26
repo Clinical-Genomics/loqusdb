@@ -1,10 +1,8 @@
 import logging
 
-from mongo_adapter import MongoAdapter as BaseAdapter
-from pymongo import MongoClient
-
 from loqusdb import INDEXES
 from loqusdb.plugins import Base
+from mongo_adapter import MongoAdapter as BaseAdapter
 
 from . import CaseMixin, ProfileVariantMixin, VariantMixin
 

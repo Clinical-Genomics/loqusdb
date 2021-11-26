@@ -1,13 +1,10 @@
 import logging
 import os
 from datetime import datetime
-from pprint import pprint as pp
 
 import click
-
-from loqusdb.exceptions import CaseError, VcfError
+from loqusdb.exceptions import CaseError
 from loqusdb.utils.load import load_database
-from loqusdb.utils.vcf import check_vcf, get_file_handle
 
 from . import base_command
 

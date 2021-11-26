@@ -1,9 +1,7 @@
 import logging
-from pprint import pprint as pp
-
-from pymongo import ASCENDING, DESCENDING, DeleteOne, UpdateOne
 
 from loqusdb.plugins import BaseVariantMixin
+from pymongo import ASCENDING, DESCENDING, DeleteOne, UpdateOne
 
 from .structural_variant import SVMixin
 

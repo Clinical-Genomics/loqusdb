@@ -8,12 +8,11 @@ This functions take an adapter which is the communication device for the databas
 """
 
 import logging
-from pprint import pprint as pp
 
-from loqusdb.build_models import build_case, build_variant
-from loqusdb.exceptions import CaseError, VcfError
+from loqusdb.build_models import build_case
+from loqusdb.exceptions import CaseError
 
-from .case import get_case, update_case
+from .case import get_case
 from .delete import delete
 from .load import load_case, load_variants
 from .vcf import check_vcf, get_vcf

@@ -3,7 +3,6 @@ import logging
 from datetime import datetime
 
 import click
-
 from loqusdb.exceptions import CaseError
 from loqusdb.utils.case import get_case
 from loqusdb.utils.delete import delete as delete_command

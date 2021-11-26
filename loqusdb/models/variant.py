@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from .dotdict import DotDict
 
 
 class Variant(dict):

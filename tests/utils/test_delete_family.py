@@ -1,5 +1,4 @@
 import pytest
-from loqusdb.models import Case
 from loqusdb.exceptions import CaseError
 
 

@@ -5,7 +5,6 @@ import subprocess
 from datetime import datetime
 
 import click
-
 from loqusdb.resources import background_path
 
 from . import base_command

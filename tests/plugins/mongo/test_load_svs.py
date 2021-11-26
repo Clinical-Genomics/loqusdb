@@ -1,4 +1,3 @@
-from pprint import pprint as pp
 from loqusdb.build_models.variant import build_variant
 
 def test_load_insertion(small_insert_variant, mongo_adapter, case_obj):

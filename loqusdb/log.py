@@ -1,6 +1,4 @@
 import logging
-import os
-import sys
 
 LEVELS = {
     1: "INFO",
