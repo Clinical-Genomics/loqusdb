@@ -20,7 +20,7 @@ DESCRIPTION = "Store observations of vcf variants in a mongodb"
 URL = "https://github.com/moonso/loqusdb"
 EMAIL = "mans.magnusson@scilifelab.com"
 AUTHOR = "Måns Magnusson"
-REQUIRES_PYTHON = ">=3.7.0"
+REQUIRES_PYTHON = "3.9.0"
 VERSION = "2.5.2"
 
 requirements = [

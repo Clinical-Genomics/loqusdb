@@ -1,7 +1,6 @@
 from .annotate import annotate as annotate_command
 from .cli import cli as base_command
 from .delete import delete as delete_command
-from .dump import dump as dump_command
 from .export import export as export_command
 from .identity import identity as identity_command
 from .load import load as load_command
