@@ -74,7 +74,6 @@ class VariantMixin(BaseVariantMixin, SVMixin):
             LOG.debug("Variant %s was updated", variant.get("_id"))
         else:
             LOG.debug("Variant was added to database for first time")
-        return
 
     def add_variants(self, variants):
         """Add a bulk of variants
@@ -101,7 +100,7 @@ class VariantMixin(BaseVariantMixin, SVMixin):
                 self.db.variant.bulk_write(operations, ordered=False)
                 operations = []
 
-        if len(operations) > 0:
+        if operations:
             self.db.variant.bulk_write(operations, ordered=False)
 
         return nr_inserted
@@ -203,7 +202,6 @@ class VariantMixin(BaseVariantMixin, SVMixin):
                     },
                     upsert=False,
                 )
-        return
 
     def delete_variants(self, variants):
         """Delete observations in database
@@ -230,7 +228,7 @@ class VariantMixin(BaseVariantMixin, SVMixin):
             update = self._get_update_delete(variant)
             operations.append(UpdateOne({"_id": variant["_id"]}, update, upsert=False))
         # Make the accumulated write operations
-        if len(operations) > 0:
+        if operations:
             self.db.variant.bulk_write(operations, ordered=False)
 
     def get_chromosomes(self, sv=False):
@@ -243,11 +241,9 @@ class VariantMixin(BaseVariantMixin, SVMixin):
             res(iterable(str)): An iterable with all chromosomes in the database
         """
         if sv:
-            res = self.db.structural_variant.distinct("chrom")
+            return self.db.structural_variant.distinct("chrom")
         else:
-            res = self.db.variant.distinct("chrom")
-
-        return res
+            return self.db.variant.distinct("chrom")
 
     def get_max_position(self, chrom):
         """Get the last position observed on a chromosome in the database

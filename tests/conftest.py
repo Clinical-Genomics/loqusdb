@@ -2,10 +2,12 @@ import logging
 
 import cyvcf2
 import pytest
-from loqusdb.build_models import build_variant, build_case
+
+from loqusdb.build_models.case import build_case
+from loqusdb.build_models.variant import build_variant
 from loqusdb.log import init_log
 from loqusdb.models import Case
-from loqusdb.plugins import MongoAdapter
+from loqusdb.plugins.mongo.adapter import MongoAdapter
 from loqusdb.utils.load import update_case
 from mongomock import MongoClient as MockClient
 from ped_parser import FamilyParser
@@ -171,8 +173,7 @@ def ped_path(request):
 @pytest.fixture(scope="function")
 def funny_ped_path(request):
     "Returns a ped file with incorrect family relations"
-    file_path = "tests/fixtures/funny_trio.ped"
-    return file_path
+    return "tests/fixtures/funny_trio.ped"
 
 
 @pytest.fixture(scope="function")
@@ -228,15 +229,14 @@ def case_obj(request, case_lines, vcf_obj, vcf_path, profile_list):
     vcf_individuals = vcf_obj.samples
     nr_variants = 0
     for nr_variants, variant in enumerate(vcf_obj, 1):
-        pass
-    _case_obj = build_case(
+        continue
+    return build_case(
         case=family,
         vcf_individuals=vcf_individuals,
         vcf_path=vcf_path,
         nr_variants=nr_variants,
         profiles={individual: profile_list for individual in vcf_individuals},
     )
-    return _case_obj
 
 
 @pytest.fixture(scope="function")
@@ -248,21 +248,19 @@ def sv_case_obj(request, case_lines, sv_vcf_obj, sv_vcf_path):
     vcf_individuals = sv_vcf_obj.samples
     nr_variants = 0
     for nr_variants, variant in enumerate(sv_vcf_obj, 1):
-        pass
-    _case_obj = build_case(
+        continue
+    return build_case(
         case=family,
         sv_individuals=vcf_individuals,
         vcf_sv_path=sv_vcf_path,
         nr_sv_variants=nr_variants,
     )
-    return _case_obj
 
 
 @pytest.fixture(scope="function")
 def complete_case_obj(request, case_obj, sv_case_obj):
     """Return a case obj with both sv and snv information"""
-    _case_obj = update_case(case_obj, sv_case_obj)
-    return _case_obj
+    return update_case(case_obj, sv_case_obj)
 
 
 @pytest.fixture(scope="function")
@@ -270,8 +268,7 @@ def family_obj(request, case_lines):
     """Return a case obj"""
     family_parser = FamilyParser(case_lines, family_type="ped")
     families = list(family_parser.families.keys())
-    family = family_parser.families[families[0]]
-    return family
+    return family_parser.families[families[0]]
 
 
 @pytest.fixture(scope="function")
@@ -280,9 +277,7 @@ def case_id(request, case_lines):
     family_parser = FamilyParser(case_lines, family_type="ped")
     families = list(family_parser.families.keys())
     family = family_parser.families[families[0]]
-    family_id = family.family_id
-
-    return family_id
+    return family.family_id
 
 
 @pytest.fixture(scope="function")
@@ -295,12 +290,11 @@ def individuals(request, case_obj):
 @pytest.fixture(scope="function")
 def two_cases(request):
     """Return ped formated case lines"""
-    case_lines = [
+    return [
         "#FamilyID\tSampleID\tFather\tMother\tSex\tPhenotype\n",
         "1\tproband\t0\t0\t1\t2\n",
         "2\tproband\t0\t0\t2\t1\n",
     ]
-    return case_lines
 
 
 ## Variant fixtures:
@@ -320,73 +314,68 @@ def two_cases(request):
 
 @pytest.fixture(scope="function")
 def variant_obj(request, het_variant, ind_positions, individuals):
-    _variant_obj = build_variant(
+    return build_variant(
         variant=het_variant,
         individuals=individuals,
         ind_positions=ind_positions,
         case_id="test",
         gq_treshold=None,
     )
-    return _variant_obj
 
 
 ### CYVCF2 variants
 ### SNVs:
 @pytest.fixture(scope="function")
 def hem_variant(request):
-    variant_object = CyvcfVariant(chrom="X", pos=60000)
-    return variant_object
+    return CyvcfVariant(chrom="X", pos=60000)
 
 
 @pytest.fixture(scope="function")
 def variant_chr(request):
-    variant_object = CyvcfVariant(chrom="chrX", pos=60000)
-    return variant_object
+    return CyvcfVariant(chrom="chrX", pos=60000)
 
 
 @pytest.fixture(scope="function")
 def par_variant(request):
-    variant_object = CyvcfVariant(chrom="X", pos=60001)
-    return variant_object
+    return CyvcfVariant(chrom="X", pos=60001)
 
 
 @pytest.fixture(scope="function")
 def het_variant(request):
-    variant_object = CyvcfVariant()
-    return variant_object
+    return CyvcfVariant()
 
 
 @pytest.fixture(scope="function")
 def bnd_variant(request):
-    variant_object = CyvcfVariant(
-        chrom="1", pos=80000, alt="N[1:80000[", ref="N", end=80000, info_dict={"SVTYPE": "BND"}
+    return CyvcfVariant(
+        chrom="1",
+        pos=80000,
+        alt="N[1:80000[",
+        ref="N",
+        end=80000,
+        info_dict={"SVTYPE": "BND"},
     )
-
-    return variant_object
 
 
 @pytest.fixture(scope="function")
 def variant_no_gq(request):
-    variant_object = CyvcfVariant(gt_quals=[-1, -1, -1])
-    return variant_object
+    return CyvcfVariant(gt_quals=[-1, -1, -1])
 
 
 @pytest.fixture(scope="function")
 def hom_variant(request):
-    variant_object = CyvcfVariant(gt_types=[3, 1, 1])
-    return variant_object
+    return CyvcfVariant(gt_types=[3, 1, 1])
 
 
 @pytest.fixture(scope="function")
 def variant_no_call(request):
-    variant_object = CyvcfVariant(gt_types=[2, 2, 2])
-    return variant_object
+    return CyvcfVariant(gt_types=[2, 2, 2])
 
 
 ### SVs:
 @pytest.fixture(scope="function")
 def del_variant(request):
-    variant_object = CyvcfVariant(
+    return CyvcfVariant(
         chrom="1",
         ref="G",
         alt="<DEL>",
@@ -395,12 +384,11 @@ def del_variant(request):
         var_type="sv",
         info_dict={"END": 1287000, "SVLEN": -20000, "SVTYPE": "DEL"},
     )
-    return variant_object
 
 
 @pytest.fixture(scope="function")
 def small_insert_variant(request):
-    variant_object = CyvcfVariant(
+    return CyvcfVariant(
         chrom="1",
         ref="G",
         alt="GGGACGGGGGTTCTGAGATAAGCAAGCCCCCACCAGGTGAGACCGGCGGAGCTGTGGCCACCGAGGTCCCGGGAGCTGGTGCT",
@@ -409,12 +397,11 @@ def small_insert_variant(request):
         var_type="sv",
         info_dict={"END": 3021145, "SVLEN": 82, "SVTYPE": "INS"},
     )
-    return variant_object
 
 
 @pytest.fixture(scope="function")
 def insertion_variant(request):
-    variant_object = CyvcfVariant(
+    return CyvcfVariant(
         chrom="1",
         ref="A",
         alt="<INS>",
@@ -423,12 +410,11 @@ def insertion_variant(request):
         var_type="sv",
         info_dict={"END": 3177306, "SVLEN": None, "SVTYPE": "INS"},
     )
-    return variant_object
 
 
 @pytest.fixture(scope="function")
 def duptandem_variant(request):
-    variant_object = CyvcfVariant(
+    return CyvcfVariant(
         chrom="1",
         ref="A",
         alt="<DUP:TANDEM>",
@@ -437,12 +423,11 @@ def duptandem_variant(request):
         var_type="sv",
         info_dict={"END": 3092849, "SVLEN": 223, "SVTYPE": "DUP"},
     )
-    return variant_object
 
 
 @pytest.fixture(scope="function")
 def translocation_variant(request):
-    variant_object = CyvcfVariant(
+    return CyvcfVariant(
         chrom="1",
         ref="N",
         alt="N[11:119123896[",
@@ -451,4 +436,3 @@ def translocation_variant(request):
         var_type="sv",
         info_dict={"END": None, "SVLEN": None, "SVTYPE": "BND"},
     )
-    return variant_object

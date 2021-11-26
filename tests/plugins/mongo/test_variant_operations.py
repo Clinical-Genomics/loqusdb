@@ -117,7 +117,6 @@ class TestBulkOperations:
         assert second_variant.get("homozygote", 0) == 1
 
     def test_insert_many(self, real_mongo_adapter):
-
         adapter = real_mongo_adapter
         db = adapter.db
 
@@ -165,7 +164,6 @@ class TestRemoveVariant:
         assert mongo_variant["families"] == ["2"]
 
     def test_remove_non_existing(self, mongo_adapter, simplest_variant):
-
         db = mongo_adapter.db
 
         mongo_adapter.delete_variant(simplest_variant)
@@ -175,7 +173,6 @@ class TestRemoveVariant:
 
 class TestRemoveSV:
     def test_remove_one_SV(self, mongo_adapter, del_variant, case_obj):
-
         # GIVEN a database poulated with one SV
         db = mongo_adapter.db
         formated_variant = build_variant(
@@ -196,7 +193,6 @@ class TestRemoveSV:
         assert mongo_identity is None
 
     def test_remove_one_of_two_SV(self, mongo_adapter, duptandem_variant, case_obj):
-
         # GIVEN a database poulated with one SV
         db = mongo_adapter.db
         formated_variant = build_variant(

@@ -5,10 +5,11 @@ import coloredlogs
 import yaml
 from loqusdb import __version__
 from loqusdb.constants import GRCH37, GRCH38
-from loqusdb.plugins import MongoAdapter
 from mongo_adapter import get_client
 from mongo_adapter.exceptions import Error as DB_Error
 from pymongo import uri_parser
+
+from loqusdb.plugins.mongo.adapter import MongoAdapter
 
 LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 

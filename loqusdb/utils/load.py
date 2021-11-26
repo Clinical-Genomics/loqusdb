@@ -242,7 +242,6 @@ def load_variants(
 
 
 def load_profile_variants(adapter, variant_file):
-
     """
 
     Loads variants used for profiling

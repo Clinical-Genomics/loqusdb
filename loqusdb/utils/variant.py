@@ -65,6 +65,4 @@ def format_variant(variant, variant_type="snv", nr_cases=None, add_freq=False):
 
     info = format_info(variant, variant_type=variant_type, nr_cases=nr_cases, add_freq=add_freq)
 
-    variant_line = f"{chrom}\t{pos}\t.\t{ref}\t{alt}\t.\t.\t{info}"
-
-    return variant_line
+    return f"{chrom}\t{pos}\t.\t{ref}\t{alt}\t.\t.\t{info}"

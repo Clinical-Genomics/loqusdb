@@ -8,6 +8,7 @@ LOG = logging.getLogger(__name__)
 
 Position = namedtuple("Position", "chrom pos")
 
+
 # These are coordinate for the pseudo autosomal regions in GRCh37
 
 
@@ -21,14 +22,11 @@ def check_par(chrom, pos, genome_build=None):
     Returns:
         par(bool)
     """
-    par = False
     if genome_build is None:
         genome_build = GRCH37
-    for interval in PAR[genome_build].get(chrom, []):
-        if pos >= interval[0] and pos <= interval[1]:
-            par = True
-
-    return par
+    return any(
+        pos >= interval[0] and pos <= interval[1] for interval in PAR[genome_build].get(chrom, [])
+    )
 
 
 def get_variant_id(variant):
@@ -36,8 +34,7 @@ def get_variant_id(variant):
     chrom = variant.CHROM
     if chrom.lower().startswith("chr"):
         chrom = chrom[3:]
-    variant_id = "_".join([str(chrom), str(variant.POS), str(variant.REF), str(variant.ALT[0])])
-    return variant_id
+    return "_".join([str(chrom), str(variant.POS), str(variant.REF), str(variant.ALT[0])])
 
 
 def is_greater(a, b):
@@ -65,11 +62,7 @@ def is_greater(a, b):
     if a_chrom > b_chrom:
         return True
 
-    if a_chrom == b_chrom:
-        if a.pos > b.pos:
-            return True
-
-    return False
+    return a_chrom == b_chrom and a.pos > b.pos
 
 
 def get_coords(variant):
@@ -101,19 +94,12 @@ def get_coords(variant):
     # Get the end position
     # This will be None for non-svs
     end_pos = variant.INFO.get("END")
-    if end_pos:
-        end = int(end_pos)
-    else:
-        end = int(variant.end)
+    end = int(end_pos) if end_pos else int(variant.end)
     coordinates["end"] = end
 
     sv_type = variant.INFO.get("SVTYPE")
     length = variant.INFO.get("SVLEN")
-    if length:
-        sv_len = abs(length)
-    else:
-        sv_len = end - pos
-
+    sv_len = abs(length) if length else end - pos
     # Translocations will sometimes have a end chrom that differs from chrom
     if sv_type == "BND":
         other_coordinates = alt.strip("ACGTN[]").split(":")
@@ -214,17 +200,19 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None, genome_buil
 
                 # If variant in X or Y and individual is male,
                 # we need to check hemizygosity
-                if chrom in ["X", "Y"] and ind_obj["sex"] == 1:
-                    if not check_par(chrom, pos, genome_build=genome_build):
-                        LOG.debug("Found hemizygous variant")
-                        found_hemizygote = 1
+                if (
+                    chrom in ["X", "Y"]
+                    and ind_obj["sex"] == 1
+                    and not check_par(chrom, pos, genome_build=genome_build)
+                ):
+                    LOG.debug("Found hemizygous variant")
+                    found_hemizygote = 1
 
                 if genotype == "hom_alt":
                     LOG.debug("Found homozygote alternative variant")
                     found_homozygote = 1
 
     if found_variant:
-
         variant_obj = Variant(
             variant_id=variant_id,
             chrom=chrom,

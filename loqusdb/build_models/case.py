@@ -110,7 +110,6 @@ def build_case(
     else:
         # If there where no family file we can create individuals from what we know
         for ind_id in individual_positions:
-
             profile = profiles[ind_id] if profiles else None
             similar_samples = matches[ind_id] if matches else None
             ind_obj = Individual(

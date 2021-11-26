@@ -25,14 +25,9 @@ def annotate(ctx, variant_file, sv):
 
     variant_path = os.path.abspath(variant_file)
 
-    expected_type = "snv"
-    if sv:
-        expected_type = "sv"
+    expected_type = "sv" if sv else "snv"
 
-    if "sv":
-        nr_cases = adapter.nr_cases(sv_cases=True)
-    else:
-        nr_cases = adapter.nr_cases(snv_cases=True)
+    nr_cases = adapter.nr_cases(sv_cases=True)
     LOG.info("Found {0} {1} cases in database".format(nr_cases, expected_type))
 
     vcf_obj = get_file_handle(variant_path)
@@ -52,6 +47,3 @@ def annotate(ctx, variant_file, sv):
     # try:
     for variant in annotated_variants:
         click.echo(str(variant).rstrip())
-    # except (Exception) as error:
-    #     LOG.warning(error)
-    #     ctx.abort()

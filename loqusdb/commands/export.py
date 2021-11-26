@@ -90,18 +90,4 @@ def export(ctx, outfile, variant_type, freq):
             variant_line = format_variant(
                 variant, variant_type=variant_type, nr_cases=nr_cases, add_freq=freq
             )
-            # chrom = variant['chrom']
-            # pos = variant['start']
-            # ref = variant['ref']
-            # alt = variant['alt']
-            # observations = variant['observations']
-            # homozygotes = variant['homozygote']
-            # hemizygotes = variant['hemizygote']
-            # info = "Obs={0}".format(observations)
-            # if homozygotes:
-            #     info += ";Hom={0}".format(homozygotes)
-            # if hemizygotes:
-            #     info += ";Hem={0}".format(hemizygotes)
-            # variant_line = "{0}\t{1}\t.\t{2}\t{3}\t.\t.\t{4}\n".format(
-            #     chrom, pos, ref, alt, info)
             print_variant(variant_line=variant_line, outfile=outfile)

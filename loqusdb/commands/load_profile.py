@@ -24,7 +24,8 @@ def validate_profile_threshold(ctx, param, value):
     "-v",
     "--variant-file",
     type=click.Path(exists=True),
-    help="Variants from file to be used in profiling. To be used in combination with the --load flag",
+    help="Variants from file to be used in profiling. To be used in combination "
+    "with the --load flag",
 )
 @click.option(
     "--update", is_flag=True, help="updates the profiles of all the sample in the database"
@@ -37,16 +38,17 @@ def validate_profile_threshold(ctx, param, value):
     type=float,
     default=0.9,
     callback=validate_profile_threshold,
-    help="Used with --stats option to determine the number of matching profiles with a similarity greater than given threshold",
+    help="Used with --stats option to determine the number of matching"
+    " profiles with a similarity greater than given threshold",
 )
 @click.option(
     "--check-vcf",
     type=click.Path(exists=True),
-    help="A vcf for a case. The profile from this vcf will be checked against the profiles in the database",
+    help="A vcf for a case. The profile from this vcf will be checked "
+    "against the profiles in the database",
 )
 @click.pass_context
 def load_profile(ctx, load, variant_file, update, stats, profile_threshold, check_vcf):
-
     """
     Command for profiling of samples. User may upload variants used in profiling
     from a vcf, update the profiles for all samples, and get some stats
@@ -92,11 +94,9 @@ def load_profile(ctx, load, variant_file, update, stats, profile_threshold, chec
 
 
 def table_from_dict(dictionary):
-
     table_str = "Distances within ranges:\n"
 
     for key, value in dictionary.items():
-
         table_str += f"{key:15} | {value}\n"
 
     return table_str

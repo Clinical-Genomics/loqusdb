@@ -6,7 +6,6 @@ from loqusdb.utils.vcf import check_vcf
 
 
 def test_get_profiles(real_mongo_adapter, profile_vcf_path, zipped_vcf_path):
-
     # Load profile variants
     load_profile_variants(real_mongo_adapter, profile_vcf_path)
 
@@ -26,7 +25,6 @@ def test_get_profiles(real_mongo_adapter, profile_vcf_path, zipped_vcf_path):
 
 
 def test_profile_match(real_mongo_adapter, profile_vcf_path, profile_list, case_obj):
-
     # Load profile variants
     load_profile_variants(real_mongo_adapter, profile_vcf_path)
 
@@ -38,12 +36,10 @@ def test_profile_match(real_mongo_adapter, profile_vcf_path, profile_list, case_
 
     # Assert that error is raised
     with pytest.raises(ProfileError) as error:
-
         profile_match(real_mongo_adapter, profiles)
 
 
 def test_check_duplicates(real_mongo_adapter, profile_vcf_path, profile_list, case_obj):
-
     # Load profile variants
     load_profile_variants(real_mongo_adapter, profile_vcf_path)
     # Load case having profiles profile_list
@@ -66,7 +62,6 @@ def test_check_duplicates(real_mongo_adapter, profile_vcf_path, profile_list, ca
 
 
 def test_compare_profiles():
-
     assert compare_profiles(["AA", "CC"], ["AA", "CC"]) == 1.0
     assert compare_profiles(["AA", "CC"], ["GG", "CC"]) == 0.5
     assert compare_profiles(["AC", "CG"], ["TC", "CG"]) == 0.5

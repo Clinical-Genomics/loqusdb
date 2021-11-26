@@ -45,7 +45,6 @@ class SVMixin:
             cluster = {
                 "chrom": variant["chrom"],
                 "end_chrom": variant["end_chrom"],
-                "sv_type": variant["sv_type"],
                 "pos_sum": 0,
                 "end_sum": 0,
                 "observations": 0,
@@ -64,11 +63,10 @@ class SVMixin:
             # One case will only give duplicated information
             if case_id in cluster["families"]:
                 return
-            else:
-                # Insert the new case in the beginning of array
-                cluster["families"].insert(0, case_id)
-                # Make sure array does not grow out of bounds
-                cluster["families"] = cluster["families"][:50]
+            # Insert the new case in the beginning of array
+            cluster["families"].insert(0, case_id)
+            # Make sure array does not grow out of bounds
+            cluster["families"] = cluster["families"][:50]
 
         # Update number of times we have seen the event
         nr_events = cluster["observations"] + 1
@@ -115,8 +113,6 @@ class SVMixin:
             cluster_id=cluster["_id"], variant_id=variant["id_column"], case_id=case_id
         )
         self.db.identity.insert_one(identity_obj)
-
-        return
 
     def delete_structural_variant(self, variant, max_window=3000):
 
@@ -177,8 +173,6 @@ class SVMixin:
             cluster_id=cluster["_id"], variant_id=variant["id_column"], case_id=case_id
         )
         self.db.identity.delete_one(dict(identity_obj))
-
-        return
 
     def _update_sv_metrics(self, sv_type, pos_mean, end_mean, max_window):
 
@@ -321,7 +315,7 @@ class SVMixin:
             query["$and"].append({"pos_right": {"$gte": pos}})
 
         if end:
-            if not "$and" in query:
+            if "$and" not in query:
                 query["$and"] = []
             query["$and"].append({"end_left": {"$lte": end}})
             query["$and"].append({"end_right": {"$gte": end}})
@@ -342,5 +336,4 @@ class SVMixin:
             clusters()
         """
         query = {"variant_id": variant_id}
-        identities = self.db.identity.find(query)
-        return identities
+        return self.db.identity.find(query)
