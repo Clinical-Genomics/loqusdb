@@ -21,7 +21,7 @@ URL = "https://github.com/moonso/loqusdb"
 EMAIL = "mans.magnusson@scilifelab.com"
 AUTHOR = "Måns Magnusson"
 REQUIRES_PYTHON = ">=3.9.0"
-VERSION = "2.6.2"
+VERSION = "2.6.3"
 
 requirements = [
     requirement.requirement
