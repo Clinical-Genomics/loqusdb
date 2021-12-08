@@ -62,12 +62,10 @@ def get_file_handle(file_path):
     if not os.path.exists(file_path):
         raise IOError("No such file:{0}".format(file_path))
 
-    if not os.path.splitext(file_path)[-1] in VALID_ENDINGS:
+    if os.path.splitext(file_path)[-1] not in VALID_ENDINGS:
         raise IOError("Not a valid vcf file name: {}".format(file_path))
 
-    vcf_obj = VCF(file_path)
-
-    return vcf_obj
+    return VCF(file_path)
 
 
 def get_vcf(file_path):
