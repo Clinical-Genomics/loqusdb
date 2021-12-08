@@ -92,10 +92,9 @@ def load_database(
         # Get a cyvcf2.VCF object
         vcf = get_vcf(_vcf_file)
 
-        if gq_treshold:
-            if not vcf.contains("GQ"):
-                LOG.warning("Set gq-treshold to 0 or add info to vcf {0}".format(_vcf_file))
-                raise SyntaxError("GQ is not defined in vcf header")
+        if gq_treshold and not vcf.contains("GQ"):
+            LOG.warning("Set gq-treshold to 0 or add info to vcf {0}".format(_vcf_file))
+            raise SyntaxError("GQ is not defined in vcf header")
 
     # Get a ped_parser.Family object from family file
     family = None

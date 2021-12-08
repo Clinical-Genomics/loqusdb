@@ -62,12 +62,10 @@ def get_file_handle(file_path):
     if not os.path.exists(file_path):
         raise IOError("No such file:{0}".format(file_path))
 
-    if not os.path.splitext(file_path)[-1] in VALID_ENDINGS:
+    if os.path.splitext(file_path)[-1] not in VALID_ENDINGS:
         raise IOError("Not a valid vcf file name: {}".format(file_path))
 
-    vcf_obj = VCF(file_path)
-
-    return vcf_obj
+    return VCF(file_path)
 
 
 def get_vcf(file_path):
@@ -142,14 +140,14 @@ def check_vcf(vcf_path, expected_type="snv"):
         if not previous_chrom:
             previous_chrom = current_chrom
             previous_pos = current_pos
-            posititon_variants = set([variant_id])
+            posititon_variants = {variant_id}
             continue
 
         # Update variables if new chromosome
         if current_chrom != previous_chrom:
             previous_chrom = current_chrom
             previous_pos = current_pos
-            posititon_variants = set([variant_id])
+            posititon_variants = {variant_id}
             continue
 
         if variant_type == "snv":
@@ -165,7 +163,7 @@ def check_vcf(vcf_path, expected_type="snv"):
                     raise VcfError("Vcf if not sorted in a correct way")
                 previous_pos = current_pos
                 # Reset posititon_variants since we are on a new position
-                posititon_variants = set([variant_id])
+                posititon_variants = {variant_id}
 
     if variant_type != expected_type:
         raise VcfError(
@@ -178,10 +176,8 @@ def check_vcf(vcf_path, expected_type="snv"):
     LOG.info("Nr of variants in vcf: {0}".format(nr_variants))
     LOG.info("Type of variants in vcf: {0}".format(variant_type))
 
-    vcf_info = {
+    return {
         "nr_variants": nr_variants,
         "variant_type": variant_type,
         "individuals": individuals,
     }
-
-    return vcf_info
