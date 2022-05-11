@@ -102,7 +102,7 @@ def get_coords(variant):
     sv_len = abs(length) if length else end - pos
     # Translocations will sometimes have a end chrom that differs from chrom
     if sv_type == "BND":
-        other_coordinates = alt.strip("ACGTN[]").split(":")
+        other_coordinates = alt.strip("ATCGN").strip("[]").split(":")
         end_chrom = other_coordinates[0]
         if end_chrom.startswith(("chr", "CHR", "Chr")):
             end_chrom = end_chrom[3:]
