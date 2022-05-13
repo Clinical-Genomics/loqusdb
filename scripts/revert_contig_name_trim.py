@@ -29,7 +29,7 @@ def revert_contig_name_trim(db_uri, db_name, live=False):
             variant["end_chrom"] = new_end
             if live:
                 db.structural_variant.find_one_and_update(
-                    {"_id": variant["_id"]}, {"end_chrom": new_end}
+                    {"_id": variant["_id"]}, {"$set": {"end_chrom": new_end}}
                 )
             click.echo(f"old end_chrom: {old_end} -> new end_chrom {new_end}")
 
