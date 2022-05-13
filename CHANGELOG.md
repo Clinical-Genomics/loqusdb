@@ -6,6 +6,7 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
 ## [unreleased]
 ### Added
+- Script to correct contig name
 ### Changed
 - GitHub actions run tests using MongoDB versions 3.2, 4.4 and 5.0
 ### Fixed
