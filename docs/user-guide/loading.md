@@ -56,7 +56,7 @@ A few demo files could be used to test a loqusdb instance. They are included in 
 
 To load all variants for a case by providing both a VCF file containing SNV variants and a VCF file containing SV variants, use the following command:
 
-`loqusdb --uri mongodb://<user>:<password>@<host>:<port> --database <database_name> --load --variant-file tests/fixtures/643594.clinical.vcf.gz --sv-variants tests/fixtures/643594.clinical.SV.vcf -c 643594`
+`loqusdb --uri mongodb://<user>:<password>@<host>:<port> --database <database_name> --load --variant-file tests/fixtures/643594.clinical.vcf.gz --sv-variants tests/fixtures/643594.clinical.SV.vcf --case-id 643594`
 
 where `643594` in the command above is an arbitrary name assigned to the group of samples present in the VCF file.
 
