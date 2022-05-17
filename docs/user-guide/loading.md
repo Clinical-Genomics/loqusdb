@@ -7,7 +7,7 @@ When loading a case for the first time one could do any of the following:
 
 1. **Load a case with an SNV file**
 1. **Load a case with an SV file**
-1. **Load a case with a SNV file and a SV file**
+1. **Load a case with an SNV file and an SV file**
 
 It is possible to add a file after a case is loaded with `loqusdb update`
 
