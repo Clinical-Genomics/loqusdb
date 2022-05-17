@@ -2,7 +2,7 @@
 
 Install **[mongo db][mongo_installation]**
 
-then do any of these:
+then, in a conda environment with Python (>=3.9) do any of these:
 
 `pip install loqusdb`
 
