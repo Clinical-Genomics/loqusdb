@@ -1,4 +1,4 @@
-# loqusdb 
+# loqusdb
 [![Publish to PyPI](https://github.com/moonso/loqusdb/actions/workflows/build_and_publish.yml/badge.svg)](https://github.com/moonso/loqusdb/actions/workflows/build_and_publish.yml)
 [![Coverage Status](https://coveralls.io/repos/github/moonso/loqusdb/badge.svg?branch=master)](https://coveralls.io/github/moonso/loqusdb?branch=master)
 [![PyPI Version][pypi-img]][pypi-url]
@@ -10,6 +10,8 @@ storing variants but there should not be a huge difference to use another
 database manager.
 
 ## Installation ##
+
+These instructions were written and tested using a conda environment with a version of **Python >=3.9**, which is required by the installer file (setup.py).
 
 `pip install loqusdb`
 

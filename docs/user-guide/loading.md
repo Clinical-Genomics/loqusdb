@@ -1,13 +1,13 @@
-#Load a case
+# Loading a case
 
-Variants are loaded in a case context, this is so that we can trace back where we have observed a variation.
+Variants are loaded in a case context, this way it becomes possible to trace back where we have observed a variation.
 VCF files usually does not hold family information, this is why we use a [ped][ped] file.
 
 When loading a case for the first time one could do any of the following:
 
-1. Load a case with a SNV file
-1. Load a case with a SV file
-1. Load a case with a SNV file **and** a SV file
+1. **Load a case with an SNV file**
+1. **Load a case with an SV file**
+1. **Load a case with an SNV file and an SV file**
 
 It is possible to add a file after a case is loaded with `loqusdb update`
 
@@ -47,7 +47,19 @@ Options:
   --help                          Show this message and exit.
 ```
 
-loqusdb will check that the individuals in ped file exists in vcf file and then add all the variants to database.
+Loqusdb will check that the individuals in ped file exists in vcf file and then add all the variants to database.
+**If no .ped file is provided when loading a case in loqusdb, then variants for all samples found in the VCF file(s) will be loaded. In this case it will be necessary to provide a case name for this group of samples by using the `--case-id` option**.
+
+# Command line example 
+
+A few demo files could be used to test a loqusdb instance. They are included in the tests folder, under [fixtures][fixtures].
+
+To load all variants for a case by providing both a VCF file containing SNV variants and a VCF file containing SV variants, use the following command:
+
+`loqusdb --uri mongodb://<user>:<password>@<host>:<port> --database <database_name> --load --variant-file tests/fixtures/643594.clinical.vcf.gz --sv-variants tests/fixtures/643594.clinical.SV.vcf --case-id 643594`
+
+where `643594` in the command above is an arbitrary name assigned to the group of samples present in the VCF file.
 
 
+[fixtures]: https://github.com/Clinical-Genomics/loqusdb/tree/master/tests/fixtures
 [ped]: http://zzz.bwh.harvard.edu/plink/data.shtml#ped
