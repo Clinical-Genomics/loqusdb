@@ -5,7 +5,7 @@ VCF files usually does not hold family information, this is why we use a [ped][p
 
 When loading a case for the first time one could do any of the following:
 
-1. **Load a case with a SNV file**
+1. **Load a case with an SNV file**
 1. **Load a case with a SV file**
 1. **Load a case with a SNV file and a SV file**
 
