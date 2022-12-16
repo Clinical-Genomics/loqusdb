@@ -232,7 +232,7 @@ def load_variants(
     with click.progressbar(vcf_obj, label="Inserting variants", length=nr_variants) as bar:
 
         variants = (
-            build_variant(variant, case_obj, case_id, gq_treshold, qual_gq, select_individual=select_individual, genome_build=genome_build)
+            build_variant(variant, case_obj, case_id, gq_threshold, qual_gq, select_individual=select_individual, genome_build=genome_build)
             for variant in bar
         )
 

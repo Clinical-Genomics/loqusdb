@@ -103,8 +103,8 @@ def load(
     check_profile,
     hard_threshold,
     soft_threshold,
-    select_individual,
     qual_gq,
+    select_individual,
 ):
     """Load the variants of a case
 
