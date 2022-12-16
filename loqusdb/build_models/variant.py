@@ -139,7 +139,7 @@ def get_coords(variant):
     return coordinates
 
 
-def build_variant(variant, case_obj, case_id=None, gq_treshold=None, genome_build=None):
+def build_variant(variant, case_obj, case_id=None, gq_treshold=None, select_individual=None, genome_build=None):
     """Return a Variant object
 
     Take a cyvcf2 formated variant line and return a models.Variant.
@@ -152,6 +152,7 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None, genome_buil
         case_obj(Case): We need the case object to check individuals sex
         case_id(str): The case id
         gq_treshold(int): Genotype Quality treshold
+        select_individual(str): sample id of individual to select for upload. Load all if None.
 
     Return:
         formated_variant(models.Variant): A variant dictionary
@@ -186,6 +187,8 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None, genome_buil
         found_variant = False
         for ind_obj in case_obj["individuals"]:
             ind_id = ind_obj["ind_id"]
+            if select_individual and ind_id != select_individual:
+                continue
             # Get the index position for the individual in the VCF
             ind_pos = ind_obj["ind_index"]
             gq = int(variant.gt_quals[ind_pos])

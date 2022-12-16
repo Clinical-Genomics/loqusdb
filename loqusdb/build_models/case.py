@@ -32,6 +32,7 @@ def build_case(
     nr_variants=None,
     nr_sv_variants=None,
     profiles=None,
+    select_individual=None,
     matches=None,
     profile_path=None,
 ):
@@ -46,7 +47,7 @@ def build_case(
         vcf_sv_path(str)
         nr_variants(int)
         nr_sv_variants(int)
-        profiles(dict): The profiles for each sample in vcf
+        profiles(dict): The profiles for each sample in profile vcf
         matches(dict(list)): list of similar samples for each sample in vcf.
 
     Returns:
@@ -58,8 +59,6 @@ def build_case(
 
     family_id = None
     if case:
-        if not case.affected_individuals:
-            LOG.warning("No affected individuals could be found in ped file")
         family_id = case.family_id
 
     # If case id is given manually we use that one
@@ -93,7 +92,11 @@ def build_case(
             individual = case.individuals[ind_id]
             try:
                 # If a profile dict exists, get the profile for ind_id
-                profile = profiles[ind_id] if profiles else None
+                profile = profiles.get(ind_id) if profiles else None
+
+                # check if all inds really should be uploaded.. The ind id will mismatch in profiles if not
+                # all inds are in the check file.
+
                 # If matching samples are found, get these samples for ind_id
                 similar_samples = matches[ind_id] if matches else None
                 ind_obj = Individual(

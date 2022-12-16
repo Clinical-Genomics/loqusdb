@@ -47,6 +47,12 @@ def validate_profile_threshold(ctx, param, value):
     help="If a different case id than the one in ped file should be used",
 )
 @click.option(
+    "-i",
+    "--select_individual",
+    type=str,
+    help="Select one specific individual to upload from multi individual VCF",
+)
+@click.option(
     "-s",
     "--skip-case-id",
     is_flag=True,
@@ -96,6 +102,7 @@ def load(
     check_profile,
     hard_threshold,
     soft_threshold,
+    select_individual,
 ):
     """Load the variants of a case
 
@@ -141,6 +148,7 @@ def load(
             profile_file=variant_profile_path,
             hard_threshold=hard_threshold,
             soft_threshold=soft_threshold,
+            select_individual=select_individual,
             genome_build=genome_build,
         )
     except (SyntaxError, CaseError, IOError) as error:
