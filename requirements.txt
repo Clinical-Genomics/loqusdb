@@ -7,6 +7,7 @@ numpy==1.21.4
 coloredlogs==14.0
 pyyaml==5.4.0
 vcftoolbox==1.5
-setuptools==59.2.0
+setuptools==65.5.1
+pip==23.1.2
 mongo_adapter>=0.3.3
 ped_parser
