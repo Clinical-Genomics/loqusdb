@@ -2,12 +2,12 @@ import logging
 from copy import deepcopy
 
 from loqusdb.exceptions import CaseError
-from ped_parser import FamilyParser
+from ped_parser import Family, FamilyParser
 
 LOG = logging.getLogger(__name__)
 
 
-def get_case(family_lines, family_type="ped", vcf_path=None):
+def get_case(family_lines, family_type="ped", vcf_path=None) -> Family:
     """Return ped_parser case from a family file
 
     Create a dictionary with case data. If no family file is given create from VCF

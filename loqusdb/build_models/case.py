@@ -1,5 +1,7 @@
 import logging
 
+from ped_parser import Family
+
 from typing import Dict, List
 
 from loqusdb.exceptions import CaseError
@@ -25,7 +27,7 @@ def get_individual_positions(individuals):
 
 
 def build_case(
-    case,
+    case: Family,
     vcf_individuals=None,
     case_id=None,
     vcf_path=None,
@@ -90,7 +92,6 @@ def build_case(
         else:
             _ind_pos = sv_individual_positions
 
-        #for ind_id, individual in enumerate(case.individuals):
         for ind_id in case.individuals:
             individual = case.individuals[ind_id]
             try:
