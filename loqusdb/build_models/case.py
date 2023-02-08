@@ -90,7 +90,9 @@ def build_case(
         else:
             _ind_pos = sv_individual_positions
 
-        for ind_id, individual in enumerate(case.individuals):
+        #for ind_id, individual in enumerate(case.individuals):
+        for ind_id in case.individuals:
+            individual = case.individuals[ind_id]
             try:
                 # If a profile dict exists, get the profile for ind_id
                 profile = profiles.get(ind_id) if profiles else None
