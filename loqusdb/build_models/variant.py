@@ -140,11 +140,7 @@ def get_coords(variant):
 
     return coordinates
 
-<<<<<<< HEAD
 def build_variant(variant:cyvcf2.Variant, case_obj: Case, case_id:str=None, gq_threshold:int=None, gq_qual:bool=False, select_individual:str=None, genome_build:str=None) -> Variant:
-=======
-def build_variant(variant, case_obj, case_id=None, gq_threshold=None, gq_qual=False, select_individual=None, genome_build=None):
->>>>>>> 666aadc (Option to select individual for upload)
     """Return a Variant object
 
     Take a cyvcf2 formated variant line and return a models.Variant.
@@ -156,11 +152,7 @@ def build_variant(variant, case_obj, case_id=None, gq_threshold=None, gq_qual=Fa
         variant(cyvcf2.Variant)
         case_obj(Case): We need the case object to check individuals sex
         case_id(str): The case id
-<<<<<<< HEAD
-        gq_threshold(int): Genotype Quality treshold
-=======
         gq_threshold(int): Genotype Quality threshold
->>>>>>> 666aadc (Option to select individual for upload)
         select_individual(str): sample id of individual to select for upload. Load all if None.
 
     Return:
