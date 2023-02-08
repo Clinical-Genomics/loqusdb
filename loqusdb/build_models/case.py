@@ -1,5 +1,7 @@
 import logging
 
+from typing import Dict, List
+
 from loqusdb.exceptions import CaseError
 from loqusdb.models import Case, Individual
 
@@ -33,7 +35,7 @@ def build_case(
     nr_sv_variants=None,
     profiles: Dict[str, str]=None,
     select_individual=None,
-    matches=None,
+    matches: Dict[str, List[str]]=None,
     profile_path=None,
 ):
     """Build a Case from the given information

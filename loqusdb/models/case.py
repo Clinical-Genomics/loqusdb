@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from typing import List
 
 class Case(dict):
     """Represent a Case."""
