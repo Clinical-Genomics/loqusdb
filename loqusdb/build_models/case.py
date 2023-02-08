@@ -93,7 +93,7 @@ def build_case(
                 # If a profile dict exists, get the profile for ind_id
                 profile = profiles.get(ind_id) if profiles else None
 
-                # check if all inds really should be uploaded.. The ind id will mismatch in profiles if not
+                # check if all inds really should be uploaded. The ind id will mismatch in profiles if not
                 # all inds are in the check file.
 
                 # If matching samples are found, get these samples for ind_id
