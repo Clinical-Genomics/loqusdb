@@ -31,7 +31,7 @@ def build_case(
     vcf_sv_path=None,
     nr_variants=None,
     nr_sv_variants=None,
-    profiles=None,
+    profiles: Dict[str, str]=None,
     select_individual=None,
     matches=None,
     profile_path=None,
@@ -47,7 +47,7 @@ def build_case(
         vcf_sv_path(str)
         nr_variants(int)
         nr_sv_variants(int)
-        profiles(dict): The profiles for each sample in profile vcf
+        profiles(dict(str)): The profile strings for each sample in profile vcf
         matches(dict(list)): list of similar samples for each sample in vcf.
 
     Returns:
@@ -88,8 +88,7 @@ def build_case(
         else:
             _ind_pos = sv_individual_positions
 
-        for ind_id in case.individuals:
-            individual = case.individuals[ind_id]
+        for ind_id, individual in enumerate(case.individuals):
             try:
                 # If a profile dict exists, get the profile for ind_id
                 profile = profiles.get(ind_id) if profiles else None
@@ -98,7 +97,7 @@ def build_case(
                 # all inds are in the check file.
 
                 # If matching samples are found, get these samples for ind_id
-                similar_samples = matches[ind_id] if matches else None
+                similar_samples = matches.get(ind_id) if matches else None
                 ind_obj = Individual(
                     ind_id=ind_id,
                     case_id=case_id,

@@ -48,7 +48,7 @@ def validate_profile_threshold(ctx, param, value):
 )
 @click.option(
     "-i",
-    "--select_individual",
+    "--select-individual",
     type=str,
     help="Select one specific individual to upload from multi individual VCF",
 )
