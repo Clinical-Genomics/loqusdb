@@ -28,7 +28,7 @@ def update_database(
     family_file=None,
     family_type="ped",
     skip_case_id=False,
-    gq_treshold=None,
+    gq_threshold=None,
     case_id=None,
     max_window=3000,
 ):
@@ -41,7 +41,7 @@ def update_database(
           family_file(str): Path to family file
           family_type(str): Format of family file
           skip_case_id(bool): If no case information should be added to variants
-          gq_treshold(int): If only quality variants should be considered
+          gq_threshold(int): If only quality variants should be considered
           case_id(str): If different case id than the one in family file should be used
           max_window(int): Specify the max size for sv windows
 
@@ -67,14 +67,14 @@ def update_database(
         vcf_files.append(sv_file)
         sv_individuals = vcf_info["individuals"]
 
-    # If a gq treshold is used the variants needs to have GQ
+    # If a gq threshold is used the variants needs to have GQ
     for _vcf_file in vcf_files:
         # Get a cyvcf2.VCF object
         vcf = get_vcf(_vcf_file)
 
-        if gq_treshold:
+        if gq_threshold:
             if not vcf.contains("GQ"):
-                LOG.warning("Set gq-treshold to 0 or add info to vcf {0}".format(_vcf_file))
+                LOG.warning("Set gq-threshold to 0 or add info to vcf {0}".format(_vcf_file))
                 raise SyntaxError("GQ is not defined in vcf header")
 
     # Get a ped_parser.Family object from family file
@@ -127,7 +127,7 @@ def update_database(
                 vcf_obj=vcf_obj,
                 case_obj=case_obj,
                 skip_case_id=skip_case_id,
-                gq_treshold=gq_treshold,
+                gq_threshold=gq_threshold,
                 max_window=max_window,
                 variant_type=variant_type,
             )

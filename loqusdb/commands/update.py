@@ -47,7 +47,7 @@ LOG = logging.getLogger(__name__)
     help="Do not store case information on variants",
 )
 @click.option("--ensure-index", is_flag=True, help="Make sure that the indexes are in place")
-@click.option("--gq-treshold", default=20, show_default=True, help="Treshold to consider variant")
+@click.option("--gq-threshold", default=20, show_default=True, help="Threshold to consider variant")
 @click.option(
     "--max-window",
     "-m",
@@ -63,7 +63,7 @@ def update(
     family_file,
     family_type,
     skip_case_id,
-    gq_treshold,
+    gq_threshold,
     case_id,
     ensure_index,
     max_window,
@@ -102,7 +102,7 @@ def update(
             family_type=family_type,
             skip_case_id=skip_case_id,
             case_id=case_id,
-            gq_treshold=gq_treshold,
+            gq_threshold=gq_threshold,
             max_window=max_window,
         )
     except (SyntaxError, CaseError, IOError, VcfError) as error:
