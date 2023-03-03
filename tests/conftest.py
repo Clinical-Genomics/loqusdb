@@ -319,7 +319,7 @@ def variant_obj(request, het_variant, ind_positions, individuals):
         individuals=individuals,
         ind_positions=ind_positions,
         case_id="test",
-        gq_treshold=None,
+        gq_threshold=None,
     )
 
 
