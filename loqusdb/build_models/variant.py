@@ -139,7 +139,7 @@ def get_coords(variant):
     return coordinates
 
 
-def build_variant(variant, case_obj, case_id=None, gq_threshold=None, genome_build=None):
+def build_variant(variant, case_obj, case_id=None, gq_threshold=None, gq_qual=False, genome_build=None):
     """Return a Variant object
 
     Take a cyvcf2 formated variant line and return a models.Variant.
@@ -188,7 +188,13 @@ def build_variant(variant, case_obj, case_id=None, gq_threshold=None, genome_bui
             ind_id = ind_obj["ind_id"]
             # Get the index position for the individual in the VCF
             ind_pos = ind_obj["ind_index"]
-            gq = int(variant.gt_quals[ind_pos])
+
+            if gq_qual:
+                gq = int(variant.QUAL)
+
+            if not gq_qual:
+                gq = int(variant.gt_quals[ind_pos])
+
             if gq_threshold and gq < gq_threshold:
                 continue
 
