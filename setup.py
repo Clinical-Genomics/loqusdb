@@ -10,8 +10,6 @@
 import io
 import os
 
-from pip._internal.network.session import PipSession
-from pip._internal.req import parse_requirements
 from setuptools import find_packages, setup
 
 # Package meta-data.
@@ -23,11 +21,8 @@ AUTHOR = "Måns Magnusson"
 REQUIRES_PYTHON = ">=3.7.0"
 VERSION = "2.6.10"
 
-requirements = [
-    requirement.requirement
-    for requirement in parse_requirements(filename="./requirements.txt", session=PipSession())
-]
-
+with open('requirements.txt') as f:
+    install_requires = f.read().strip().split('\n')
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
@@ -68,7 +63,7 @@ setup(
     entry_points={
         "console_scripts": ["loqusdb = loqusdb.__main__:base_command"],
     },
-    install_requires=requirements,
+    install_requires=install_requires,
     include_package_data=True,
     license="MIT",
     keywords=["vcf", "variants"],
