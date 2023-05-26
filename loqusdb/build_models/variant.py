@@ -139,19 +139,19 @@ def get_coords(variant):
     return coordinates
 
 
-def build_variant(variant, case_obj, case_id=None, gq_treshold=None, genome_build=None):
+def build_variant(variant, case_obj, case_id=None, gq_threshold=None, gq_qual=False, genome_build=None):
     """Return a Variant object
 
     Take a cyvcf2 formated variant line and return a models.Variant.
 
     If criterias are not fullfilled, eg. variant have no gt call or quality
-    is below gq treshold then return None.
+    is below gq threshold then return None.
 
     Args:
         variant(cyvcf2.Variant)
         case_obj(Case): We need the case object to check individuals sex
         case_id(str): The case id
-        gq_treshold(int): Genotype Quality treshold
+        gq_threshold(int): Genotype Quality threshold
 
     Return:
         formated_variant(models.Variant): A variant dictionary
@@ -188,8 +188,14 @@ def build_variant(variant, case_obj, case_id=None, gq_treshold=None, genome_buil
             ind_id = ind_obj["ind_id"]
             # Get the index position for the individual in the VCF
             ind_pos = ind_obj["ind_index"]
-            gq = int(variant.gt_quals[ind_pos])
-            if gq_treshold and gq < gq_treshold:
+
+            if gq_qual:
+                gq = int(variant.QUAL)
+
+            if not gq_qual:
+                gq = int(variant.gt_quals[ind_pos])
+
+            if gq_threshold and gq < gq_threshold:
                 continue
 
             genotype = GENOTYPE_MAP[variant.gt_types[ind_pos]]

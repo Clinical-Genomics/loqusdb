@@ -25,9 +25,9 @@ def test_format_variant_no_gq(variant_no_gq, case_obj):
     ## GIVEN a variant without GQ
     variant = variant_no_gq
     case_id = case_obj["case_id"]
-    ## WHEN parsing the variant using a GQ treshold
+    ## WHEN parsing the variant using a GQ threshold
     formated_variant = build_variant(
-        variant=variant, case_obj=case_obj, case_id=case_id, gq_treshold=20
+        variant=variant, case_obj=case_obj, case_id=case_id, gq_threshold=20
     )
     ## THEN assert that None is returned since requirements are not fulfilled
     assert formated_variant is None
@@ -38,9 +38,9 @@ def test_format_variant_chr_prefix(variant_chr, case_obj):
     variant = variant_chr
     assert variant.CHROM.startswith("chr")
     case_id = case_obj["case_id"]
-    ## WHEN parsing the variant using a GQ treshold
+    ## WHEN parsing the variant using a GQ threshold
     formated_variant = build_variant(
-        variant=variant, case_obj=case_obj, case_id=case_id, gq_treshold=20
+        variant=variant, case_obj=case_obj, case_id=case_id, gq_threshold=20
     )
     ## THEN assert that the 'chr' part has been stripped away
     assert formated_variant["chrom"] == variant.CHROM[3:]

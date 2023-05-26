@@ -35,7 +35,7 @@ Options:
   -s, --skip-case-id              Do not store case information on variants
                                   [default: False]
   --ensure-index                  Make sure that the indexes are in place
-  --gq-treshold INTEGER           Treshold to consider variant  [default: 20]
+  --gq-threshold INTEGER           Threshold to consider variant  [default: 20]
   -m, --max-window INTEGER        Specify the maximum window size for svs
                                   [default: 2000]
   --check-profile PATH            Apply sample profiling for the samples,
