@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from typing import List
 
 class Case(dict):
     """Represent a Case."""
@@ -39,8 +40,8 @@ class Individual(dict):
         sex=None,
         phenotype=None,
         ind_index=None,
-        profile=None,
-        similar_samples=None,
+        profile:str=None,
+        similar_samples:List[str]=None,
     ):
         """Construct a individual object
 
@@ -52,6 +53,8 @@ class Individual(dict):
             sex (str): Sex in ped format
             phenotype (str): Phenotype in ped format
             ind_index (int): Column in the vcf.
+            profile (str): Profile string
+            similar_samples (List(str)): List of profile matches
         """
         super(Individual, self).__init__(
             ind_id=ind_id,

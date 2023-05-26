@@ -38,6 +38,7 @@ def load_database(
     profile_file=None,
     hard_threshold=0.95,
     soft_threshold=0.9,
+    select_individual=None,
     genome_build=None,
 ):
     """Load the database with a case and its variants
@@ -52,6 +53,7 @@ def load_database(
           gq_threshold(int): If only quality variants should be considered
           qual_gq(bool): Use QUAL field instead of GQ format tag to gate quality
           case_id(str): If different case id than the one in family file should be used
+          select_individual(str): Sample id for individual to upload
           max_window(int): Specify the max size for sv windows
           check_profile(bool): Does profile check if True
           hard_threshold(float): Rejects load if hamming distance above this is found
@@ -120,6 +122,7 @@ def load_database(
         sv_individuals=sv_individuals,
         nr_sv_variants=nr_sv_variants,
         profiles=profiles,
+        select_individual=select_individual,
         matches=matches,
         profile_path=profile_file,
     )
@@ -149,6 +152,7 @@ def load_database(
                 qual_gq=qual_gq,
                 max_window=max_window,
                 variant_type=variant_type,
+                select_individual=select_individual,
                 genome_build=genome_build,
             )
         except Exception as err:
@@ -196,6 +200,7 @@ def load_variants(
     qual_gq=False,
     max_window=3000,
     variant_type="snv",
+    select_individual=None,
     genome_build=None,
 ):
     """Load variants for a family into the database.
@@ -209,6 +214,7 @@ def load_variants(
         gq_threshold(int)
         max_window(int): Specify the max size for sv windows
         variant_type(str): 'sv' or 'snv'
+        select_individual(str): optional sample id for individual selected for upload, otherwise all inds are loaded
 
     Returns:
         nr_inserted(int)
@@ -226,7 +232,7 @@ def load_variants(
     with click.progressbar(vcf_obj, label="Inserting variants", length=nr_variants) as bar:
 
         variants = (
-            build_variant(variant, case_obj, case_id, gq_threshold, qual_gq, genome_build=genome_build)
+            build_variant(variant, case_obj, case_id, gq_threshold, qual_gq, select_individual=select_individual, genome_build=genome_build)
             for variant in bar
         )
 

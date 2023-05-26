@@ -1,5 +1,9 @@
 import logging
 
+from ped_parser import Family
+
+from typing import Dict, List
+
 from loqusdb.exceptions import CaseError
 from loqusdb.models import Case, Individual
 
@@ -23,7 +27,7 @@ def get_individual_positions(individuals):
 
 
 def build_case(
-    case,
+    case: Family,
     vcf_individuals=None,
     case_id=None,
     vcf_path=None,
@@ -31,8 +35,9 @@ def build_case(
     vcf_sv_path=None,
     nr_variants=None,
     nr_sv_variants=None,
-    profiles=None,
-    matches=None,
+    profiles: Dict[str, str]=None,
+    select_individual=None,
+    matches: Dict[str, List[str]]=None,
     profile_path=None,
 ):
     """Build a Case from the given information
@@ -46,7 +51,7 @@ def build_case(
         vcf_sv_path(str)
         nr_variants(int)
         nr_sv_variants(int)
-        profiles(dict): The profiles for each sample in vcf
+        profiles(dict(str)): The profile strings for each sample in profile vcf
         matches(dict(list)): list of similar samples for each sample in vcf.
 
     Returns:
@@ -58,8 +63,6 @@ def build_case(
 
     family_id = None
     if case:
-        if not case.affected_individuals:
-            LOG.warning("No affected individuals could be found in ped file")
         family_id = case.family_id
 
     # If case id is given manually we use that one
@@ -93,9 +96,13 @@ def build_case(
             individual = case.individuals[ind_id]
             try:
                 # If a profile dict exists, get the profile for ind_id
-                profile = profiles[ind_id] if profiles else None
+                profile = profiles.get(ind_id) if profiles else None
+
+                # check if all inds really should be uploaded. The ind id will mismatch in profiles if not
+                # all inds are in the check file.
+
                 # If matching samples are found, get these samples for ind_id
-                similar_samples = matches[ind_id] if matches else None
+                similar_samples = matches.get(ind_id) if matches else None
                 ind_obj = Individual(
                     ind_id=ind_id,
                     case_id=case_id,
@@ -110,8 +117,8 @@ def build_case(
     else:
         # If there where no family file we can create individuals from what we know
         for ind_id in individual_positions:
-            profile = profiles[ind_id] if profiles else None
-            similar_samples = matches[ind_id] if matches else None
+            profile = profiles.get(ind_id) if profiles else None
+            similar_samples = matches.get(ind_id) if matches else None
             ind_obj = Individual(
                 ind_id=ind_id,
                 case_id=case_id,

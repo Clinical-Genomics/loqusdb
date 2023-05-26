@@ -1,8 +1,10 @@
 import logging
 from collections import namedtuple
 
+import cyvcf2
+
 from loqusdb.constants import CHROM_TO_INT, GENOTYPE_MAP, GRCH37, PAR
-from loqusdb.models import Variant
+from loqusdb.models import Case, Variant
 
 LOG = logging.getLogger(__name__)
 
@@ -12,7 +14,7 @@ Position = namedtuple("Position", "chrom pos")
 # These are coordinate for the pseudo autosomal regions in GRCh37
 
 
-def check_par(chrom, pos, genome_build=None):
+def check_par(chrom, pos, genome_build:str=None):
     """Check if a coordinate is in the PAR region
 
     Args:
@@ -138,8 +140,7 @@ def get_coords(variant):
 
     return coordinates
 
-
-def build_variant(variant, case_obj, case_id=None, gq_threshold=None, gq_qual=False, genome_build=None):
+def build_variant(variant:cyvcf2.Variant, case_obj: Case, case_id:str=None, gq_threshold:int=None, gq_qual:bool=False, select_individual:str=None, genome_build:str=None) -> Variant:
     """Return a Variant object
 
     Take a cyvcf2 formated variant line and return a models.Variant.
@@ -152,9 +153,10 @@ def build_variant(variant, case_obj, case_id=None, gq_threshold=None, gq_qual=Fa
         case_obj(Case): We need the case object to check individuals sex
         case_id(str): The case id
         gq_threshold(int): Genotype Quality threshold
+        select_individual(str): sample id of individual to select for upload. Load all if None.
 
     Return:
-        formated_variant(models.Variant): A variant dictionary
+        formated_variant(models.Variant): A variant if found
     """
     variant_obj = None
 
@@ -186,6 +188,8 @@ def build_variant(variant, case_obj, case_id=None, gq_threshold=None, gq_qual=Fa
         found_variant = False
         for ind_obj in case_obj["individuals"]:
             ind_id = ind_obj["ind_id"]
+            if select_individual and ind_id != select_individual:
+                continue
             # Get the index position for the individual in the VCF
             ind_pos = ind_obj["ind_index"]
 
