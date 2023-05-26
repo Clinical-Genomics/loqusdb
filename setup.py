@@ -19,7 +19,7 @@ URL = "https://github.com/moonso/loqusdb"
 EMAIL = "mans.magnusson@scilifelab.com"
 AUTHOR = "Måns Magnusson"
 REQUIRES_PYTHON = ">=3.7.0"
-VERSION = "2.6.10"
+VERSION = "2.7.0"
 
 with open('requirements.txt') as f:
     install_requires = f.read().strip().split('\n')
