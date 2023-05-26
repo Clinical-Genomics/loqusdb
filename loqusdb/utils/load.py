@@ -32,6 +32,7 @@ def load_database(
     family_type="ped",
     skip_case_id=False,
     gq_threshold=None,
+    qual_gq=False,
     case_id=None,
     max_window=3000,
     profile_file=None,
@@ -49,6 +50,7 @@ def load_database(
           family_type(str): Format of family file
           skip_case_id(bool): If no case information should be added to variants
           gq_threshold(int): If only quality variants should be considered
+          qual_gq(bool): Use QUAL field instead of GQ format tag to gate quality
           case_id(str): If different case id than the one in family file should be used
           max_window(int): Specify the max size for sv windows
           check_profile(bool): Does profile check if True
@@ -92,7 +94,7 @@ def load_database(
         # Get a cyvcf2.VCF object
         vcf = get_vcf(_vcf_file)
 
-        if gq_threshold and not vcf.contains("GQ"):
+        if gq_threshold and not vcf.contains("GQ") and not qual_gq:
             LOG.warning("Set gq-threshold to 0 or add info to vcf {0}".format(_vcf_file))
             raise SyntaxError("GQ is not defined in vcf header")
 
@@ -144,6 +146,7 @@ def load_database(
                 case_obj=case_obj,
                 skip_case_id=skip_case_id,
                 gq_threshold=gq_threshold,
+                qual_gq=qual_gq,
                 max_window=max_window,
                 variant_type=variant_type,
                 genome_build=genome_build,
@@ -190,6 +193,7 @@ def load_variants(
     case_obj,
     skip_case_id=False,
     gq_threshold=None,
+    qual_gq=False,
     max_window=3000,
     variant_type="snv",
     genome_build=None,
@@ -222,7 +226,7 @@ def load_variants(
     with click.progressbar(vcf_obj, label="Inserting variants", length=nr_variants) as bar:
 
         variants = (
-            build_variant(variant, case_obj, case_id, gq_threshold, genome_build=genome_build)
+            build_variant(variant, case_obj, case_id, gq_threshold, qual_gq, genome_build=genome_build)
             for variant in bar
         )
 

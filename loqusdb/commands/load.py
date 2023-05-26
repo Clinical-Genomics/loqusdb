@@ -55,6 +55,7 @@ def validate_profile_threshold(ctx, param, value):
 )
 @click.option("--ensure-index", is_flag=True, help="Make sure that the indexes are in place")
 @click.option("--gq-threshold", default=20, show_default=True, help="Threshold to consider variant")
+@click.option("--qual-gq", is_flag=True, default=False, show_default=True, help="Use QUAL tag instead of GQ value for quality filter")
 @click.option(
     "--max-window",
     "-m",
@@ -96,6 +97,7 @@ def load(
     check_profile,
     hard_threshold,
     soft_threshold,
+    qual_gq
 ):
     """Load the variants of a case
 
@@ -137,6 +139,7 @@ def load(
             skip_case_id=skip_case_id,
             case_id=case_id,
             gq_threshold=gq_threshold,
+            qual_gq=qual_gq,
             max_window=max_window,
             profile_file=variant_profile_path,
             hard_threshold=hard_threshold,
