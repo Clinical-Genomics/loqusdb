@@ -31,6 +31,12 @@ def validate_profile_threshold(ctx, param, value):
     metavar="<sv_vcf_file>",
     help="Load a VCF with Structural Variants",
 )
+@click.option(
+    "--mei-variants",
+    type=click.Path(exists=True),
+    metavar="<mei_vcf_file>",
+    help="Load a VCF with Mobile Element Insertion Variants",
+)
 @click.option("-f", "--family-file", type=click.Path(exists=True), metavar="<ped_file>")
 @click.option(
     "-t",
@@ -87,6 +93,7 @@ def load(
     ctx,
     variant_file,
     sv_variants,
+    mei_variants,
     family_file,
     family_type,
     skip_case_id,
@@ -108,13 +115,17 @@ def load(
         LOG.warning("Please provide a family file or a case id")
         ctx.abort()
 
-    if not (variant_file or sv_variants):
+    if not (variant_file or sv_variants or mei_variants):
         LOG.warning("Please provide a VCF file")
         ctx.abort()
 
     variant_path = None
     if variant_file:
         variant_path = os.path.abspath(variant_file)
+
+    variant_mei_path = None
+    if mei_variants:
+        variant_mei_path = os.path.abspath(mei_variants)
 
     variant_sv_path = None
     if sv_variants:
@@ -134,6 +145,7 @@ def load(
             adapter=adapter,
             variant_file=variant_path,
             sv_file=variant_sv_path,
+            mei_file=variant_mei_path,
             family_file=family_file,
             family_type=family_type,
             skip_case_id=skip_case_id,
