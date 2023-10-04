@@ -224,14 +224,16 @@ def load_variants(
                              or not
         gq_threshold(int)
         max_window(int): Specify the max size for sv windows
-        variant_type(str): 'sv' or 'snv'
+        variant_type(str): 'sv', 'mei' or 'snv'
 
     Returns:
         nr_inserted(int)
     """
     if variant_type == "snv":
         nr_variants = case_obj["nr_variants"]
-    else:
+    if variant_type == "mei":
+        nr_variants = case_obj["nr_mei_variants"]
+    if variant_type == "sv":
         nr_variants = case_obj["nr_sv_variants"]
 
     nr_inserted = 0
@@ -252,6 +254,9 @@ def load_variants(
                 continue
             adapter.add_structural_variant(variant=sv_variant, max_window=max_window)
             nr_inserted += 1
+
+    if variant_type == "mei":
+        nr_inserted = adapter.add_variants(variants)
 
     if variant_type == "snv":
         nr_inserted = adapter.add_variants(variants)
