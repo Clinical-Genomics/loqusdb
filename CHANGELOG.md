@@ -5,6 +5,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
 ## [unreleased]
+### Fixed
+- `Deprecated config in setup.cfg` error when installing the package
+
+## [2.7.1]
 ### Added
 - Script to correct contig name
 - Expanded instructions on how to set up an instance and load data into database
