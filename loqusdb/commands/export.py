@@ -39,7 +39,6 @@ def export(ctx, outfile, variant_type, freq):
     version = ctx.obj["version"]
 
     LOG.info("Export the variants from {0}".format(adapter))
-    nr_cases = 0
 
     is_sv = variant_type == "sv"
     existing_chromosomes = set(adapter.get_chromosomes(sv=is_sv))
@@ -52,7 +51,7 @@ def export(ctx, outfile, variant_type, freq):
     for chrom in existing_chromosomes:
         ordered_chromosomes.append(chrom)
 
-    nr_cases = adapter.cases().count()
+    nr_cases = adapter.cases().count_documents()
     LOG.info("Found {0} cases in database".format(nr_cases))
 
     head = HeaderParser()
@@ -85,7 +84,7 @@ def export(ctx, outfile, variant_type, freq):
         else:
             LOG.info("Collecting all SV variants")
             variants = adapter.get_sv_variants(chromosome=chrom)
-        LOG.info("{} variants found".format(variants.count()))
+        LOG.info("{} variants found".format(variants.count_documents()))
         for variant in variants:
             variant_line = format_variant(
                 variant, variant_type=variant_type, nr_cases=nr_cases, add_freq=freq

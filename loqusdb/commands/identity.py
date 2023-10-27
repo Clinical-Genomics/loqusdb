@@ -22,7 +22,7 @@ def identity(ctx, variant_id):
     LOG.info("Search variants {0}".format(adapter))
 
     result = adapter.get_clusters(variant_id)
-    if result.count() == 0:
+    if result.count_documents() == 0:
         LOG.info("No hits for variant %s", variant_id)
         return
 

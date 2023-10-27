@@ -105,7 +105,6 @@ class CaseMixin:
         returns:
             nr_of_cases (int): Total number of cases in database
         """
-        nr_of_cases = 0
         res = self.cases
 
-        return res.count()
+        return res.count_documents()
