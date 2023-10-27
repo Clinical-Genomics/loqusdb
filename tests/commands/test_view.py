@@ -3,7 +3,7 @@ from click.testing import CliRunner
 from loqusdb.commands.cli import cli as base_command
 
 def test_view_cases_no_cases(vcf_path, ped_path, real_mongo_adapter, real_db_name):
-    """Test the command that returns database cases."""
+    """Test the command that returns database cases when the database is empty."""
 
     ## GIVEN an empty database
     assert sum([1 for _ in real_mongo_adapter.cases()]) == 0

@@ -84,7 +84,7 @@ def export(ctx, outfile, variant_type, freq):
         else:
             LOG.info("Collecting all SV variants")
             variants = adapter.get_sv_variants(chromosome=chrom)
-        LOG.info("{} variants found".format(variants.count_documents()))
+        LOG.info(f"{adapter.nr_variants(chromosome=chrom)} variants found")
         for variant in variants:
             variant_line = format_variant(
                 variant, variant_type=variant_type, nr_cases=nr_cases, add_freq=freq
