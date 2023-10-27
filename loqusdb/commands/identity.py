@@ -22,7 +22,7 @@ def identity(ctx, variant_id):
 
     variant_count: int = adapter.db.identity.count_documents({"variant_id": variant_id})
     if variant_count == 0:
-        LOG.info("No hits for variant %s", variant_id)
+        LOG.info(f"No hits for variant {variant_id}")
         return
 
     for res in result:
