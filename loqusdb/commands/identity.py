@@ -20,7 +20,7 @@ def identity(ctx, variant_id):
 
     LOG.info("Search variants {0}".format(adapter))
 
-    nr_results = adapter.db.identity.count_documents({"variant_id": variant_id})
+    variant_count: int = adapter.db.identity.count_documents({"variant_id": variant_id})
     if nr_results == 0:
         LOG.info("No hits for variant %s", variant_id)
         return
