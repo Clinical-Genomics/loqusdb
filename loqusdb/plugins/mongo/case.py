@@ -99,12 +99,6 @@ class CaseMixin:
         LOG.info("Removing case {0} from database".format(mongo_case.get("case_id")))
         self.db.case.delete_one({"_id": mongo_case["_id"]})
 
-    def case_count(self):
-        """Returns the total number of cases in the database
-
-        returns:
-            nr_of_cases (int): Total number of cases in database
-        """
-        res = self.cases
-
-        return res.count_documents()
+    def case_count(self) -> int:
+        """Returns the total number of cases in the database."""
+        return self.db.case.count_documents({})
