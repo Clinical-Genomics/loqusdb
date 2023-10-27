@@ -51,8 +51,8 @@ def export(ctx, outfile, variant_type, freq):
     for chrom in existing_chromosomes:
         ordered_chromosomes.append(chrom)
 
-    nr_cases = adapter.cases().count_documents()
-    LOG.info("Found {0} cases in database".format(nr_cases))
+    nr_cases = adapter.case_count()
+    LOG.info(f"Found {0} cases in database".format(nr_cases))
 
     head = HeaderParser()
     head.add_fileformat("VCFv4.3")
