@@ -4,7 +4,14 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
-## [unreleased]
+## [2.8]
+### Added
+- Basic cli tests touching fixed deprecated code
+### Changed
+- Unfreezed PyMongo in requirements.txt
+- Replaced deprecated pymongo `.count()` function with `count_documents()` in code.
+
+## [2.7.2]
 ### Fixed
 - `Deprecated config in setup.cfg` error when installing the package
 
