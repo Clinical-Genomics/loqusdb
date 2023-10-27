@@ -44,7 +44,7 @@ def cases(ctx, case_id, to_json, count, case_type):
     else:
 
         case_count: int = adapter.case_count()
-        if nr_cases == 0:
+        if case_count == 0:
             LOG.info("No cases found in database")
             ctx.abort()
         cases = adapter.cases()
