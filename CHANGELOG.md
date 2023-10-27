@@ -4,9 +4,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
-## [unreleased]
+## [2.8]
+### Added
+- Basic cli tests touching fixed deprecated code
 ### Changed
-- Un-freeze Pymongo and mongo_adapter collections
+- Unfreezed PyMongo in requirements.txt
+
+## [2.7.2]
 ### Fixed
 - `Deprecated config in setup.cfg` error when installing the package
 
