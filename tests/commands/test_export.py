@@ -7,7 +7,7 @@ def test_export_base(real_db_name):
 
     runner = CliRunner()
 
-    # WHen the command to export cases is run
+    # WHEN the base command to export cases is run
     command = ["--database", real_db_name, "export"]
 
     ## THEN it should return success

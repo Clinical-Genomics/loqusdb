@@ -52,7 +52,7 @@ def export(ctx, outfile, variant_type, freq):
         ordered_chromosomes.append(chrom)
 
     nr_cases = adapter.case_count()
-    LOG.info(f"Found {0} cases in database".format(nr_cases))
+    LOG.info(f"Found {nr_cases} cases in database")
 
     head = HeaderParser()
     head.add_fileformat("VCFv4.3")
