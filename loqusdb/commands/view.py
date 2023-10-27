@@ -2,6 +2,7 @@
 import json
 import logging
 from pprint import pprint as pp
+from pymongo.cursor import Cursor
 
 import click
 
@@ -42,12 +43,12 @@ def cases(ctx, case_id, to_json, count, case_type):
         case_obj["_id"] = str(case_obj["_id"])
         cases.append(case_obj)
     else:
-
         case_count: int = adapter.case_count()
         if case_count == 0:
             LOG.info("No cases found in database")
             ctx.abort()
-        cases = adapter.cases()
+        cases: Cursor = adapter.cases()
+
 
     if to_json:
         click.echo(json.dumps(cases))
