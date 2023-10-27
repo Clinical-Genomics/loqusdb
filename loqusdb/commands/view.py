@@ -42,10 +42,12 @@ def cases(ctx, case_id, to_json, count, case_type):
         case_obj["_id"] = str(case_obj["_id"])
         cases.append(case_obj)
     else:
-        cases = adapter.cases()
-        if cases.count_documents() == 0:
+
+        nr_cases = adapter.db.case.count_documents({})
+        if nr_cases == 0:
             LOG.info("No cases found in database")
             ctx.abort()
+        cases = adapter.cases()
 
     if to_json:
         click.echo(json.dumps(cases))
