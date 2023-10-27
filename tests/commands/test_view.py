@@ -2,7 +2,7 @@ from click.testing import CliRunner
 from loqusdb.plugins.mongo.adapter import MongoAdapter
 from loqusdb.commands.cli import cli as base_command
 
-def test_view_cases_base(real_mongo_adapter, real_db_name:str):
+def test_view_cases_base(real_mongo_adapter: MongoAdapter, real_db_name:str):
     """Test the base command that returns database cases."""
 
     ## GIVEN an empty database
