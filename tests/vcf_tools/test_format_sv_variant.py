@@ -84,7 +84,7 @@ def test_format_dup_tandem(duptandem_variant, case_obj):
 
 def test_format_tiddit_dup_tandem(duptandem_tiddit_variant, case_obj):
     ## GIVEN a TIDDIT style notation, ie both SVTYPE info and alt field tag has subtype, eg DUP:TANDEM
-    variant = duptandem_variant
+    variant = duptandem_tiddit_variant
     case_id = case_obj["case_id"]
     ## WHEN parsing the variant
     formated_variant = build_variant(variant=variant, case_obj=case_obj, case_id=case_id)
@@ -103,7 +103,7 @@ def test_format_tiddit_dup_tandem(duptandem_tiddit_variant, case_obj):
 
 def test_format_old_tiddit_dup_tandem(duptandem_old_tiddit_variant, case_obj):
     ## GIVEN a dup with older TIDDIT notation (TDUP, IDUP, ...)
-    variant = duptandem_variant
+    variant = duptandem_old_tiddit_variant
     case_id = case_obj["case_id"]
     ## WHEN parsing the variant
     formated_variant = build_variant(variant=variant, case_obj=case_obj, case_id=case_id)

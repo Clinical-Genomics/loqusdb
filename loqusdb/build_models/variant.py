@@ -97,7 +97,9 @@ def get_coords(variant):
     end = int(end_pos) if end_pos else int(variant.end)
     coordinates["end"] = end
 
-    sv_type = variant.INFO.get("SVTYPE").split(":")[0]
+    sv_type = variant.INFO.get("SVTYPE")
+    if sv_type:
+        sv_type = sv_type.split(":")[0]
     if sv_type in ["TDUP", "IDUP"]:
         sv_type = "DUP"
 
