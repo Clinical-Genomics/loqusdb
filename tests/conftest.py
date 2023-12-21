@@ -424,6 +424,32 @@ def duptandem_variant(request):
         info_dict={"END": 3092849, "SVLEN": 223, "SVTYPE": "DUP"},
     )
 
+@pytest.fixture(scope="function")
+def duptandem_tiddit_variant(request):
+    return CyvcfVariant(
+        chrom="1",
+        ref="A",
+        alt="<DUP:TANDEM>",
+        pos=3092626,
+        end=3092849,
+        var_type="sv",
+        info_dict={"END": 3092849, "SVLEN": 223, "SVTYPE": "DUP:TANDEM"},
+    )
+
+
+@pytest.fixture(scope="function")
+def duptandem_old_tiddit_variant(request):
+    return CyvcfVariant(
+        chrom="1",
+        ref="A",
+        alt="<TDUP>",
+        pos=3092626,
+        end=3092849,
+        var_type="sv",
+        info_dict={"END": 3092849, "SVLEN": 223, "SVTYPE": "TDUP"},
+    )
+
+
 
 @pytest.fixture(scope="function")
 def translocation_variant(request):

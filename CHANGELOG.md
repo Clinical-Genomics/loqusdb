@@ -13,6 +13,7 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 ### Fixed
 - Restore command accepts custom database name
 - Restore command uses either database URI or host:port params
+- Tiddit style variants (IDUP, TDUP or DUP:TANDEM also in SVTYPE, not only ALT field) collapse to primary type (DUP, DEL) 
 
 ## [2.5.2]
 
