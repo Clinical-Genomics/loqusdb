@@ -35,6 +35,7 @@ INDEXES = {
                 ("pos_right", ASCENDING),
             ],
             name="coordinates",
+            background=True,
         ),
         IndexModel(
             [
@@ -43,6 +44,7 @@ INDEXES = {
                 ("end_right", ASCENDING),
             ],
             name="short_coordinates",
+            background=True,
         ),
     ],
     "identity": [
