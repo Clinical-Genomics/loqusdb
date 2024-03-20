@@ -148,7 +148,7 @@ def build_variant(variant:cyvcf2.Variant, case_obj:Case, case_id:Optional[str]=N
 
     Take a cyvcf2 formated variant line and return a models.Variant.
 
-    If criteria are not fulfilled, eg variant has no gt call or quality
+    If criteria are not fulfilled, eg variant has no GT call or quality.
     is below gq threshold then return None.
 
 
