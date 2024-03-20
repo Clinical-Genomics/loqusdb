@@ -1,8 +1,12 @@
 import logging
 from collections import namedtuple
 
+import cyvcf2
+
+from typing import Optional
+
 from loqusdb.constants import CHROM_TO_INT, GENOTYPE_MAP, GRCH37, PAR
-from loqusdb.models import Variant
+from loqusdb.models import Case, Variant
 
 LOG = logging.getLogger(__name__)
 
@@ -139,19 +143,21 @@ def get_coords(variant):
     return coordinates
 
 
-def build_variant(variant, case_obj, case_id=None, gq_threshold=None, gq_qual=False, genome_build=None):
+def build_variant(variant:cyvcf2.Variant, case_obj:Case, case_id:Optional[str]=None, gq_threshold:Optional[int]=None, gq_qual:Optional[bool]=False, genome_build:Optional[str]=None) -> Variant:
     """Return a Variant object
 
     Take a cyvcf2 formated variant line and return a models.Variant.
 
-    If criterias are not fullfilled, eg. variant have no gt call or quality
+    If criteria are not fulfilled, eg variant has no gt call or quality
     is below gq threshold then return None.
+
 
     Args:
         variant(cyvcf2.Variant)
         case_obj(Case): We need the case object to check individuals sex
         case_id(str): The case id
         gq_threshold(int): Genotype Quality threshold
+        gq_qual(bool): Use variant.QUAL for quality instead of GQ
 
     Return:
         formated_variant(models.Variant): A variant dictionary
@@ -190,7 +196,9 @@ def build_variant(variant, case_obj, case_id=None, gq_threshold=None, gq_qual=Fa
             ind_pos = ind_obj["ind_index"]
 
             if gq_qual:
-                gq = int(variant.QUAL)
+                gq = 0
+                if variant.QUAL:
+                    gq = int(variant.QUAL)
 
             if not gq_qual:
                 gq = int(variant.gt_quals[ind_pos])
