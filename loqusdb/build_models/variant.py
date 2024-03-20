@@ -143,7 +143,7 @@ def get_coords(variant):
     return coordinates
 
 
-def build_variant(variant:cyvcf2.Variant, case_obj:Case, case_id:Optional[str]=None, gq_threshold:Optional[int]=None, gq_qual:Optional[bool]=False, genome_build:Optional[str]=None) -> Variant:
+def build_variant(variant: cyvcf2.Variant, case_obj: Case, case_id: Optional[str]=None, gq_threshold: Optional[int]=None, gq_qual: Optional[bool]=False, genome_build: Optional[str]=None) -> Variant:
     """Return a Variant object
 
     Take a cyvcf2 formated variant line and return a models.Variant.
