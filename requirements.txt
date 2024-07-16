@@ -8,6 +8,6 @@ coloredlogs==14.0
 pyyaml>=5.4.1
 vcftoolbox==1.5
 pip==23.1.2
-setuptools==65.5.1
+setuptools>=70.0.0
 mongo_adapter
 ped_parser
