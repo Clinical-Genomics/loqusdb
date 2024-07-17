@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
+
+## [2.7.7]
+### Fixed
+- Update to setuptools >= v.70 to address a security issue in the `package_index` module
+
+## [2.7.6]
+### Fixed
+- Updated issue templates
+
 ## [2.7.4]
 ## Changed
 - When using QUAL values, treat . as 0 quality
