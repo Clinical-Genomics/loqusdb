@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "loqusdb"
+version = "2.7.7"
+description = "A simple observation count database"
+authors = ["Your Name <you@example.com>"]
+license = "MIT"
+readme = "README.md"
+include = [
+  "README.md",
+  "loqusdb/**/*",
+  "tests/**/*"
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+cyvcf2 = "*"
+click = "*"
+pymongo = "^4"
+numpy = "*"
+coloredlogs = "*"
+PyYAML = "*"
+vcftoolbox = "*"
+setuptools = "*"
+mongo-adapter = "*"
+ped_parser = "*"
+
+[tool.poetry.group.dev.dependencies]
+coveralls =  "^3"
+mongomock = "*"
+pytest = "*"
+pytest-cov = "*"
+
+[tool.poetry.scripts]
+trailblazer = "loqusdb.commands.cli:cli"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
