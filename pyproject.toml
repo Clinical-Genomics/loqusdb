@@ -31,7 +31,7 @@ pytest = "*"
 pytest-cov = "*"
 
 [tool.poetry.scripts]
-trailblazer = "loqusdb.commands.cli:cli"
+loqusdb = "loqusdb.commands.cli:cli"
 
 [build-system]
 requires = ["poetry-core"]
