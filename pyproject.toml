@@ -12,11 +12,11 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = ">=3.9,<3.11"
 cyvcf2 = "0.30.12"
 click = "*"
 pymongo = "^4"
-numpy = "*"
+numpy = "1.21.4"
 coloredlogs = "*"
 PyYAML = "*"
 vcftoolbox = "*"
