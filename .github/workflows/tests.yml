@@ -3,8 +3,7 @@ name: Run tests and coverage
 on: ["pull_request"]
 
 jobs:
-  build:
-    name: tests-coverage
+  tests-coverage:
     runs-on: ubuntu-latest
     strategy:
       matrix:
