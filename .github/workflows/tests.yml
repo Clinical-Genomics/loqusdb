@@ -19,7 +19,7 @@ jobs:
         python-version: ${{ matrix.python-version}}
 
     - name: Start MongoDB
-      uses: wbari/start-mongoDB@v0.2
+      uses: supercharge/mongodb-github-action@1.11.0
       with:
         mongoDBVersion: ${{ matrix.mongodb-version}}
 
