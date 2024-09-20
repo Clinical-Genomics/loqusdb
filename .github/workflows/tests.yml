@@ -21,7 +21,7 @@ jobs:
     - name: Start MongoDB
       uses: supercharge/mongodb-github-action@1.11.0
       with:
-        mongoDBVersion: ${{ matrix.mongodb-version}}
+        mongodb-version: ${{ matrix.mongodb-version}}
 
     - name: Install and configure Poetry
       uses: snok/install-poetry@v1
