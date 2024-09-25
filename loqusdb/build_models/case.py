@@ -28,7 +28,7 @@ def build_case(
     matches=None,
     profile_path=None,
 ):
-    """Build a Case from the given information
+    """Build a Case from the given information.
 
     Args:
         case(ped_parser.Family): A family object
