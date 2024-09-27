@@ -4,7 +4,7 @@ from pymongo import ASCENDING, IndexModel
 
 logger = logging.getLogger(__name__)
 
-__version__ = "2.7.9"
+__version__ = "2.7.10"
 
 INDEXES = {
     "variant": [
