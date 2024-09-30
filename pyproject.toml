@@ -27,6 +27,7 @@ ped_parser = "*"
 [tool.poetry.group.dev.dependencies]
 coveralls =  "^3"
 mongomock = "*"
+pre-commit = "*"
 pytest = "*"
 pytest-cov = "*"
 
@@ -36,3 +37,14 @@ loqusdb = "loqusdb.commands.cli:cli"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+
+[tool.isort]
+profile = "black"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+ignore = ["E501"]
