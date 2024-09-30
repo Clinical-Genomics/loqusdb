@@ -2,9 +2,9 @@
 import json
 import logging
 from pprint import pprint as pp
+from pymongo.cursor import Cursor
 
 import click
-from pymongo.cursor import Cursor
 
 from loqusdb.commands.cli import cli as base_command
 
@@ -48,6 +48,7 @@ def cases(ctx, case_id, to_json, count, case_type):
             LOG.info("No cases found in database")
             ctx.abort()
         cases: Cursor = adapter.cases()
+
 
     if to_json:
         click.echo(json.dumps(cases))

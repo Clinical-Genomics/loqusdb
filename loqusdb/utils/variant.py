@@ -32,12 +32,14 @@ def format_info(variant, variant_type="snv", nr_cases=None, add_freq=False):
 
     # This is SV specific
     if variant_type == "sv":
-        if variant["sv_type"] != "BND":
-            end = int((variant["end_left"] + variant["end_right"]) / 2)
+        pos= int((variant["pos_left"] + variant["pos_right"]) / 2)
+        end = int((variant["end_left"] + variant["end_right"]) / 2)
 
+        if not variant['sv_type'] == "BND":
             vcf_info += f";SVTYPE={variant['sv_type']};END={end};SVLEN={variant['length']}"
         else:
-            vcf_info += ";SVTYPE=BND"
+            vcf_info += f";SVTYPE=BND"
+
 
     return vcf_info
 
@@ -61,10 +63,10 @@ def format_variant(variant, variant_type="snv", nr_cases=None, add_freq=False):
 
     if variant_type == "sv":
         pos = int((variant["pos_left"] + variant["pos_right"]) / 2)
-        end = int((variant["end_left"] + variant["end_right"]) / 2)
+        end=  int((variant["end_left"] + variant["end_right"]) / 2)
         ref = "N"
 
-        if not variant["sv_type"] == "BND":
+        if not variant['sv_type'] == "BND":
             alt = f"<{variant['sv_type']}>"
         else:
             alt = f"N]{variant['end_chrom']}:{end}]"

@@ -2,8 +2,7 @@ from click.testing import CliRunner
 
 from loqusdb.commands.cli import cli as base_command
 
-
-def test_identity(real_db_name: str):
+def test_identity(real_db_name:str):
     """Test the SV identity base command."""
 
     runner = CliRunner()
@@ -17,3 +16,7 @@ def test_identity(real_db_name: str):
 
     # AND no variant found message
     assert "No hits for variant" in result.output
+
+
+
+

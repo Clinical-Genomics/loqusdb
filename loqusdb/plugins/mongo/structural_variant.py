@@ -1,8 +1,7 @@
 import logging
 
-from pymongo import ASCENDING
-
 from loqusdb.models import Identity
+from pymongo import ASCENDING
 
 LOG = logging.getLogger(__name__)
 
@@ -90,6 +89,25 @@ class SVMixin:
             sv_type=cluster["sv_type"], pos_mean=pos_mean, end_mean=end_mean, max_window=max_window
         )
 
+        res = self.db.structural_variant.find_one_and_update(
+            {"_id": cluster["_id"]},
+            {
+                "$inc": {
+                    "observations": 1,
+                    "pos_sum": variant["pos"],
+                    "end_sum": variant["end"],
+                },
+                "$set": {
+                    "pos_left": max(pos_mean - interval_size, 0),
+                    "pos_right": pos_mean + interval_size,
+                    "end_left": max(end_mean - interval_size, 0),
+                    "end_right": end_mean + interval_size,
+                    "families": cluster["families"],
+                    "length": cluster_len,
+                },
+            },
+        )
+
         # Insert an identity object to link cases to variants and clusters
         identity_obj = Identity(
             cluster_id=cluster["_id"], variant_id=variant["id_column"], case_id=case_id
@@ -131,6 +149,25 @@ class SVMixin:
             sv_type=cluster["sv_type"], pos_mean=pos_mean, end_mean=end_mean, max_window=max_window
         )
 
+        res = self.db.structural_variant.find_one_and_update(
+            {"_id": cluster["_id"]},
+            {
+                "$inc": {
+                    "observations": -1,
+                    "pos_sum": -variant["pos"],
+                    "end_sum": -variant["end"],
+                },
+                "$set": {
+                    "pos_left": max(pos_mean - interval_size, 0),
+                    "pos_right": pos_mean + interval_size,
+                    "end_left": max(end_mean - interval_size, 0),
+                    "end_right": end_mean + interval_size,
+                    "families": cluster["families"],
+                    "length": cluster_len,
+                },
+            },
+        )
+
         # Insert an identity object to link cases to variants and clusters
         identity_obj = Identity(
             cluster_id=cluster["_id"], variant_id=variant["id_column"], case_id=case_id
@@ -138,6 +175,7 @@ class SVMixin:
         self.db.identity.delete_one(dict(identity_obj))
 
     def _update_sv_metrics(self, sv_type, pos_mean, end_mean, max_window):
+
         """
         calculates cluster length, and interval size for SV based on
         mean start position and mean end position.
