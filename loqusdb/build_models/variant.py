@@ -1,9 +1,8 @@
 import logging
 from collections import namedtuple
+from typing import Optional
 
 import cyvcf2
-
-from typing import Optional
 
 from loqusdb.constants import CHROM_TO_INT, GENOTYPE_MAP, GRCH37, PAR
 from loqusdb.models import Case, Variant
@@ -143,7 +142,14 @@ def get_coords(variant):
     return coordinates
 
 
-def build_variant(variant: cyvcf2.Variant, case_obj: Case, case_id: Optional[str]=None, gq_threshold: Optional[int]=None, gq_qual: Optional[bool]=False, genome_build: Optional[str]=None) -> Variant:
+def build_variant(
+    variant: cyvcf2.Variant,
+    case_obj: Case,
+    case_id: Optional[str] = None,
+    gq_threshold: Optional[int] = None,
+    gq_qual: Optional[bool] = False,
+    genome_build: Optional[str] = None,
+) -> Variant:
     """Return a Variant object
 
     Take a cyvcf2 formated variant line and return a models.Variant.
@@ -191,7 +197,6 @@ def build_variant(variant: cyvcf2.Variant, case_obj: Case, case_id: Optional[str
     else:
         found_variant = False
         for ind_obj in case_obj["individuals"]:
-            ind_id = ind_obj["ind_id"]
             # Get the index position for the individual in the VCF
             ind_pos = ind_obj["ind_index"]
 

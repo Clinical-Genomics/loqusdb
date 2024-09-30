@@ -11,15 +11,14 @@ import logging
 
 import click
 
+from loqusdb.build_models.case import build_case
+from loqusdb.build_models.profile_variant import build_profile_variant
+from loqusdb.build_models.variant import build_variant
 from loqusdb.exceptions import CaseError, VcfError
-
 from loqusdb.utils.case import get_case, update_case
 from loqusdb.utils.delete import delete
 from loqusdb.utils.profiling import get_profiles, profile_match
 from loqusdb.utils.vcf import check_vcf, get_vcf
-from loqusdb.build_models.case import build_case
-from loqusdb.build_models.profile_variant import build_profile_variant
-from loqusdb.build_models.variant import build_variant
 
 LOG = logging.getLogger(__name__)
 
@@ -226,7 +225,9 @@ def load_variants(
     with click.progressbar(vcf_obj, label="Inserting variants", length=nr_variants) as bar:
 
         variants = (
-            build_variant(variant, case_obj, case_id, gq_threshold, qual_gq, genome_build=genome_build)
+            build_variant(
+                variant, case_obj, case_id, gq_threshold, qual_gq, genome_build=genome_build
+            )
             for variant in bar
         )
 
@@ -258,7 +259,6 @@ def load_profile_variants(adapter, variant_file):
     """
 
     vcf_info = check_vcf(variant_file)
-    nr_variants = vcf_info["nr_variants"]
     variant_type = vcf_info["variant_type"]
 
     if variant_type != "snv":

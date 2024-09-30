@@ -1,7 +1,8 @@
 import logging
 
-from loqusdb.models import Identity
 from pymongo import ASCENDING
+
+from loqusdb.models import Identity
 
 LOG = logging.getLogger(__name__)
 
@@ -175,7 +176,6 @@ class SVMixin:
         self.db.identity.delete_one(dict(identity_obj))
 
     def _update_sv_metrics(self, sv_type, pos_mean, end_mean, max_window):
-
         """
         calculates cluster length, and interval size for SV based on
         mean start position and mean end position.
