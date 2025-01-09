@@ -4,6 +4,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
+## [2.7.12]
+## Changed
+- Update the description of the Frq INFO tag to include information about the number of cases as well. 
+
 ## [2.7.7]
 ### Fixed
 - Update to setuptools >= v.70 to address a security issue in the `package_index` module
