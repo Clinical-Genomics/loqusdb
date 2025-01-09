@@ -59,8 +59,10 @@ def export(ctx, outfile, variant_type, freq):
     head.add_meta_line("NrCases", nr_cases)
     if freq:
         head.add_info(
-            "Frq", "1", "Float", 
-            f"Observation frequency of the variant (not allele frequency) based on {nr_cases} cases"
+            "Frq",
+            "1",
+            "Float",
+            f"Observation frequency of the variant (not allele frequency) based on {nr_cases} cases",
         )
     head.add_info("Obs", "1", "Integer", "The number of observations for the variant")
     head.add_info("Hom", "1", "Integer", "The number of observed homozygotes")
