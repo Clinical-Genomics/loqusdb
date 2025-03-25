@@ -58,7 +58,6 @@ def export(ctx, outfile, variant_type, freq):
     else:
         raise ValueError(f"Unknown variant_type: {variant_type}, expected 'snv' or 'sv'")
 
-    # nr_cases = adapter.case_count()
     LOG.info(f"Found {nr_cases} cases in database")
 
     head = HeaderParser()
