@@ -4,6 +4,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
+## [2.7.8]
+### Fixed
+- For export, NrCases now reflects the number of cases with variants of the type specified by `--variant-type`
+
 ## [2.7.7]
 ### Fixed
 - Update to setuptools >= v.70 to address a security issue in the `package_index` module
