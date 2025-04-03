@@ -8,7 +8,7 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 ### Fixed
 - Update bumpversion config to also update the changelog version on bump (#147)
 
-## [2.7.12]
+## [## [unreleased]]
 ### Changed
 - Update the description of the Frq INFO tag to include information about the number of cases as well. (#144)
 
