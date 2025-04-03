@@ -3,47 +3,47 @@ name: Run tests and coverage
 on: ["pull_request"]
 
 jobs:
-  build:
-    name: Tests
+  tests-coverage:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.9]
-        mongodb-version: ["4.4", "5.0"]
+        python-version: [3.12]
+        mongodb-version: ["5", "7"]
 
     steps:
-    # Check out Scout code
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
-    # Set up python
     - name: Set up Python ${{ matrix.python-version}}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version}}
 
-    # Set up mongodb
     - name: Start MongoDB
-      uses: wbari/start-mongoDB@v0.2
+      uses: supercharge/mongodb-github-action@1.11.0
       with:
-        mongoDBVersion: ${{ matrix.mongodb-version}}
+        mongodb-version: ${{ matrix.mongodb-version}}
 
-    - name: Production Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -e . 
+    - name: Install and configure Poetry
+      uses: snok/install-poetry@v1
 
-    - name: Dev Dependencies
-      run: |
-        pip install pytest
+    - name: Install dependencies
+      run: poetry install --no-interaction
 
-    - name: Coveralls Dependencies
+    - name: Test with Pytest & Coveralls
       run: |
-        pip install pytest-cov coveralls
-
-    - name: Test with pytest & Coveralls
-      run: |
-        pytest --cov=./ tests/
-        coveralls
+        poetry run pytest --cov=loqusdb/
+        poetry run coveralls
       env:
         GITHUB: 1
+        GITHUB_TOKEN: ${{ secrets.github_token }}
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+
+  finish:
+    needs: tests-coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Coveralls Finished
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.github_token }}
+          parallel-finished: true

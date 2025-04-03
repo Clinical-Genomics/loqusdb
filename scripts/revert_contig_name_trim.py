@@ -3,8 +3,8 @@
 import re
 
 import click
-
 from pymongo import MongoClient
+
 
 @click.command()
 @click.option("--db-uri", required=True, help="mongodb://user:password@db_url:db_port")
@@ -18,8 +18,7 @@ def revert_contig_name_trim(db_uri, db_name, live=False):
         click.echo("database connection info:{}".format(db))
         old_GL_pattern = re.compile("^L00")
 
-        variants = list(db.structural_variant.find(
-            {"end_chrom": old_GL_pattern}))
+        variants = list(db.structural_variant.find({"end_chrom": old_GL_pattern}))
 
         click.echo(f"found: {len(variants)} trimmed end_chrom")
 
@@ -35,6 +34,7 @@ def revert_contig_name_trim(db_uri, db_name, live=False):
 
     except Exception as err:
         click.echo("Error {}".format(err))
+
 
 if __name__ == "__main__":
     revert_contig_name_trim()

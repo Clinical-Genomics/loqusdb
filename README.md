@@ -3,24 +3,24 @@
 [![Coverage Status](https://coveralls.io/repos/github/moonso/loqusdb/badge.svg?branch=master)](https://coveralls.io/github/moonso/loqusdb?branch=master)
 [![PyPI Version][pypi-img]][pypi-url]
 
-Small tool to setup a local variant database. If you find loqusdb useful in your work, please cite the [article][publication].
+Small tool to set up a local variant database.
+If you find Loqusdb useful in your work, please cite the [article][publication].
 
-Right now **locusdb** uses [mongodb][mongodb] as backend for
-storing variants but there should not be a huge difference to use another
+Right now **Locusdb** uses [mongodb][mongodb] as backend for
+storing variants, but there should not be a huge difference to use another
 database manager.
 
 ## Installation ##
 
-These instructions were written and tested using a conda environment with a version of **Python >=3.9**, which is required by the installer file (setup.py).
 
-`pip install loqusdb`
+`poetry install`
 
 or
 
 ```
 $git clone https://github.com/moonso/loqusdb
 $cd loqusdb
-$pip install --editable .
+$poetry install
 ```
 
 ## Idea ##
@@ -30,16 +30,16 @@ This is **NOT** a tool to create a true frequency database.
 It will basically count the number of times we have seen a variant in any individual.
 We will also keep track of the variants that have been seen in a homozygous or hemizygous state.
 
-Variants are stored by providing a vcf file and a (ped or ped like)family file.
+Variants are stored by providing a VCF file and a (ped or ped like) family file.
 
-Loqusdb will first check if the vcf file looks ok.
+Loqusdb will first check if the VCF file adheres to the VCF format.
 
 The tool will then check all variants if they have been observed in any of the individuals in the family.
 
 When the variants are added:
 
 - Either the variant exists, in this case we increase the number of observations with one
-- Or this variant has not ben seen before, then the variant is added to database
+- Or this variant has not been seen before, then the variant is added to the database
 
 
 ## Command Line Interface ##
@@ -96,7 +96,7 @@ Commands:
 
 ### Connecting ###
 
-Connection can be specified on command line with `--database`, `--username`, `--password`, `--port`, `--host` and/or `--uri`. Or these options can be sent with a config file that can take the same options, looks like:
+Connection can be specified on command line with `--database`, `--username`, `--password`, `--port`, `--host` and/or `--uri`. Or these options can be sent with a config file that can take the same options:
 
 ```yaml
 uri: mongodb://loqusdb-username:loqusdb-pwd@localhost:27030/loqusdb-rd?authSource=admin
@@ -114,7 +114,7 @@ db_name: loqusdb_test
 
 ### Mongo ###
 
-The collections looks like:
+The collections are defined as follows:
 
 **Case**
 

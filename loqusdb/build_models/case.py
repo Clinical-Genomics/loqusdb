@@ -6,15 +6,8 @@ from loqusdb.models import Case, Individual
 LOG = logging.getLogger(__name__)
 
 
-def get_individual_positions(individuals):
-    """Return a dictionary with individual positions
-
-    Args:
-        individuals(list): A list with vcf individuals in correct order
-
-    Returns:
-        ind_pos(dict): Map from ind_id -> index position
-    """
+def get_individual_positions(individuals: list[str]) -> dict[str, int]:
+    """Return a dictionary with individual positions."""
     ind_pos = {}
     if individuals:
         for i, ind in enumerate(individuals):
@@ -35,7 +28,7 @@ def build_case(
     matches=None,
     profile_path=None,
 ):
-    """Build a Case from the given information
+    """Build a Case from the given information.
 
     Args:
         case(ped_parser.Family): A family object

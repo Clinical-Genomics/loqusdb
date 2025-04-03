@@ -39,7 +39,6 @@ def export(ctx, outfile, variant_type, freq):
     version = ctx.obj["version"]
 
     LOG.info("Export the variants from {0}".format(adapter))
-    nr_cases = 0
 
     is_sv = variant_type == "sv"
     existing_chromosomes = set(adapter.get_chromosomes(sv=is_sv))
@@ -52,15 +51,24 @@ def export(ctx, outfile, variant_type, freq):
     for chrom in existing_chromosomes:
         ordered_chromosomes.append(chrom)
 
-    nr_cases = adapter.cases().count()
-    LOG.info("Found {0} cases in database".format(nr_cases))
+    if variant_type == "snv":
+        nr_cases = adapter.nr_cases(snv_cases=True)
+    elif variant_type == "sv":
+        nr_cases = adapter.nr_cases(sv_cases=True)
+    else:
+        raise ValueError(f"Unknown variant_type: {variant_type}, expected 'snv' or 'sv'")
+
+    LOG.info(f"Found {nr_cases} cases in database")
 
     head = HeaderParser()
     head.add_fileformat("VCFv4.3")
     head.add_meta_line("NrCases", nr_cases)
     if freq:
         head.add_info(
-            "Frq", "1", "Float", "Observation frequency of the variant (not allele frequency)"
+            "Frq",
+            "1",
+            "Float",
+            f"Observation frequency of the variant (not allele frequency) based on {nr_cases} cases",
         )
     head.add_info("Obs", "1", "Integer", "The number of observations for the variant")
     head.add_info("Hom", "1", "Integer", "The number of observed homozygotes")
@@ -85,7 +93,7 @@ def export(ctx, outfile, variant_type, freq):
         else:
             LOG.info("Collecting all SV variants")
             variants = adapter.get_sv_variants(chromosome=chrom)
-        LOG.info("{} variants found".format(variants.count()))
+        LOG.info(f"{adapter.nr_variants(chromosome=chrom)} variants found")
         for variant in variants:
             variant_line = format_variant(
                 variant, variant_type=variant_type, nr_cases=nr_cases, add_freq=freq

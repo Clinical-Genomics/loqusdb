@@ -4,7 +4,69 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
-## [unreleased]
+
+## [2.7.16]
+### Fixed 
+- Fixed changelog
+
+## [2.7.15]
+### Fixed
+- For export, NrCases now reflects the number of cases with variants of the type specified by `--variant-type`
+
+## [2.7.14]
+### Added
+- GitHub workflow for ChangeLog reminders 
+### Fixed
+- Fixed bumpversion changelog rule - attempted to anyway (#148)
+
+## [2.7.13]
+### Changed
+- Update bumpversion config to also update the changelog version on bump (#147)
+
+## [2.7.12]
+### Changed
+- Update the description of the Frq INFO tag to include information about the number of cases as well. (#144)
+
+## [2.7.11]
+### Changed
+- Add linters (#143)
+
+## [2.7.10]
+### Changed
+- Add codeowners (#142)
+
+## [2.7.9]
+### Changed
+-Fix bump action (#141)
+
+## [2.7.8]
+### Changed
+- Fix Bump action (#137)
+
+## [2.7.7]
+### Fixed
+- Update to setuptools >= v.70 to address a security issue in the `package_index` module
+
+## [2.7.6]
+### Fixed
+- Updated issue templates
+
+## [2.7.4]
+## Changed
+- When using QUAL values, treat . as 0 quality
+
+## [2.7.3]
+### Added
+- Basic cli tests touching fixed deprecated code
+### Changed
+- Unfreezed PyMongo in requirements.txt
+- Replaced deprecated pymongo `.count()` function with `count_documents()` in code.
+
+## [2.7.2]
+### Fixed
+- `Deprecated config in setup.cfg` error when installing the package
+
+## [2.7.1]
 ### Added
 - Script to correct contig name
 - Expanded instructions on how to set up an instance and load data into database

@@ -17,13 +17,12 @@ def identity(ctx, variant_id):
         ctx.abort()
 
     adapter = ctx.obj["adapter"]
-    version = ctx.obj["version"]
 
     LOG.info("Search variants {0}".format(adapter))
 
-    result = adapter.get_clusters(variant_id)
-    if result.count() == 0:
-        LOG.info("No hits for variant %s", variant_id)
+    variant_count: int = adapter.db.identity.count_documents({"variant_id": variant_id})
+    if variant_count == 0:
+        LOG.info(f"No hits for variant {variant_id}")
         return
 
     for res in result:

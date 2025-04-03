@@ -21,6 +21,20 @@ def test_format_variant(het_variant, case_obj):
     assert formated_variant["homozygote"] == 0
 
 
+def test_format_variant_no_qual(variant_no_gq, case_obj):
+    ## GIVEN a variant without GQ
+    variant = variant_no_gq
+    ## And that has a missing QUAL value
+    variant.QUAL = None
+    case_id = case_obj["case_id"]
+    ## WHEN parsing the variant using a QUAL threshold
+    formated_variant = build_variant(
+        variant=variant, case_obj=case_obj, case_id=case_id, gq_qual=True, gq_threshold=20
+    )
+    ## THEN assert that None is returned since requirements are not fulfilled
+    assert formated_variant is None
+
+
 def test_format_variant_no_gq(variant_no_gq, case_obj):
     ## GIVEN a variant without GQ
     variant = variant_no_gq

@@ -65,14 +65,14 @@ def real_db_name(request):
 @pytest.fixture(scope="function")
 def mongo_client(request):
     """Return a mongomock client"""
-    client = MockClient()
+    client = MockClient(directConnection=True)
     return client
 
 
 @pytest.fixture(scope="function")
 def real_mongo_client(request):
     """Return a mongomock client"""
-    client = MongoClient()
+    client = MongoClient(directConnection=True)
 
     def teardown():
         print("\n")
