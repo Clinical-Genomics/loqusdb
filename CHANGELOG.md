@@ -5,10 +5,16 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
 ## [unreleased]
+### Added
+- GitHub workflow for ChangeLog reminders 
+### Fixed
+- Fixed bumpversion changelog rule - attempted to anyway (#148)
+
+## [2.7.13]
 ### Fixed
 - Update bumpversion config to also update the changelog version on bump (#147)
 
-## [## [unreleased]]
+## [2.7.12]
 ### Changed
 - Update the description of the Frq INFO tag to include information about the number of cases as well. (#144)
 
