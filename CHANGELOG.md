@@ -4,15 +4,20 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
+
+## [unreleased]
+### Fixed 
+- Fixed changelog
+
+## [2.7.15]
+### Fixed
+- For export, NrCases now reflects the number of cases with variants of the type specified by `--variant-type`
+
 ## [2.7.14]
 ### Added
 - GitHub workflow for ChangeLog reminders 
 ### Fixed
 - Fixed bumpversion changelog rule - attempted to anyway (#148)
-
-## [2.7.13]
-### Fixed
-- For export, NrCases now reflects the number of cases with variants of the type specified by `--variant-type`
 
 ## [2.7.13]
 ### Changed
