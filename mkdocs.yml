@@ -2,6 +2,7 @@ site_name: loqusdb documentation
 site_url: https://clinical-genomics.github.io/loqusdb
 repo_url: https://github.com/Clinical-Genomics/loqusdb
 site_author: Måns Magnusson and Jesper Eisfeldt
+docs_dir: docs
 
 theme:
   name: 'material'
@@ -12,5 +13,19 @@ theme:
 
 nav:
   - Home: 'README.md'
-  - User Guide: 'user-guide/README.md'
-  - Admin Guide: 'admin-guide/README.md'
+
+  - Installation: 'install.md'
+
+  - User Guide:
+    - User Guide README: 'user-guide/README.md'
+    - Loading: 'user-guide/loading.md'
+    - Deleting: 'user-guide/deleting.md'
+    - Exporting: 'user-guide/exporting.md'
+    - Annotating: 'user-guide/annotating.md'
+    - Profiling: 'user-guide/profiling.md'
+    
+  - Admin Guide:
+    - Admin Guide README: 'admin-guide/README.md'
+    - Dump database: 'admin-guide/dump.md'
+    - Restore database: 'admin-guide/restore.md'
+
