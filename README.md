@@ -10,7 +10,7 @@ Right now **Locusdb** uses [mongodb][mongodb] as backend for
 storing variants, but there should not be a huge difference to use another
 database manager.
 
-Find more detailed instructions and examples in the [documentation](docs).
+Find more detailed instructions and examples in the [documentation][docs].
 
 ## Installation ##
 

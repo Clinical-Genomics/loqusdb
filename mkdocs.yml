@@ -23,7 +23,7 @@ nav:
     - Exporting: 'user-guide/exporting.md'
     - Annotating: 'user-guide/annotating.md'
     - Profiling: 'user-guide/profiling.md'
-    
+
   - Admin Guide:
     - Admin Guide README: 'admin-guide/README.md'
     - Dump database: 'admin-guide/dump.md'
