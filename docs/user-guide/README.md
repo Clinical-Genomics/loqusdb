@@ -18,7 +18,6 @@ homozygous state 2 times before we could either exclude the variant or solve 2 m
 Variants are only counted once per family, regardless of how many individuals it was observed in.
 This is to avoid the situation where a large family could have a great impact on a rare variant.
 
-* [Usage](./usage.md)
 * [Loading](./loading.md)
 * [Deleting](./deleting.md)
 * [Exporting](./exporting.md)

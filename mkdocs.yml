@@ -1,6 +1,6 @@
 site_name: loqusdb documentation
-site_url: http://moonso.github.io/loqusdb/
-repo_url: https://github.com/moonso/loqusdb
+site_url: https://clinical-genomics.github.io/loqusdb
+repo_url: https://github.com/Clinical-Genomics/loqusdb
 site_author: Måns Magnusson and Jesper Eisfeldt
 
 theme:
