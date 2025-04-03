@@ -27,6 +27,7 @@ def load_database(
     adapter,
     variant_file=None,
     sv_file=None,
+    mei_file=None,
     family_file=None,
     family_type="ped",
     skip_case_id=False,
@@ -45,6 +46,7 @@ def load_database(
           adapter: Connection to database
           variant_file(str): Path to variant file
           sv_file(str): Path to sv variant file
+          mei_file(str): Path to mei variant file
           family_file(str): Path to family file
           family_type(str): Format of family file
           skip_case_id(bool): If no case information should be added to variants
@@ -78,6 +80,15 @@ def load_database(
         nr_sv_variants = vcf_info["nr_variants"]
         vcf_files.append(sv_file)
         sv_individuals = vcf_info["individuals"]
+
+    nr_mei_variants = None
+    mei_individuals = None
+    if mei_file:
+        # MEI variants are expected to register as SVs with cyvcf2
+        vcf_info = check_vcf(mei_file, "sv")
+        nr_mei_variants = vcf_info["nr_variants"]
+        vcf_files.append(mei_file)
+        mei_individuals = vcf_info["individuals"]
 
     profiles = None
     matches = None
@@ -118,6 +129,9 @@ def load_database(
         vcf_sv_path=sv_file,
         sv_individuals=sv_individuals,
         nr_sv_variants=nr_sv_variants,
+        vcf_mei_path=mei_file,
+        mei_individuals=mei_individuals,
+        nr_mei_variants=nr_mei_variants,
         profiles=profiles,
         matches=matches,
         profile_path=profile_file,
@@ -130,10 +144,12 @@ def load_database(
 
     nr_inserted = 0
     # If case was succesfully added we can store the variants
-    for file_type in ["vcf_path", "vcf_sv_path"]:
+    for file_type in ["vcf_path", "vcf_sv_path", "vcf_mei_path"]:
         variant_type = "snv"
         if file_type == "vcf_sv_path":
             variant_type = "sv"
+        if file_type == "vcf_mei_path":
+            variant_type = "mei"
         if case_obj.get(file_type) is None:
             continue
 
@@ -207,14 +223,16 @@ def load_variants(
                              or not
         gq_threshold(int)
         max_window(int): Specify the max size for sv windows
-        variant_type(str): 'sv' or 'snv'
+        variant_type(str): 'sv', 'mei' or 'snv'
 
     Returns:
         nr_inserted(int)
     """
     if variant_type == "snv":
         nr_variants = case_obj["nr_variants"]
-    else:
+    if variant_type == "mei":
+        nr_variants = case_obj["nr_mei_variants"]
+    if variant_type == "sv":
         nr_variants = case_obj["nr_sv_variants"]
 
     nr_inserted = 0
@@ -237,6 +255,9 @@ def load_variants(
                 continue
             adapter.add_structural_variant(variant=sv_variant, max_window=max_window)
             nr_inserted += 1
+
+    if variant_type == "mei":
+        nr_inserted = adapter.add_variants(variants)
 
     if variant_type == "snv":
         nr_inserted = adapter.add_variants(variants)

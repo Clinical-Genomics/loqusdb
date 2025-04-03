@@ -94,7 +94,7 @@ def check_vcf(vcf_path, expected_type="snv"):
 
     Args:
         vcf_path(str)
-        expected_type(str): 'sv' or 'snv'
+        expected_type(str): 'sv', or 'snv'
 
     Returns:
         vcf_info(dict): dict like
@@ -125,7 +125,7 @@ def check_vcf(vcf_path, expected_type="snv"):
 
         # Vcf can not include both snvs and svs
         if variant_type != current_type:
-            raise VcfError("Vcf includes a mix of snvs and svs")
+            raise VcfError("VCF includes a mix of snvs and svs")
 
         current_chrom = variant.CHROM
         current_pos = variant.POS
