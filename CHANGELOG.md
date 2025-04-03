@@ -12,6 +12,10 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
 ## [2.7.13]
 ### Fixed
+- For export, NrCases now reflects the number of cases with variants of the type specified by `--variant-type`
+
+## [2.7.13]
+### Changed
 - Update bumpversion config to also update the changelog version on bump (#147)
 
 ## [2.7.12]

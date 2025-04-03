@@ -51,7 +51,13 @@ def export(ctx, outfile, variant_type, freq):
     for chrom in existing_chromosomes:
         ordered_chromosomes.append(chrom)
 
-    nr_cases = adapter.case_count()
+    if variant_type == "snv":
+        nr_cases = adapter.nr_cases(snv_cases=True)
+    elif variant_type == "sv":
+        nr_cases = adapter.nr_cases(sv_cases=True)
+    else:
+        raise ValueError(f"Unknown variant_type: {variant_type}, expected 'snv' or 'sv'")
+
     LOG.info(f"Found {nr_cases} cases in database")
 
     head = HeaderParser()
