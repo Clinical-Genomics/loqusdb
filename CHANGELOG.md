@@ -8,6 +8,30 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 ### Fixed
 - For export, NrCases now reflects the number of cases with variants of the type specified by `--variant-type`
 
+## [2.7.13]
+### Changed
+- Update bumpversion config to also update the changelog version on bump (#147)
+
+## [2.7.12]
+### Changed
+- Update the description of the Frq INFO tag to include information about the number of cases as well. (#144)
+
+## [2.7.11]
+### Changed
+- Add linters (#143)
+
+## [2.7.10]
+### Changed
+- Add codeowners (#142)
+
+## [2.7.9]
+### Changed
+-Fix bump action (#141)
+
+## [2.7.8]
+### Changed
+- Fix Bump action (#137)
+
 ## [2.7.7]
 ### Fixed
 - Update to setuptools >= v.70 to address a security issue in the `package_index` module
