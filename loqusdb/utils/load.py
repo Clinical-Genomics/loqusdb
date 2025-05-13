@@ -31,6 +31,7 @@ def load_database(
     family_type="ped",
     skip_case_id=False,
     gq_threshold=None,
+    snv_gq_only=False,
     qual_gq=False,
     case_id=None,
     max_window=3000,
@@ -88,11 +89,13 @@ def load_database(
             adapter, profiles, hard_threshold=hard_threshold, soft_threshold=soft_threshold
         )
 
-    # If a gq threshold is used the variants needs to have GQ
+    # If a gq threshold is used the variants need to have GQ (only SNVs if snv_gq_only)
     for _vcf_file in vcf_files:
-        # Get a cyvcf2.VCF object
-        vcf = get_vcf(_vcf_file)
+        is_sv = _vcf_file == sv_file
+        if snv_gq_only and is_sv:
+            continue  # skip GQ check for SV VCF
 
+        vcf = get_vcf(_vcf_file)
         if gq_threshold and not vcf.contains("GQ") and not qual_gq:
             LOG.warning("Set gq-threshold to 0 or add info to vcf {0}".format(_vcf_file))
             raise SyntaxError("GQ is not defined in vcf header")
@@ -144,7 +147,7 @@ def load_database(
                 vcf_obj=vcf_obj,
                 case_obj=case_obj,
                 skip_case_id=skip_case_id,
-                gq_threshold=gq_threshold,
+                gq_threshold=gq_threshold if not snv_gq_only or variant_type == "snv" else None,
                 qual_gq=qual_gq,
                 max_window=max_window,
                 variant_type=variant_type,

@@ -88,6 +88,13 @@ def validate_profile_threshold(ctx, param, value):
     callback=validate_profile_threshold,
     help="profile hamming distance to store similar individuals (0-1)",
 )
+@click.option(
+    "--snv-gq-only",
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="Apply GQ threshold only to SNV variants",
+)
 @click.pass_context
 def load(
     ctx,
@@ -104,6 +111,7 @@ def load(
     hard_threshold,
     soft_threshold,
     qual_gq,
+    snv_gq_only,
 ):
     """Load the variants of a case
 
@@ -145,6 +153,7 @@ def load(
             skip_case_id=skip_case_id,
             case_id=case_id,
             gq_threshold=gq_threshold,
+            snv_gq_only=snv_gq_only,
             qual_gq=qual_gq,
             max_window=max_window,
             profile_file=variant_profile_path,
