@@ -4,7 +4,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
-## [2.7.16]
+## [2.7.17]
 ### Added
 - Flag to skip GQ check on SV files
 
