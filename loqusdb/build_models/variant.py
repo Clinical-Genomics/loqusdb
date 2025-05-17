@@ -148,6 +148,7 @@ def build_variant(
     case_id: Optional[str] = None,
     gq_threshold: Optional[int] = None,
     gq_qual: Optional[bool] = False,
+    ignore_gq_if_unset: Optional[bool]=False,
     genome_build: Optional[str] = None,
 ) -> Variant:
     """Return a Variant object
@@ -164,6 +165,8 @@ def build_variant(
         case_id(str): The case id
         gq_threshold(int): Genotype Quality threshold
         gq_qual(bool): Use variant.QUAL for quality instead of GQ
+        ignore_gq_if_unset(bool): Ignore GQ threshold check for variants that do not have GQ or QUAL set.
+        genome_build(str): Genome build. Ex. GRCh37 or GRCh38
 
     Return:
         formated_variant(models.Variant): A variant dictionary
@@ -208,8 +211,9 @@ def build_variant(
             if not gq_qual:
                 gq = int(variant.gt_quals[ind_pos])
 
-            if gq_threshold and gq < gq_threshold:
-                continue
+            if not ignore_gq_if_unset:
+                if gq_threshold and gq < gq_threshold:
+                    continue
 
             genotype = GENOTYPE_MAP[variant.gt_types[ind_pos]]
 

@@ -95,6 +95,13 @@ def validate_profile_threshold(ctx, param, value):
     show_default=True,
     help="Apply GQ threshold only to SNV variants",
 )
+@click.option(
+    "--ignore-gq-if-unset",
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="Ignore GQ threshold if GQ or QUAL field is unset in VCF",
+)
 @click.pass_context
 def load(
     ctx,
@@ -112,6 +119,7 @@ def load(
     soft_threshold,
     qual_gq,
     snv_gq_only,
+    ignore_gq_if_unset,
 ):
     """Load the variants of a case
 
@@ -160,6 +168,7 @@ def load(
             hard_threshold=hard_threshold,
             soft_threshold=soft_threshold,
             genome_build=genome_build,
+            ignore_gq_if_unset=ignore_gq_if_unset
         )
     except (SyntaxError, CaseError, IOError) as error:
         LOG.warning(error)
