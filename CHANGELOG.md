@@ -4,6 +4,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
+## [unreleased]
+### Added
+- `ignore-gq-if-unset` flag to ignore GQ threshold check when GQ or QUAL field is unset for some variants in a VCF file.
+
 ## [2.7.17]
 ### Added
 - Flag to skip GQ check on SV files
