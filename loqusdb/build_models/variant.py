@@ -204,16 +204,16 @@ def build_variant(
             ind_pos = ind_obj["ind_index"]
 
             if gq_qual:
-                gq = 0
+                gq = -1
                 if variant.QUAL:
                     gq = int(variant.QUAL)
 
             if not gq_qual:
                 gq = int(variant.gt_quals[ind_pos])
 
-            if not ignore_gq_if_unset:
-                if gq_threshold and gq < gq_threshold:
-                    continue
+            # When gq is missing in FORMAT cyvcf2 assigns a score of -1
+            if (gq_threshold and 0 <= gq < gq_threshold) or (gq == -1 and not ignore_gq_if_unset):
+                continue
 
             genotype = GENOTYPE_MAP[variant.gt_types[ind_pos]]
 
