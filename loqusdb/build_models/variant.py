@@ -148,7 +148,7 @@ def build_variant(
     case_id: Optional[str] = None,
     gq_threshold: Optional[int] = None,
     gq_qual: Optional[bool] = False,
-    ignore_gq_if_unset: Optional[bool]=False,
+    ignore_gq_if_unset: Optional[bool] = False,
     genome_build: Optional[str] = None,
 ) -> Variant:
     """Return a Variant object

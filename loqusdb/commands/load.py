@@ -168,7 +168,7 @@ def load(
             hard_threshold=hard_threshold,
             soft_threshold=soft_threshold,
             genome_build=genome_build,
-            ignore_gq_if_unset=ignore_gq_if_unset
+            ignore_gq_if_unset=ignore_gq_if_unset,
         )
     except (SyntaxError, CaseError, IOError) as error:
         LOG.warning(error)
