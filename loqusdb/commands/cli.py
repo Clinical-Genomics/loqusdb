@@ -52,6 +52,8 @@ LOG = logging.getLogger(__name__)
 @click.option(
     "-g",
     "--genome-build",
+    default="GRCh37",
+    show_default=True,
     type=click.Choice([GRCH37, GRCH38]),
     help="Specify what genome build to use",
 )
@@ -102,7 +104,7 @@ def cli(
 
     adapter = MongoAdapter(client, db_name=database)
 
-    genome_build = genome_build or configs.get("genome_build") or GRCH37
+    genome_build = genome_build or configs.get("genome_build")
 
     ctx.obj = {}
     ctx.obj["db"] = database

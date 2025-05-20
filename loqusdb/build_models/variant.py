@@ -25,8 +25,6 @@ def check_par(chrom, pos, genome_build=None):
     Returns:
         par(bool)
     """
-    if genome_build is None:
-        genome_build = GRCH37
     return any(
         pos >= interval[0] and pos <= interval[1] for interval in PAR[genome_build].get(chrom, [])
     )
@@ -40,14 +38,14 @@ def get_variant_id(variant):
     return "_".join([str(chrom), str(variant.POS), str(variant.REF), str(variant.ALT[0])])
 
 
-def is_greater(a, b):
+def is_greater(a, b, genome_build):
     """Check if position a is greater than position b
     This will look at chromosome and position.
 
     For example a position where chrom = 2 and pos = 300 is greater than a position where
     chrom = 1 and pos = 1000
 
-    If any of the chromosomes is outside [1-22,X,Y,MT] we can not say which is biggest.
+    If any of the chromosomes is outside [1-22,X,Y,MT] or [chr1-chr22,chrX,chrY,chrM] we can not say which is biggest.
 
     Args:
         a,b(Position)
@@ -56,8 +54,8 @@ def is_greater(a, b):
         bool: True if a is greater than b
     """
 
-    a_chrom = CHROM_TO_INT.get(a.chrom, 0)
-    b_chrom = CHROM_TO_INT.get(b.chrom, 0)
+    a_chrom = CHROM_TO_INT[genome_build].get(a.chrom, 0)
+    b_chrom = CHROM_TO_INT[genome_build].get(b.chrom, 0)
 
     if a_chrom == 0 or b_chrom == 0:
         return False
@@ -68,7 +66,7 @@ def is_greater(a, b):
     return a_chrom == b_chrom and a.pos > b.pos
 
 
-def get_coords(variant):
+def get_coords(variant, genome_build=None):
     """Returns a dictionary with position information
 
     Args:
@@ -126,7 +124,7 @@ def get_coords(variant):
     end_position = Position(end_chrom, end)
 
     # If 'start' is greater than 'end', switch positions
-    if is_greater(position, end_position):
+    if is_greater(position, end_position, genome_build=genome_build):
         end_chrom = position.chrom
         end = position.pos
 
@@ -183,7 +181,7 @@ def build_variant(
     # We allways assume splitted and normalized VCFs
     alt = variant.ALT[0]
 
-    coordinates = get_coords(variant)
+    coordinates = get_coords(variant, genome_build=genome_build)
     chrom = coordinates["chrom"]
     pos = coordinates["pos"]
 
