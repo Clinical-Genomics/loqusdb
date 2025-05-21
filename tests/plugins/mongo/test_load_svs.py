@@ -1,5 +1,5 @@
 from loqusdb.build_models.variant import build_variant
-
+from loqusdb.constants import GRCH37
 
 def test_load_insertion(small_insert_variant, mongo_adapter, case_obj):
     adapter = mongo_adapter
@@ -9,7 +9,7 @@ def test_load_insertion(small_insert_variant, mongo_adapter, case_obj):
     adapter.add_case(case_obj)
 
     ## WHEN loading a small insertion
-    formated_variant = build_variant(variant=variant, case_obj=case_obj, case_id=case_id)
+    formated_variant = build_variant(variant=variant, case_obj=case_obj, case_id=case_id, genome_build=GRCH37)
     adapter.add_structural_variant(formated_variant)
 
     ## THEN assert the object returned is correct
@@ -26,7 +26,7 @@ def test_load_same_insertion_twice(small_insert_variant, mongo_adapter, case_obj
     adapter.add_case(case_obj)
 
     ## WHEN loading a small insertion
-    formated_variant = build_variant(variant=variant, case_obj=case_obj, case_id=case_id)
+    formated_variant = build_variant(variant=variant, case_obj=case_obj, case_id=case_id, genome_build=GRCH37)
     adapter.add_structural_variant(formated_variant)
     formated_variant["case_id"] = "2"
     adapter.add_structural_variant(formated_variant)
@@ -45,7 +45,7 @@ def test_load_translocation(translocation_variant, case_obj, mongo_adapter):
     adapter.add_case(case_obj)
 
     ## WHEN loading a small insertion
-    formated_variant = build_variant(variant=variant, case_obj=case_obj, case_id=case_id)
+    formated_variant = build_variant(variant=variant, case_obj=case_obj, case_id=case_id, genome_build=GRCH37)
     adapter.add_structural_variant(formated_variant)
 
     ## THEN assert the object returned is correct
@@ -62,7 +62,7 @@ def test_load_same_translocation_twice(translocation_variant, case_obj, mongo_ad
     adapter.add_case(case_obj)
 
     ## WHEN loading a small insertion
-    formated_variant = build_variant(variant=variant, case_obj=case_obj, case_id=case_id)
+    formated_variant = build_variant(variant=variant, case_obj=case_obj, case_id=case_id, genome_build=GRCH37)
     adapter.add_structural_variant(formated_variant)
 
     formated_variant["case_id"] = "2"

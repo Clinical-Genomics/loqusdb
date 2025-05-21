@@ -1,6 +1,6 @@
 from loqusdb.utils.delete import delete
 from loqusdb.utils.load import load_database
-
+from loqusdb.constants import GRCH37
 
 def test_delete_case(mongo_adapter, simple_case):
     ## GIVEN a mongoadapter with a inserted case
@@ -29,6 +29,7 @@ def test_delete_case_and_variants(vcf_path, ped_path, real_mongo_adapter, case_i
         variant_file=vcf_path,
         family_file=ped_path,
         family_type="ped",
+        genome_build=GRCH37
     )
 
     mongo_case = db.case.find_one()
@@ -38,6 +39,7 @@ def test_delete_case_and_variants(vcf_path, ped_path, real_mongo_adapter, case_i
     delete(
         adapter=mongo_adapter,
         case_obj=case_obj,
+        genome_build=GRCH37
     )
 
     mongo_case = db.case.find_one()
@@ -56,17 +58,17 @@ def test_delete_structural_variants(vcf_path, ped_path, real_mongo_adapter, case
 
     load_database(
         adapter=mongo_adapter,
-        variant_file=sv_case_obj["vcf_path"],
         family_file=ped_path,
         family_type="ped",
         sv_file=sv_case_obj["vcf_sv_path"],
+        genome_build=GRCH37
     )
 
     mongo_svs = db.structural_variant.find()
     assert len(list(mongo_svs)) == 19
 
     # WHEN deleteing the case
-    delete(adapter=mongo_adapter, case_obj=sv_case_obj)
+    delete(adapter=mongo_adapter, case_obj=sv_case_obj, genome_build=GRCH37)
 
     # All structural variants should be deleted.
     mongo_svs = db.structural_variant.find()

@@ -44,6 +44,7 @@ def delete(adapter, case_obj, update=False, existing_case=False, genome_build=No
                 adapter=adapter,
                 vcf_obj=vcf_obj,
                 case_obj=case_obj,
+                genome_build=genome_build
             )
 
 
@@ -109,8 +110,8 @@ def delete_variants(adapter, vcf_obj, case_obj, case_id=None, genome_build=None)
     return nr_deleted
 
 
-def delete_structural_variants(adapter, vcf_obj, case_obj, case_id=None):
-    """Delete structural variants for a case in the database
+def delete_structural_variants(adapter, vcf_obj, case_obj, genome_build, case_id=None):
+    """Delete structural variants for a case in the dastabase
 
     Args:
         adapter(loqusdb.plugins.Adapter)
@@ -133,6 +134,7 @@ def delete_structural_variants(adapter, vcf_obj, case_obj, case_id=None):
             variant=variant,
             case_obj=case_obj,
             case_id=case_id,
+            genome_build=genome_build
         )
 
         if not formated_variant:

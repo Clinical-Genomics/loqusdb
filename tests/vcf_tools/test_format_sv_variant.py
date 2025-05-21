@@ -1,12 +1,12 @@
 from loqusdb.build_models.variant import build_variant
-
+from loqusdb.constants import GRCH37
 
 def test_format_indel(del_variant, case_obj):
     ## GIVEN a SV deletion
     variant = del_variant
     case_id = case_obj["case_id"]
     ## WHEN parsing the variant
-    formated_variant = build_variant(variant=variant, case_obj=case_obj, case_id=case_id)
+    formated_variant = build_variant(variant=variant, case_obj=case_obj, case_id=case_id, genome_build=GRCH37)
     expected_id = "_".join([variant.CHROM, str(variant.POS), variant.REF, variant.ALT[0]])
 
     ## THEN assert the sv is parsed correct
@@ -31,7 +31,7 @@ def test_format_small_ins(small_insert_variant, case_obj):
     variant = small_insert_variant
     case_id = case_obj["case_id"]
     ## WHEN parsing the variant
-    formated_variant = build_variant(variant=variant, case_obj=case_obj, case_id=case_id)
+    formated_variant = build_variant(variant=variant, case_obj=case_obj, case_id=case_id, genome_build=GRCH37)
 
     ## THEN assert the sv is parsed correct
     assert formated_variant["chrom"] == variant.CHROM
@@ -50,7 +50,7 @@ def test_format_insertion(insertion_variant, case_obj):
     variant = insertion_variant
     case_id = case_obj["case_id"]
     ## WHEN parsing the variant
-    formated_variant = build_variant(variant=variant, case_obj=case_obj, case_id=case_id)
+    formated_variant = build_variant(variant=variant, case_obj=case_obj, case_id=case_id, genome_build=GRCH37)
 
     ## THEN assert the sv is parsed correct
     assert formated_variant["chrom"] == variant.CHROM
@@ -69,7 +69,7 @@ def test_format_dup_tandem(duptandem_variant, case_obj):
     variant = duptandem_variant
     case_id = case_obj["case_id"]
     ## WHEN parsing the variant
-    formated_variant = build_variant(variant=variant, case_obj=case_obj, case_id=case_id)
+    formated_variant = build_variant(variant=variant, case_obj=case_obj, case_id=case_id, genome_build=GRCH37)
 
     ## THEN assert the sv is parsed correct
     assert formated_variant["chrom"] == variant.CHROM
@@ -88,7 +88,7 @@ def test_format_translocation(translocation_variant, case_obj):
     variant = translocation_variant
     case_id = case_obj["case_id"]
     ## WHEN parsing the variant
-    formated_variant = build_variant(variant=variant, case_obj=case_obj, case_id=case_id)
+    formated_variant = build_variant(variant=variant, case_obj=case_obj, case_id=case_id, genome_build=GRCH37)
 
     ## THEN assert the sv is parsed correct
     assert formated_variant["chrom"] == variant.CHROM

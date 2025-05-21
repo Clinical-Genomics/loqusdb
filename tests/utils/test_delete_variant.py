@@ -1,6 +1,6 @@
 from loqusdb.build_models.variant import get_variant_id
 from loqusdb.utils.delete import delete_variants
-
+from loqusdb.constants import GRCH37
 
 def test_delete_variants(real_mongo_adapter, het_variant, case_obj):
     ## GIVEN a database with one variant
@@ -19,7 +19,7 @@ def test_delete_variants(real_mongo_adapter, het_variant, case_obj):
     assert mongo_variant["families"] == [case_id]
 
     ## WHEN deleting the variant
-    delete_variants(adapter=real_mongo_adapter, vcf_obj=[het_variant], case_obj=case_obj)
+    delete_variants(adapter=real_mongo_adapter, vcf_obj=[het_variant], case_obj=case_obj, genome_build=GRCH37)
 
     mongo_variant = db.variant.find_one()
 
@@ -49,6 +49,7 @@ def test_delete_variant(real_mongo_adapter, het_variant, case_obj):
         vcf_obj=[het_variant],
         case_obj=case_obj,
         case_id="2",
+        genome_build=GRCH37
     )
 
     mongo_variant = db.variant.find_one()
@@ -66,7 +67,7 @@ def test_delete_non_existing_variant(mongo_adapter, het_variant, case_obj):
     case_id = case_obj["case_id"]
 
     ## WHEN deleting the variants
-    delete_variants(adapter=mongo_adapter, vcf_obj=[het_variant], case_obj=case_obj)
+    delete_variants(adapter=mongo_adapter, vcf_obj=[het_variant], case_obj=case_obj, genome_build=GRCH37)
 
     # THEN assert nothing happens
     mongo_variant = db.variant.find_one()

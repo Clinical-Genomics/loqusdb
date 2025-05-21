@@ -15,7 +15,7 @@ Position = namedtuple("Position", "chrom pos")
 # These are coordinate for the pseudo autosomal regions in GRCh37
 
 
-def check_par(chrom, pos, genome_build=None):
+def check_par(chrom, pos, genome_build):
     """Check if a coordinate is in the PAR region
 
     Args:
@@ -66,7 +66,7 @@ def is_greater(a, b, genome_build):
     return a_chrom == b_chrom and a.pos > b.pos
 
 
-def get_coords(variant, genome_build=None):
+def get_coords(variant, genome_build):
     """Returns a dictionary with position information
 
     Args:

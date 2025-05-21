@@ -1,4 +1,5 @@
 from loqusdb.build_models.variant import Position, is_greater
+from loqusdb.constants import GRCH37
 
 
 def test_is_greater_different_chrom():
@@ -7,12 +8,12 @@ def test_is_greater_different_chrom():
     b = Position("3", 100)
 
     ## WHEN testing if a is greater than b
-    res = is_greater(a, b)
+    res = is_greater(a, b, genome_build=GRCH37)
     ## THEN assert a was not greater than b
     assert res is False
 
     ## WHEN testing if b is greater than a
-    res = is_greater(b, a)
+    res = is_greater(b, a, genome_build=GRCH37)
     ## THEN assert b was greater than a
     assert res is True
 
@@ -23,12 +24,12 @@ def test_is_greater_same_chrom():
     b = Position("1", 300)
 
     ## WHEN testing if a is greater than b
-    res = is_greater(a, b)
+    res = is_greater(a, b, genome_build=GRCH37)
     ## THEN assert a was not greater than b
     assert res is False
 
     ## WHEN testing if b is greater than a
-    res = is_greater(b, a)
+    res = is_greater(b, a, genome_build=GRCH37)
     ## THEN assert b was greater than a
     assert res is True
 
@@ -39,11 +40,11 @@ def test_is_greater_wierd_chrom():
     b = Position("GRLrs2", 300)
 
     ## WHEN testing if a is greater than b
-    res = is_greater(a, b)
+    res = is_greater(a, b, genome_build=GRCH37)
     ## THEN assert a was not greater than b
     assert res is False
 
     ## WHEN testing if b is greater than a
-    res = is_greater(b, a)
+    res = is_greater(b, a, genome_build=GRCH37)
     ## THEN assert a was not greater than b
     assert res is False

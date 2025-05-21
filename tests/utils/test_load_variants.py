@@ -1,6 +1,7 @@
 from cyvcf2 import VCF
 
 from loqusdb.utils.load import load_variants
+from loqusdb.constants import GRCH37
 
 
 def test_load_variants(real_mongo_adapter, het_variant, case_obj):
@@ -19,6 +20,7 @@ def test_load_variants(real_mongo_adapter, het_variant, case_obj):
         adapter=mongo_adapter,
         vcf_obj=vcf,
         case_obj=case_obj,
+        genome_build=GRCH37
     )
 
     mongo_variant = db.variant.find_one()
@@ -44,6 +46,7 @@ def test_load_homozygote(real_mongo_adapter, hom_variant, case_obj):
         adapter=mongo_adapter,
         vcf_obj=vcf,
         case_obj=case_obj,
+        genome_build=GRCH37
     )
     mongo_variant = db.variant.find_one()
 
@@ -69,6 +72,7 @@ def test_load_hemizygote(real_mongo_adapter, hem_variant, case_obj):
         adapter=mongo_adapter,
         vcf_obj=vcf,
         case_obj=case_obj,
+        genome_build=GRCH37
     )
     mongo_variant = db.variant.find_one()
 
@@ -95,6 +99,7 @@ def test_load_par_variant(real_mongo_adapter, par_variant, case_obj):
         adapter=mongo_adapter,
         vcf_obj=vcf,
         case_obj=case_obj,
+        genome_build=GRCH37
     )
     mongo_variant = db.variant.find_one()
 
@@ -119,6 +124,7 @@ def test_load_two_variants(real_mongo_adapter, het_variant, case_obj):
         adapter=mongo_adapter,
         vcf_obj=vcf,
         case_obj=case_obj,
+        genome_build=GRCH37
     )
 
     ## THEN assert that the variant is loaded correct
@@ -141,6 +147,7 @@ def test_load_variants_skip_case_id(real_mongo_adapter, het_variant, case_obj):
         vcf_obj=vcf,
         case_obj=case_obj,
         skip_case_id=True,
+        genome_build=GRCH37
     )
 
     mongo_variant = db.variant.find_one()
@@ -162,6 +169,7 @@ def test_load_same_variant_different_case(real_mongo_adapter, het_variant, case_
         adapter=mongo_adapter,
         vcf_obj=vcf,
         case_obj=case_obj,
+        genome_build=GRCH37
     )
 
     case_id = case_obj["case_id"]
@@ -172,6 +180,7 @@ def test_load_same_variant_different_case(real_mongo_adapter, het_variant, case_
         adapter=mongo_adapter,
         vcf_obj=vcf,
         case_obj=case_obj,
+        genome_build=GRCH37
     )
 
     mongo_variant = db.variant.find_one()
@@ -191,6 +200,7 @@ def test_load_case_variants(real_mongo_adapter, case_obj):
         adapter=mongo_adapter,
         vcf_obj=vcf_obj,
         case_obj=case_obj,
+        genome_build=GRCH37
     )
 
     nr_loaded = 0
@@ -211,6 +221,7 @@ def test_load_sv_case_variants(mongo_adapter, sv_case_obj):
         vcf_obj=vcf_obj,
         case_obj=sv_case_obj,
         variant_type="sv",
+        genome_build=GRCH37
     )
 
     nr_loaded_svs = 0

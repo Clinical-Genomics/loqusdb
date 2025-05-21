@@ -1,7 +1,7 @@
 import pytest
 from loqusdb.exceptions import CaseError
 from loqusdb.utils.load import load_database
-
+from loqusdb.constants import GRCH37
 
 def test_load_database(vcf_path, ped_path, real_mongo_adapter, case_id):
     mongo_adapter = real_mongo_adapter
@@ -12,6 +12,7 @@ def test_load_database(vcf_path, ped_path, real_mongo_adapter, case_id):
         variant_file=vcf_path,
         family_file=ped_path,
         family_type="ped",
+        genome_build=GRCH37
     )
 
     mongo_case = db.case.find_one()
@@ -29,6 +30,7 @@ def test_load_database_alternative_ped(vcf_path, ped_path, real_mongo_adapter, c
         family_file=ped_path,
         family_type="ped",
         case_id="alternative",
+        genome_build=GRCH37
     )
 
     mongo_case = db.case.find_one()
@@ -49,4 +51,5 @@ def test_load_database_wrong_ped(vcf_path, funny_ped_path, real_mongo_adapter):
             variant_file=vcf_path,
             family_file=funny_ped_path,
             family_type="ped",
+            genome_build=GRCH37
         )
