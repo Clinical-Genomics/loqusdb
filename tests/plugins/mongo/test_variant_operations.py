@@ -3,6 +3,7 @@ import copy
 from loqusdb.build_models.variant import build_variant
 from loqusdb.constants import GRCH37
 
+
 class TestInsertVariant:
     def test_insert_one_variant(self, mongo_adapter, simplest_variant):
         """Test to insert one variant"""

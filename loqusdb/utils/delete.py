@@ -41,10 +41,7 @@ def delete(adapter, case_obj, update=False, existing_case=False, genome_build=No
         elif file_type == "vcf_sv_path":
             LOG.info("deleting structural variants")
             delete_structural_variants(
-                adapter=adapter,
-                vcf_obj=vcf_obj,
-                case_obj=case_obj,
-                genome_build=genome_build
+                adapter=adapter, vcf_obj=vcf_obj, case_obj=case_obj, genome_build=genome_build
             )
 
 
@@ -131,10 +128,7 @@ def delete_structural_variants(adapter, vcf_obj, case_obj, genome_build, case_id
 
     for variant in vcf_obj:
         formated_variant = build_variant(
-            variant=variant,
-            case_obj=case_obj,
-            case_id=case_id,
-            genome_build=genome_build
+            variant=variant, case_obj=case_obj, case_id=case_id, genome_build=genome_build
         )
 
         if not formated_variant:

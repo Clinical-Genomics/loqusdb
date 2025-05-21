@@ -7,6 +7,7 @@ Test if variants are in the Pseudo Autosomal Recessive region.
 from loqusdb.build_models.variant import check_par
 from loqusdb.constants import GRCH37
 
+
 def test_par_region_X_lower():
     chrom = "X"
     pos = 60001
