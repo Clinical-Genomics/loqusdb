@@ -1,6 +1,7 @@
 import copy
 
 from loqusdb.build_models.variant import build_variant
+from loqusdb.constants import GRCH37
 
 
 class TestInsertVariant:
@@ -177,7 +178,7 @@ class TestRemoveSV:
         # GIVEN a database poulated with one SV
         db = mongo_adapter.db
         formated_variant = build_variant(
-            del_variant, case_obj=case_obj, case_id=case_obj["case_id"]
+            del_variant, case_obj=case_obj, case_id=case_obj["case_id"], genome_build=GRCH37
         )
         mongo_adapter.add_structural_variant(formated_variant)
         mongo_SV = db.structural_variant.find_one()
@@ -197,7 +198,7 @@ class TestRemoveSV:
         # GIVEN a database poulated with one SV
         db = mongo_adapter.db
         formated_variant = build_variant(
-            duptandem_variant, case_obj=case_obj, case_id=case_obj["case_id"]
+            duptandem_variant, case_obj=case_obj, case_id=case_obj["case_id"], genome_build=GRCH37
         )
         mongo_adapter.add_structural_variant(formated_variant)
 
