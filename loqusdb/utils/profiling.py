@@ -11,7 +11,7 @@ from .vcf import get_file_handle
 LOG = logging.getLogger(__name__)
 
 
-def get_profiles(adapter, vcf_file):
+def get_profiles(adapter, vcf_file, keep_chr_prefix):
     """Given a vcf, get a profile string for each sample in the vcf
     based on the profile variants in the database
 
@@ -44,7 +44,7 @@ def get_profiles(adapter, vcf_file):
         found_variant = False
         for variant in vcf(region):
 
-            variant_id = get_variant_id(variant)
+            variant_id = get_variant_id(variant, keep_chr_prefix)
 
             # If variant id i.e. chrom_pos_ref_alt matches
             if variant_id == profile_variant["_id"]:
@@ -183,7 +183,7 @@ def compare_profiles(profile1, profile2):
     return similarity_ratio
 
 
-def update_profiles(adapter):
+def update_profiles(adapter, keep_chr_prefix):
     """
     For all cases having vcf_path, update the profile string for the samples
 
@@ -198,7 +198,7 @@ def update_profiles(adapter):
         # case with new profiled individuals.
         if case.get("profile_path"):
 
-            profiles = get_profiles(adapter, case["profile_path"])
+            profiles = get_profiles(adapter, case["profile_path"], keep_chr_prefix)
             profiled_individuals = deepcopy(case["individuals"])
 
             for individual in profiled_individuals:

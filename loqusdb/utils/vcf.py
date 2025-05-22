@@ -89,7 +89,7 @@ def check_sorting(previous_chrom, previous_pos, current_chrom, current_pos):
     pass
 
 
-def check_vcf(vcf_path, expected_type="snv"):
+def check_vcf(vcf_path, keep_chr_prefix=None, expected_type="snv"):
     """Check if there are any problems with the vcf file
 
     Args:
@@ -113,7 +113,7 @@ def check_vcf(vcf_path, expected_type="snv"):
     previous_pos = None
     previous_chrom = None
 
-    posititon_variants = set()
+    position_variants = set()
 
     nr_variants = 0
     for nr_variants, variant in enumerate(vcf, 1):
@@ -134,36 +134,36 @@ def check_vcf(vcf_path, expected_type="snv"):
         variant_id = "{0}_{1}".format(current_chrom, current_pos)
         # For SNVs we can create a proper variant id with chrom_pos_ref_alt
         if variant_type == "snv":
-            variant_id = get_variant_id(variant)
+            variant_id = get_variant_id(variant, keep_chr_prefix)
 
         # Initiate variables
         if not previous_chrom:
             previous_chrom = current_chrom
             previous_pos = current_pos
-            posititon_variants = {variant_id}
+            position_variants = {variant_id}
             continue
 
         # Update variables if new chromosome
         if current_chrom != previous_chrom:
             previous_chrom = current_chrom
             previous_pos = current_pos
-            posititon_variants = {variant_id}
+            position_variants = {variant_id}
             continue
 
         if variant_type == "snv":
             # Check if variant is unique
             if current_pos == previous_pos:
-                if variant_id in posititon_variants:
+                if variant_id in position_variants:
                     raise VcfError("Variant {0} occurs several times" " in vcf".format(variant_id))
                 else:
-                    posititon_variants.add(variant_id)
+                    position_variants.add(variant_id)
             # Check if vcf is sorted
             else:
                 if not current_pos >= previous_pos:
                     raise VcfError("Vcf if not sorted in a correct way")
                 previous_pos = current_pos
-                # Reset posititon_variants since we are on a new position
-                posititon_variants = {variant_id}
+                # Reset position_variants since we are on a new position
+                position_variants = {variant_id}
 
     if variant_type != expected_type:
         raise VcfError(

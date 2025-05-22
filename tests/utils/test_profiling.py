@@ -12,7 +12,7 @@ def test_get_profiles(real_mongo_adapter, profile_vcf_path, zipped_vcf_path):
     vcf_info = check_vcf(zipped_vcf_path)
 
     # Get profiles from vcf
-    profiles = get_profiles(real_mongo_adapter, zipped_vcf_path)
+    profiles = get_profiles(real_mongo_adapter, zipped_vcf_path, False)
 
     # Assert that all individuals are included
     assert list(profiles.keys()) == vcf_info["individuals"]
