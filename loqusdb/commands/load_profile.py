@@ -60,13 +60,14 @@ def load_profile(ctx, load, variant_file, update, stats, profile_threshold, chec
     """
 
     adapter = ctx.obj["adapter"]
+    keep_chr_prefix = ctx.obj["keep_chr_prefix"]
 
     LOG.info("Running loqusdb profile")
 
     if check_vcf:
         LOG.info(f"Check if profile in {check_vcf} has match in database")
         vcf_file = check_vcf
-        profiles = get_profiles(adapter, vcf_file)
+        profiles = get_profiles(adapter, vcf_file, keep_chr_prefix)
         duplicate = check_duplicates(adapter, profiles, profile_threshold)
 
         if duplicate is not None:
@@ -81,11 +82,11 @@ def load_profile(ctx, load, variant_file, update, stats, profile_threshold, chec
         if variant_file is not None:
             vcf_path = variant_file
         LOG.info(f"Loads variants in {vcf_path} to be used in profiling")
-        load_profile_variants(adapter, vcf_path)
+        load_profile_variants(adapter, vcf_path, keep_chr_prefix)
 
     if update:
         LOG.info("Updates profiles in database")
-        update_profiles(adapter)
+        update_profiles(adapter, keep_chr_prefix)
 
     if stats:
         LOG.info("Prints profile stats")

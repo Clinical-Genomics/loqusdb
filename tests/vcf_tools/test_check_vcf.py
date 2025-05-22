@@ -47,7 +47,7 @@ def test_check_sv_vcf(sv_vcf_path):
                 true_nr += 1
 
     ## WHEN collecting the VCF info
-    vcf_info = check_vcf(sv_vcf_path, "sv")
+    vcf_info = check_vcf(sv_vcf_path, expected_type= "sv")
 
     ## THEN assert that the number of variants collected is correct
     assert vcf_info["nr_variants"] == true_nr

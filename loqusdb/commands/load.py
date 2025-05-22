@@ -140,7 +140,7 @@ def load(
 
     adapter = ctx.obj["adapter"]
     genome_build = ctx.obj["genome_build"]
-
+    keep_chr_prefix = ctx.obj["keep_chr_prefix"]
     start_inserting = datetime.now()
 
     try:
@@ -154,6 +154,7 @@ def load(
             case_id=case_id,
             gq_threshold=gq_threshold,
             snv_gq_only=snv_gq_only,
+            keep_chr_prefix=keep_chr_prefix,
             qual_gq=qual_gq,
             max_window=max_window,
             profile_file=variant_profile_path,
