@@ -66,7 +66,19 @@ LOG = logging.getLogger(__name__)
 @click.version_option(__version__)
 @click.pass_context
 def cli(
-    ctx, database, username, password, authdb, port, host, uri, verbose, config, test, genome_build, keep_chr_prefix
+    ctx,
+    database,
+    username,
+    password,
+    authdb,
+    port,
+    host,
+    uri,
+    verbose,
+    config,
+    test,
+    genome_build,
+    keep_chr_prefix,
 ):
     """loqusdb: manage a local variant count database."""
     loglevel = "INFO"

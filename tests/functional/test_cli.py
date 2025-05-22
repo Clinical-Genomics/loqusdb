@@ -6,7 +6,7 @@ from loqusdb.exceptions import ProfileError
 
 def test_base_command():
     runner = CliRunner()
-    result = runner.invoke(base_command, ['--help'])
+    result = runner.invoke(base_command, ["--help"])
 
     assert result.exit_code == 0
 

@@ -60,7 +60,12 @@ def delete(ctx, family_file, family_type, case_id):
     genome_build = ctx.obj["genome_build"]
     start_deleting = datetime.now()
     try:
-        delete_command(adapter=adapter, case_obj=existing_case, genome_build=genome_build, keep_chr_prefix=keep_chr_prefix)
+        delete_command(
+            adapter=adapter,
+            case_obj=existing_case,
+            genome_build=genome_build,
+            keep_chr_prefix=keep_chr_prefix,
+        )
     except (CaseError, IOError) as error:
         LOG.warning(error)
         ctx.abort()

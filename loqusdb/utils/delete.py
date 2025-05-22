@@ -9,7 +9,9 @@ from loqusdb.build_models.variant import build_variant
 LOG = logging.getLogger(__name__)
 
 
-def delete(adapter, case_obj, keep_chr_prefix=None, update=False, existing_case=False, genome_build=None):
+def delete(
+    adapter, case_obj, keep_chr_prefix=None, update=False, existing_case=False, genome_build=None
+):
     """Delete a case and all of it's variants from the database.
 
     Args:
@@ -37,19 +39,22 @@ def delete(adapter, case_obj, keep_chr_prefix=None, update=False, existing_case=
         if file_type == "vcf_path":
             LOG.info("deleting variants")
             delete_variants(
-                adapter=adapter, vcf_obj=vcf_obj, keep_chr_prefix=keep_chr_prefix, case_obj=case_obj, genome_build=genome_build
+                adapter=adapter,
+                vcf_obj=vcf_obj,
+                keep_chr_prefix=keep_chr_prefix,
+                case_obj=case_obj,
+                genome_build=genome_build,
             )
         elif file_type == "vcf_sv_path":
             LOG.info("deleting structural variants")
             delete_structural_variants(
-                adapter=adapter,
-                vcf_obj=vcf_obj,
-                case_obj=case_obj,
-                keep_chr_prefix=keep_chr_prefix
+                adapter=adapter, vcf_obj=vcf_obj, case_obj=case_obj, keep_chr_prefix=keep_chr_prefix
             )
 
 
-def delete_variants(adapter, vcf_obj, case_obj, keep_chr_prefix=None, case_id=None, genome_build=None):
+def delete_variants(
+    adapter, vcf_obj, case_obj, keep_chr_prefix=None, case_id=None, genome_build=None
+):
     """Delete variants for a case in the database
 
     Args:
@@ -71,7 +76,11 @@ def delete_variants(adapter, vcf_obj, case_obj, keep_chr_prefix=None, case_id=No
     variant_list = []
     for variant in vcf_obj:
         formated_variant = build_variant(
-            variant=variant, case_obj=case_obj, keep_chr_prefix=keep_chr_prefix, case_id=case_id, genome_build=genome_build
+            variant=variant,
+            case_obj=case_obj,
+            keep_chr_prefix=keep_chr_prefix,
+            case_id=case_id,
+            genome_build=genome_build,
         )
 
         if not formated_variant:
@@ -132,10 +141,7 @@ def delete_structural_variants(adapter, vcf_obj, case_obj, keep_chr_prefix=None,
 
     for variant in vcf_obj:
         formated_variant = build_variant(
-            variant=variant,
-            case_obj=case_obj,
-            case_id=case_id,
-            keep_chr_prefix=keep_chr_prefix
+            variant=variant, case_obj=case_obj, case_id=case_id, keep_chr_prefix=keep_chr_prefix
         )
 
         if not formated_variant:

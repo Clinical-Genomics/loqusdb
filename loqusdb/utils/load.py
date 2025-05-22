@@ -234,7 +234,13 @@ def load_variants(
 
         variants = (
             build_variant(
-                variant, case_obj, case_id, gq_threshold, qual_gq, keep_chr_prefix, genome_build=genome_build
+                variant,
+                case_obj,
+                case_id,
+                gq_threshold,
+                qual_gq,
+                keep_chr_prefix,
+                genome_build=genome_build,
             )
             for variant in bar
         )
