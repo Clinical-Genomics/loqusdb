@@ -48,7 +48,11 @@ def delete(
         elif file_type == "vcf_sv_path":
             LOG.info("deleting structural variants")
             delete_structural_variants(
-                adapter=adapter, vcf_obj=vcf_obj, case_obj=case_obj, keep_chr_prefix=keep_chr_prefix, genome_build=genome_build
+                adapter=adapter,
+                vcf_obj=vcf_obj,
+                case_obj=case_obj,
+                keep_chr_prefix=keep_chr_prefix,
+                genome_build=genome_build,
             )
 
 
@@ -120,7 +124,9 @@ def delete_variants(
     return nr_deleted
 
 
-def delete_structural_variants(adapter, vcf_obj, case_obj,  genome_build, keep_chr_prefix=None, case_id=None):
+def delete_structural_variants(
+    adapter, vcf_obj, case_obj, genome_build, keep_chr_prefix=None, case_id=None
+):
     """Delete structural variants for a case in the database
 
     Args:
@@ -141,7 +147,11 @@ def delete_structural_variants(adapter, vcf_obj, case_obj,  genome_build, keep_c
 
     for variant in vcf_obj:
         formated_variant = build_variant(
-            variant=variant, case_obj=case_obj, case_id=case_id, genome_build=genome_build, keep_chr_prefix=keep_chr_prefix
+            variant=variant,
+            case_obj=case_obj,
+            case_id=case_id,
+            genome_build=genome_build,
+            keep_chr_prefix=keep_chr_prefix,
         )
 
         if not formated_variant:
