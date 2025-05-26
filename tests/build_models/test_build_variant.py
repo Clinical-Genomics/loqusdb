@@ -10,7 +10,7 @@ def test_build_het_variant(het_variant, case_obj):
 
 
 def test_get_coords_for_BND(bnd_variant):
-    coords = get_coords(bnd_variant, GRCH37)
+    coords = get_coords(bnd_variant, True, GRCH37)
     assert coords["pos"] == coords["end"]
     assert coords["sv_length"] == float("inf")
     assert coords["sv_type"] == "BND"

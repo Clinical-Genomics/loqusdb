@@ -30,11 +30,21 @@ def check_par(chrom, pos, genome_build):
     )
 
 
-def get_variant_id(variant):
-    """Get a variant id on the format chrom_pos_ref_alt"""
+def get_variant_id(variant, keep_chr_prefix=None):
+    """Get a variant id on the format chrom_pos_ref_alt
+
+    Args:
+        variant (cyvcf2.Variant)
+        keep_chr_prefix(bool): Retain chr/CHR/Chr prefix when present
+
+    Returns:
+        variant (models.ProfileVariant)
+    """
+
     chrom = variant.CHROM
-    if chrom.lower().startswith("chr"):
-        chrom = chrom[3:]
+    if not keep_chr_prefix:
+        if chrom.lower().startswith("chr"):
+            chrom = chrom[3:]
     return "_".join([str(chrom), str(variant.POS), str(variant.REF), str(variant.ALT[0])])
 
 
@@ -66,11 +76,12 @@ def is_greater(a, b, genome_build):
     return a_chrom == b_chrom and a.pos > b.pos
 
 
-def get_coords(variant, genome_build):
+def get_coords(variant, keep_chr_prefix, genome_build):
     """Returns a dictionary with position information
 
     Args:
         variant(cyvcf2.Variant)
+        keep_chr_prefix(bool): Retain chr/CHR/Chr prefix when present
 
     Returns:
         coordinates(dict)
@@ -84,8 +95,9 @@ def get_coords(variant, genome_build):
         "end": None,
     }
     chrom = variant.CHROM
-    if chrom.startswith(("chr", "CHR", "Chr")):
-        chrom = chrom[3:]
+    if not keep_chr_prefix:
+        if chrom.startswith(("chr", "CHR", "Chr")):
+            chrom = chrom[3:]
     coordinates["chrom"] = chrom
     end_chrom = chrom
 
@@ -105,8 +117,9 @@ def get_coords(variant, genome_build):
     if sv_type == "BND":
         other_coordinates = alt.strip("ATCGN").strip("[]").split(":")
         end_chrom = other_coordinates[0]
-        if end_chrom.startswith(("chr", "CHR", "Chr")):
-            end_chrom = end_chrom[3:]
+        if not keep_chr_prefix:
+            if end_chrom.startswith(("chr", "CHR", "Chr")):
+                end_chrom = end_chrom[3:]
 
         end = int(other_coordinates[1])
 
@@ -146,6 +159,8 @@ def build_variant(
     case_id: Optional[str] = None,
     gq_threshold: Optional[int] = None,
     gq_qual: Optional[bool] = False,
+    keep_chr_prefix: Optional[bool] = False,
+    ignore_gq_if_unset: Optional[bool] = False,
     genome_build: Optional[str] = None,
 ) -> Variant:
     """Return a Variant object
@@ -162,6 +177,9 @@ def build_variant(
         case_id(str): The case id
         gq_threshold(int): Genotype Quality threshold
         gq_qual(bool): Use variant.QUAL for quality instead of GQ
+        keep_chr_prefix(bool): Retain chr/CHR/Chr prefix when present
+        ignore_gq_if_unset(bool): Ignore GQ threshold check for variants that do not have GQ or QUAL set.
+        genome_build(str): Genome build. Ex. GRCh37 or GRCh38
 
     Return:
         formated_variant(models.Variant): A variant dictionary
@@ -174,14 +192,14 @@ def build_variant(
         sv = True
 
     # chrom_pos_ref_alt
-    variant_id = get_variant_id(variant)
+    variant_id = get_variant_id(variant, keep_chr_prefix)
 
     ref = variant.REF
     # ALT is an array in cyvcf2
     # We allways assume splitted and normalized VCFs
     alt = variant.ALT[0]
 
-    coordinates = get_coords(variant, genome_build=genome_build)
+    coordinates = get_coords(variant, keep_chr_prefix, genome_build=genome_build)
     chrom = coordinates["chrom"]
     pos = coordinates["pos"]
 
@@ -199,14 +217,15 @@ def build_variant(
             ind_pos = ind_obj["ind_index"]
 
             if gq_qual:
-                gq = 0
+                gq = -1
                 if variant.QUAL:
                     gq = int(variant.QUAL)
 
             if not gq_qual:
                 gq = int(variant.gt_quals[ind_pos])
 
-            if gq_threshold and gq < gq_threshold:
+            # When gq is missing in FORMAT cyvcf2 assigns a score of -1
+            if (gq_threshold and 0 <= gq < gq_threshold) or (gq == -1 and not ignore_gq_if_unset):
                 continue
 
             genotype = GENOTYPE_MAP[variant.gt_types[ind_pos]]
