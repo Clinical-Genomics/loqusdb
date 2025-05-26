@@ -21,6 +21,7 @@ def delete(
         existing_case(models.Case): If something failed during an update we need to revert
                                     to the original case
         keep_chr_prefix(bool): Retain chr/CHR/Chr prefixes in chromosome IDs when they are present
+        genome_build(str): Genome build. Ex. GRCh37 or GRCh38
 
     """
     # This will overwrite the updated case with the previous one
@@ -66,6 +67,7 @@ def delete_variants(
         vcf_obj(iterable(dict))
         ind_positions(dict)
         case_id(str)
+        genome_build(str): Genome build. Ex. GRCh37 or GRCh38
 
     Returns:
         nr_deleted (int): Number of deleted variants
@@ -134,6 +136,7 @@ def delete_structural_variants(
         vcf_obj(iterable(dict))
         ind_positions(dict)
         case_id(str)
+        genome_build(str): Genome build. Ex. GRCh37 or GRCh38
 
     Returns:
         nr_deleted (int): Number of deleted variants"""

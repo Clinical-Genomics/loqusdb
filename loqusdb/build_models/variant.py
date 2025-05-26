@@ -21,6 +21,7 @@ def check_par(chrom, pos, genome_build):
     Args:
         chrom(str)
         pos(int)
+        genome_build(str): Genome build. Ex. GRCh37 or GRCh38
 
     Returns:
         par(bool)
@@ -59,6 +60,7 @@ def is_greater(a, b, genome_build):
 
     Args:
         a,b(Position)
+        genome_build(str): Genome build. Ex. GRCh37 or GRCh38
 
     Returns:
         bool: True if a is greater than b
@@ -82,6 +84,7 @@ def get_coords(variant, keep_chr_prefix, genome_build):
     Args:
         variant(cyvcf2.Variant)
         keep_chr_prefix(bool): Retain chr/CHR/Chr prefix when present
+        genome_build(str): Genome build. Ex. GRCh37 or GRCh38
 
     Returns:
         coordinates(dict)
