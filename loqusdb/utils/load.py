@@ -40,6 +40,7 @@ def load_database(
     hard_threshold=0.95,
     soft_threshold=0.9,
     genome_build=None,
+    ignore_gq_if_unset=False,
 ):
     """Load the database with a case and its variants
 
@@ -58,6 +59,8 @@ def load_database(
           check_profile(bool): Does profile check if True
           hard_threshold(float): Rejects load if hamming distance above this is found
           soft_threshold(float): Stores similar samples if hamming distance above this is found
+          genome_build(str): Store the genome version
+          ignore_gq_if_unset(str): Ignore the gq threhsold check for variants that do not have a GQ or QUAL set
 
     Returns:
           nr_inserted(int)
@@ -155,6 +158,7 @@ def load_database(
                 max_window=max_window,
                 variant_type=variant_type,
                 genome_build=genome_build,
+                ignore_gq_if_unset=ignore_gq_if_unset,
             )
         except Exception as err:
             # If something went wrong do a rollback
@@ -203,19 +207,23 @@ def load_variants(
     max_window=3000,
     variant_type="snv",
     genome_build=None,
+    ignore_gq_if_unset=False,
 ):
     """Load variants for a family into the database.
 
     Args:
         adapter (loqusdb.plugins.Adapter): initialized plugin
+        vcf_obj(cyvcf2.VCF): Iterable with cyvcf2.Variant
         case_obj(Case): dict with case information
-        nr_variants(int)
         skip_case_id (bool): whether to include the case id on variant level
                              or not
         keep_chr_prefix(bool): Retain chr/CHR/Chr prefix when present
         gq_threshold(int)
+        qual_gq(bool): whether to use QUAL instead of GQ
         max_window(int): Specify the max size for sv windows
         variant_type(str): 'sv' or 'snv'
+        genome_build(str): Genome version. Ex. GRCH37
+        ignore_gq_if_unset (bool): whether to add entries that have missing GQ or QUAL field
 
     Returns:
         nr_inserted(int)
@@ -240,6 +248,7 @@ def load_variants(
                 gq_threshold,
                 qual_gq,
                 keep_chr_prefix,
+                ignore_gq_if_unset,
                 genome_build=genome_build,
             )
             for variant in bar

@@ -162,6 +162,7 @@ def build_variant(
     gq_threshold: Optional[int] = None,
     gq_qual: Optional[bool] = False,
     keep_chr_prefix: Optional[bool] = False,
+    ignore_gq_if_unset: Optional[bool] = False,
     genome_build: Optional[str] = None,
 ) -> Variant:
     """Return a Variant object
@@ -179,6 +180,8 @@ def build_variant(
         gq_threshold(int): Genotype Quality threshold
         gq_qual(bool): Use variant.QUAL for quality instead of GQ
         keep_chr_prefix(bool): Retain chr/CHR/Chr prefix when present
+        ignore_gq_if_unset(bool): Ignore GQ threshold check for variants that do not have GQ or QUAL set.
+        genome_build(str): Genome build. Ex. GRCh37 or GRCh38
 
     Return:
         formated_variant(models.Variant): A variant dictionary
@@ -216,14 +219,15 @@ def build_variant(
             ind_pos = ind_obj["ind_index"]
 
             if gq_qual:
-                gq = 0
+                gq = -1
                 if variant.QUAL:
                     gq = int(variant.QUAL)
 
             if not gq_qual:
                 gq = int(variant.gt_quals[ind_pos])
 
-            if gq_threshold and gq < gq_threshold:
+            # When gq is missing in FORMAT cyvcf2 assigns a score of -1
+            if (gq_threshold and 0 <= gq < gq_threshold) or (gq == -1 and not ignore_gq_if_unset):
                 continue
 
             genotype = GENOTYPE_MAP[variant.gt_types[ind_pos]]
