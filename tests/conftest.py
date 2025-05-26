@@ -437,6 +437,7 @@ def translocation_variant(request):
         info_dict={"END": None, "SVLEN": None, "SVTYPE": "BND"},
     )
 
+
 ##SVs with chr prefix
 @pytest.fixture(scope="function")
 def chr_del_variant(request):

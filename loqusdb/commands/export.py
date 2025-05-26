@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 
 import click
-from loqusdb import CHROMOSOME_ORDER
+from loqusdb.constants import CHROMOSOMES
 from loqusdb.utils.variant import format_variant
 from vcftoolbox import HeaderParser, print_headers, print_variant
 
@@ -43,8 +43,9 @@ def export(ctx, outfile, variant_type, freq):
     is_sv = variant_type == "sv"
     existing_chromosomes = set(adapter.get_chromosomes(sv=is_sv))
 
+    chromosome_order = CHROMOSOMES[ctx.obj["genome_build"]]
     ordered_chromosomes = []
-    for chrom in CHROMOSOME_ORDER:
+    for chrom in chromosome_order:
         if chrom in existing_chromosomes:
             ordered_chromosomes.append(chrom)
             existing_chromosomes.remove(chrom)

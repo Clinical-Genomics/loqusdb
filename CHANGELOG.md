@@ -4,6 +4,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
+## [unreleased]
+### Added
+- Representation of chromsomes from GRCh38
+
 ## [2.7.19]
 ### Added
 - Flag to retain chr/CHR/Chr prefixes when they are present
