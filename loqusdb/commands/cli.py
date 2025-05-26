@@ -55,11 +55,30 @@ LOG = logging.getLogger(__name__)
     type=click.Choice([GRCH37, GRCH38]),
     help="Specify what genome build to use",
 )
+@click.option(
+    "--keep-chr-prefix",
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="Retain the 'chr/Chr/CHR' prefix for chromosomes if it is present",
+)
 @click.option("-v", "--verbose", is_flag=True)
 @click.version_option(__version__)
 @click.pass_context
 def cli(
-    ctx, database, username, password, authdb, port, host, uri, verbose, config, test, genome_build
+    ctx,
+    database,
+    username,
+    password,
+    authdb,
+    port,
+    host,
+    uri,
+    verbose,
+    config,
+    test,
+    genome_build,
+    keep_chr_prefix,
 ):
     """loqusdb: manage a local variant count database."""
     loglevel = "INFO"
@@ -103,6 +122,7 @@ def cli(
     adapter = MongoAdapter(client, db_name=database)
 
     genome_build = genome_build or configs.get("genome_build") or GRCH37
+    keep_chr_prefix = keep_chr_prefix or configs.get("keep_chr_prefix")
 
     ctx.obj = {}
     ctx.obj["db"] = database
@@ -114,3 +134,4 @@ def cli(
     ctx.obj["adapter"] = adapter
     ctx.obj["version"] = __version__
     ctx.obj["genome_build"] = genome_build
+    ctx.obj["keep_chr_prefix"] = keep_chr_prefix

@@ -436,3 +436,68 @@ def translocation_variant(request):
         var_type="sv",
         info_dict={"END": None, "SVLEN": None, "SVTYPE": "BND"},
     )
+
+##SVs with chr prefix
+@pytest.fixture(scope="function")
+def chr_del_variant(request):
+    return CyvcfVariant(
+        chrom="chr1",
+        ref="G",
+        alt="<DEL>",
+        pos=1285001,
+        end=1287000,
+        var_type="sv",
+        info_dict={"END": 1287000, "SVLEN": -20000, "SVTYPE": "DEL"},
+    )
+
+
+@pytest.fixture(scope="function")
+def chr_small_insert_variant(request):
+    return CyvcfVariant(
+        chrom="chr1",
+        ref="G",
+        alt="GGGACGGGGGTTCTGAGATAAGCAAGCCCCCACCAGGTGAGACCGGCGGAGCTGTGGCCACCGAGGTCCCGGGAGCTGGTGCT",
+        pos=3021145,
+        end=3021145,
+        var_type="sv",
+        info_dict={"END": 3021145, "SVLEN": 82, "SVTYPE": "INS"},
+    )
+
+
+@pytest.fixture(scope="function")
+def chr_insertion_variant(request):
+    return CyvcfVariant(
+        chrom="chr1",
+        ref="A",
+        alt="<INS>",
+        pos=3177306,
+        end=3177306,
+        var_type="sv",
+        info_dict={"END": 3177306, "SVLEN": None, "SVTYPE": "INS"},
+    )
+
+
+@pytest.fixture(scope="function")
+def chr_duptandem_variant(request):
+    return CyvcfVariant(
+        chrom="chr1",
+        ref="A",
+        alt="<DUP:TANDEM>",
+        pos=3092626,
+        end=3092849,
+        var_type="sv",
+        info_dict={"END": 3092849, "SVLEN": 223, "SVTYPE": "DUP"},
+    )
+
+
+@pytest.fixture(scope="function")
+def chr_translocation_variant(request):
+    return CyvcfVariant(
+        chrom="chr1",
+        ref="N",
+        alt="N[11:119123896[",
+        pos=3754913,
+        end=3754913,
+        var_type="sv",
+        info_dict={"END": None, "SVLEN": None, "SVTYPE": "BND"},
+    )
