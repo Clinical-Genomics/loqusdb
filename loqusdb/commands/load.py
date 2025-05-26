@@ -100,7 +100,7 @@ def validate_profile_threshold(ctx, param, value):
     is_flag=True,
     default=False,
     show_default=True,
-    help="Ignore GQ threshold if GQ or QUAL field is unset in VCF",
+    help="Ignore GQ threshold if GQ (or the QUAL field for --qual-gq) is unset in VCF",
 )
 @click.pass_context
 def load(
