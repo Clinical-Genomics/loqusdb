@@ -21,6 +21,7 @@ def delete(
         existing_case(models.Case): If something failed during an update we need to revert
                                     to the original case
         keep_chr_prefix(bool): Retain chr/CHR/Chr prefixes in chromosome IDs when they are present
+        genome_build(str): Genome build. Ex. GRCh37 or GRCh38
 
     """
     # This will overwrite the updated case with the previous one
@@ -48,7 +49,11 @@ def delete(
         elif file_type == "vcf_sv_path":
             LOG.info("deleting structural variants")
             delete_structural_variants(
-                adapter=adapter, vcf_obj=vcf_obj, case_obj=case_obj, keep_chr_prefix=keep_chr_prefix
+                adapter=adapter,
+                vcf_obj=vcf_obj,
+                case_obj=case_obj,
+                keep_chr_prefix=keep_chr_prefix,
+                genome_build=genome_build,
             )
 
 
@@ -62,6 +67,7 @@ def delete_variants(
         vcf_obj(iterable(dict))
         ind_positions(dict)
         case_id(str)
+        genome_build(str): Genome build. Ex. GRCh37 or GRCh38
 
     Returns:
         nr_deleted (int): Number of deleted variants
@@ -120,7 +126,9 @@ def delete_variants(
     return nr_deleted
 
 
-def delete_structural_variants(adapter, vcf_obj, case_obj, keep_chr_prefix=None, case_id=None):
+def delete_structural_variants(
+    adapter, vcf_obj, case_obj, genome_build, keep_chr_prefix=None, case_id=None
+):
     """Delete structural variants for a case in the database
 
     Args:
@@ -128,6 +136,7 @@ def delete_structural_variants(adapter, vcf_obj, case_obj, keep_chr_prefix=None,
         vcf_obj(iterable(dict))
         ind_positions(dict)
         case_id(str)
+        genome_build(str): Genome build. Ex. GRCh37 or GRCh38
 
     Returns:
         nr_deleted (int): Number of deleted variants"""
@@ -141,7 +150,11 @@ def delete_structural_variants(adapter, vcf_obj, case_obj, keep_chr_prefix=None,
 
     for variant in vcf_obj:
         formated_variant = build_variant(
-            variant=variant, case_obj=case_obj, case_id=case_id, keep_chr_prefix=keep_chr_prefix
+            variant=variant,
+            case_obj=case_obj,
+            case_id=case_id,
+            genome_build=genome_build,
+            keep_chr_prefix=keep_chr_prefix,
         )
 
         if not formated_variant:

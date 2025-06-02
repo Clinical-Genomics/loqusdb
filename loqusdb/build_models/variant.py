@@ -15,18 +15,17 @@ Position = namedtuple("Position", "chrom pos")
 # These are coordinate for the pseudo autosomal regions in GRCh37
 
 
-def check_par(chrom, pos, genome_build=None):
+def check_par(chrom, pos, genome_build):
     """Check if a coordinate is in the PAR region
 
     Args:
         chrom(str)
         pos(int)
+        genome_build(str): Genome build. Ex. GRCh37 or GRCh38
 
     Returns:
         par(bool)
     """
-    if genome_build is None:
-        genome_build = GRCH37
     return any(
         pos >= interval[0] and pos <= interval[1] for interval in PAR[genome_build].get(chrom, [])
     )
@@ -50,24 +49,25 @@ def get_variant_id(variant, keep_chr_prefix=None):
     return "_".join([str(chrom), str(variant.POS), str(variant.REF), str(variant.ALT[0])])
 
 
-def is_greater(a, b):
+def is_greater(a, b, genome_build):
     """Check if position a is greater than position b
     This will look at chromosome and position.
 
     For example a position where chrom = 2 and pos = 300 is greater than a position where
     chrom = 1 and pos = 1000
 
-    If any of the chromosomes is outside [1-22,X,Y,MT] we can not say which is biggest.
+    If any of the chromosomes is outside [1-22,X,Y,MT] or [chr1-chr22,chrX,chrY,chrM] we can not say which is biggest.
 
     Args:
         a,b(Position)
+        genome_build(str): Genome build. Ex. GRCh37 or GRCh38
 
     Returns:
         bool: True if a is greater than b
     """
 
-    a_chrom = CHROM_TO_INT.get(a.chrom, 0)
-    b_chrom = CHROM_TO_INT.get(b.chrom, 0)
+    a_chrom = CHROM_TO_INT[genome_build].get(a.chrom, 0)
+    b_chrom = CHROM_TO_INT[genome_build].get(b.chrom, 0)
 
     if a_chrom == 0 or b_chrom == 0:
         return False
@@ -78,12 +78,13 @@ def is_greater(a, b):
     return a_chrom == b_chrom and a.pos > b.pos
 
 
-def get_coords(variant, keep_chr_prefix):
+def get_coords(variant, keep_chr_prefix, genome_build):
     """Returns a dictionary with position information
 
     Args:
         variant(cyvcf2.Variant)
         keep_chr_prefix(bool): Retain chr/CHR/Chr prefix when present
+        genome_build(str): Genome build. Ex. GRCh37 or GRCh38
 
     Returns:
         coordinates(dict)
@@ -139,7 +140,7 @@ def get_coords(variant, keep_chr_prefix):
     end_position = Position(end_chrom, end)
 
     # If 'start' is greater than 'end', switch positions
-    if is_greater(position, end_position):
+    if is_greater(position, end_position, genome_build=genome_build):
         end_chrom = position.chrom
         end = position.pos
 
@@ -201,7 +202,7 @@ def build_variant(
     # We allways assume splitted and normalized VCFs
     alt = variant.ALT[0]
 
-    coordinates = get_coords(variant, keep_chr_prefix)
+    coordinates = get_coords(variant, keep_chr_prefix, genome_build=genome_build)
     chrom = coordinates["chrom"]
     pos = coordinates["pos"]
 
@@ -239,7 +240,7 @@ def build_variant(
                 # If variant in X or Y and individual is male,
                 # we need to check hemizygosity
                 if (
-                    chrom in ["X", "Y"]
+                    chrom in ["X", "Y", "chrX", "chrY"]
                     and ind_obj["sex"] == 1
                     and not check_par(chrom, pos, genome_build=genome_build)
                 ):

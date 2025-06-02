@@ -332,7 +332,7 @@ def hem_variant(request):
 
 @pytest.fixture(scope="function")
 def variant_chr(request):
-    return CyvcfVariant(chrom="chrX", pos=60000)
+    return CyvcfVariant(chrom="chrX", pos=9000)
 
 
 @pytest.fixture(scope="function")
@@ -436,6 +436,7 @@ def translocation_variant(request):
         var_type="sv",
         info_dict={"END": None, "SVLEN": None, "SVTYPE": "BND"},
     )
+
 
 ##SVs with chr prefix
 @pytest.fixture(scope="function")
