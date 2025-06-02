@@ -121,13 +121,13 @@ def variants(
         if chromosome.startswith("chr"):
             chromosomes = [chromosome, chromosome[3:]]
         elif not chromosome.startswith("chr"):
-            chromosomes = [chromosome, "chr"+chromosome]
+            chromosomes = [chromosome, "chr" + chromosome]
 
     if end_chromosome:
         if end_chromosome.startswith("chr"):
             end_chromosomes = [end_chromosome, end_chromosome[3:]]
         elif not chromosome.startswith("chr"):
-            end_chromosomes = [end_chromosome, "chr"+end_chromosome]
+            end_chromosomes = [end_chromosome, "chr" + end_chromosome]
     else:
         end_chromosomes = [None, None]
 
@@ -175,13 +175,15 @@ def variants(
             result = adapter.get_variants(chromosome=chromosomes[1], start=start, end=end)
     else:
         LOG.info("Search for svs")
-        result = list(adapter.get_sv_variants(
-            chromosome=chromosomes[0],
-            end_chromosome=end_chromosomes[0],
-            sv_type=sv_type,
-            pos=start,
-            end=end,
-        ))
+        result = list(
+            adapter.get_sv_variants(
+                chromosome=chromosomes[0],
+                end_chromosome=end_chromosomes[0],
+                sv_type=sv_type,
+                pos=start,
+                end=end,
+            )
+        )
         if len(result) == 0:
             result = adapter.get_sv_variants(
                 chromosome=chromosomes[1],
@@ -190,7 +192,6 @@ def variants(
                 pos=start,
                 end=end,
             )
-
 
     if to_json:
         json.dumps(variant)
