@@ -117,16 +117,40 @@ def variants(
             sv_cases = True
         nr_cases = adapter.nr_cases(snv_cases=snv_cases, sv_cases=sv_cases)
 
+    if chromosome:
+        if chromosome.startswith("chr"):
+            chromosomes = [chromosome, chromosome[3:]]
+        elif not chromosome.startswith("chr"):
+            chromosomes = [chromosome, "chr"+chromosome]
+
+    if end_chromosome:
+        if end_chromosome.startswith("chr"):
+            end_chromosomes = [end_chromosome, end_chromosome[3:]]
+        elif not chromosome.startswith("chr"):
+            end_chromosomes = [end_chromosome, "chr"+end_chromosome]
+    else:
+        end_chromosomes = [None, None]
+
     if variant_id:
         if variant_type == "sv":
             variant_query = {
-                "chrom": chromosome,
-                "end_chrom": end_chromosome or chromosome,
+                "chrom": chromosomes[0],
+                "end_chrom": end_chromosomes[0] or chromosomes[0],
                 "sv_type": sv_type,
                 "pos": start,
                 "end": end,
             }
-            variant = adapter.get_structural_variant(variant_query)
+            variant = list(adapter.get_structural_variant(variant_query))
+            if len(variant) == 0:
+                variant_query = {
+                    "chrom": chromosomes[1],
+                    "end_chrom": end_chromosomes[1] or chromosomes[1],
+                    "sv_type": sv_type,
+                    "pos": start,
+                    "end": end,
+                }
+                variant = adapter.get_structural_variant(variant_query)
+
         else:
             variant = adapter.get_variant({"_id": variant_id})
 
@@ -145,18 +169,28 @@ def variants(
 
         click.echo(variant)
         return
-
     if variant_type == "snv":
-        result = adapter.get_variants(chromosome=chromosome, start=start, end=end)
+        result = list(adapter.get_variants(chromosome=chromosomes[0], start=start, end=end))
+        if len(result) == 0:
+            result = adapter.get_variants(chromosome=chromosomes[1], start=start, end=end)
     else:
         LOG.info("Search for svs")
-        result = adapter.get_sv_variants(
-            chromosome=chromosome,
-            end_chromosome=end_chromosome,
+        result = list(adapter.get_sv_variants(
+            chromosome=chromosomes[0],
+            end_chromosome=end_chromosomes[0],
             sv_type=sv_type,
             pos=start,
             end=end,
-        )
+        ))
+        if len(result) == 0:
+            result = adapter.get_sv_variants(
+                chromosome=chromosomes[1],
+                end_chromosome=end_chromosomes[1],
+                sv_type=sv_type,
+                pos=start,
+                end=end,
+            )
+
 
     if to_json:
         json.dumps(variant)
