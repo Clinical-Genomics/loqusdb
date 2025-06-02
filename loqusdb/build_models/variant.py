@@ -240,7 +240,7 @@ def build_variant(
                 # If variant in X or Y and individual is male,
                 # we need to check hemizygosity
                 if (
-                    chrom in ["X", "Y"]
+                    chrom in ["X", "Y", "chrX", "chrY"]
                     and ind_obj["sex"] == 1
                     and not check_par(chrom, pos, genome_build=genome_build)
                 ):

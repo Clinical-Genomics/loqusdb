@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 
 import click
-from loqusdb.constants import CHROMOSOMES
+from loqusdb.constants import CHROMOSOMES, GRCH37, GRCH38
 from loqusdb.utils.variant import format_variant
 from vcftoolbox import HeaderParser, print_headers, print_variant
 
@@ -43,12 +43,22 @@ def export(ctx, outfile, variant_type, freq):
     is_sv = variant_type == "sv"
     existing_chromosomes = set(adapter.get_chromosomes(sv=is_sv))
 
-    chromosome_order = CHROMOSOMES[ctx.obj["genome_build"]]
+    genome = ctx.obj["genome_build"]
+    chromosome_order = CHROMOSOMES[genome]
+    keep_chr_prefix = ctx.obj["keep_chr_prefix"]
+
     ordered_chromosomes = []
     for chrom in chromosome_order:
-        if chrom in existing_chromosomes:
+        if keep_chr_prefix and chrom in existing_chromosomes:
             ordered_chromosomes.append(chrom)
             existing_chromosomes.remove(chrom)
+        elif not keep_chr_prefix:
+            if genome == GRCH37 and chrom in existing_chromosomes:
+                ordered_chromosomes.append(chrom)
+                existing_chromosomes.remove(chrom)
+            elif genome == GRCH38 and chrom[3:] in existing_chromosomes:
+                ordered_chromosomes.append(chrom)
+                existing_chromosomes.remove(chrom)
     for chrom in existing_chromosomes:
         ordered_chromosomes.append(chrom)
 

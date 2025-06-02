@@ -1,5 +1,5 @@
 from loqusdb.build_models.variant import build_variant
-from loqusdb.constants import GRCH37
+from loqusdb.constants import GRCH37, GRCH38
 
 
 def test_format_indel(del_variant, case_obj):
@@ -38,7 +38,7 @@ def test_format_indel_chrprefix(chr_del_variant, case_obj):
         variant=variant,
         case_obj=case_obj,
         case_id=case_id,
-        genome_build=GRCH37,
+        genome_build=GRCH38,
         keep_chr_prefix=True,
     )
     expected_id = "_".join([variant.CHROM, str(variant.POS), variant.REF, variant.ALT[0]])
@@ -90,7 +90,7 @@ def test_format_small_ins_chrprefix(chr_small_insert_variant, case_obj):
         variant=variant,
         case_obj=case_obj,
         case_id=case_id,
-        genome_build=GRCH37,
+        genome_build=GRCH38,
         keep_chr_prefix=True,
     )
 
@@ -136,7 +136,7 @@ def test_format_insertion_chrprefix(chr_insertion_variant, case_obj):
         variant=variant,
         case_obj=case_obj,
         case_id=case_id,
-        genome_build=GRCH37,
+        genome_build=GRCH38,
         keep_chr_prefix=True,
     )
 
@@ -182,7 +182,7 @@ def test_format_dup_tandem_chrprefix(chr_duptandem_variant, case_obj):
         variant=variant,
         case_obj=case_obj,
         case_id=case_id,
-        genome_build=GRCH37,
+        genome_build=GRCH38,
         keep_chr_prefix=True,
     )
 
@@ -228,7 +228,7 @@ def test_format_translocation_chrprefix(chr_translocation_variant, case_obj):
         variant=variant,
         case_obj=case_obj,
         case_id=case_id,
-        genome_build=GRCH37,
+        genome_build=GRCH38,
         keep_chr_prefix=True,
     )
 

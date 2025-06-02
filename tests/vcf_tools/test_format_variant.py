@@ -1,5 +1,5 @@
 from loqusdb.build_models.variant import build_variant, GENOTYPE_MAP
-from loqusdb.constants import GRCH37
+from loqusdb.constants import GRCH37, GRCH38
 
 
 def test_format_variant(het_variant, case_obj):
@@ -33,7 +33,7 @@ def test_format_variant_chrprefix(het_variant, case_obj):
         variant=variant,
         case_obj=case_obj,
         case_id=case_id,
-        genome_build=GRCH37,
+        genome_build=GRCH38,
         keep_chr_prefix=True,
     )
 
@@ -82,7 +82,7 @@ def test_format_variant_no_qual_chrprefix(variant_no_gq, case_obj):
         case_id=case_id,
         gq_qual=True,
         gq_threshold=20,
-        genome_build=GRCH37,
+        genome_build=GRCH38,
         keep_chr_prefix=True,
     )
     ## THEN assert that None is returned since requirements are not fulfilled
@@ -111,7 +111,7 @@ def test_format_variant_no_gq_chrprefix(variant_no_gq, case_obj):
         case_obj=case_obj,
         case_id=case_id,
         gq_threshold=20,
-        genome_build=GRCH37,
+        genome_build=GRCH38,
         keep_chr_prefix=True,
     )
     ## THEN assert that None is returned since requirements are not fulfilled
@@ -142,7 +142,7 @@ def test_format_variant_chr_prefix_chrprefix(variant_chr, case_obj):
         case_obj=case_obj,
         case_id=case_id,
         gq_threshold=20,
-        genome_build=GRCH37,
+        genome_build=GRCH38,
         keep_chr_prefix=True,
     )
     ## THEN assert that the 'chr' part has not been stripped away
@@ -169,7 +169,7 @@ def test_format_variant_no_family_id_chrprefix(het_variant, case_obj):
     case_id = case_obj["case_id"]
     ## WHEN parsing the variant telling that 'case_id' is None
     formated_variant = build_variant(
-        variant=variant, case_obj=case_obj, case_id=None, genome_build=GRCH37, keep_chr_prefix=True
+        variant=variant, case_obj=case_obj, case_id=None, genome_build=GRCH38, keep_chr_prefix=True
     )
     ## THEN assert that case_id was not added
     assert formated_variant.get("case_id") == None
@@ -202,7 +202,7 @@ def test_format_homozygote_variant_chrprefix(hom_variant, case_obj):
         variant=variant,
         case_obj=case_obj,
         case_id=case_id,
-        genome_build=GRCH37,
+        genome_build=GRCH38,
         keep_chr_prefix=True,
     )
 
@@ -226,9 +226,9 @@ def test_format_hemizygote_variant(hem_variant, case_obj):
     assert formated_variant["hemizygote"] == 1
 
 
-def test_format_hemizygote_variant_chrprefix(hem_variant, case_obj):
+def test_format_hemizygote_variant_chrprefix(variant_chr, case_obj):
     ## GIVEN a parsed hemizygous variant
-    variant = hem_variant
+    variant = variant_chr
     case_id = case_obj["case_id"]
 
     ## WHEN parsing the variant
@@ -236,7 +236,7 @@ def test_format_hemizygote_variant_chrprefix(hem_variant, case_obj):
         variant=variant,
         case_obj=case_obj,
         case_id=case_id,
-        genome_build=GRCH37,
+        genome_build=GRCH38,
         keep_chr_prefix=True,
     )
 
@@ -275,7 +275,7 @@ def test_format_variant_no_call_chrprefix(variant_no_call, case_obj):
         variant=variant,
         case_obj=case_obj,
         case_id=case_id,
-        genome_build=GRCH37,
+        genome_build=GRCH38,
         keep_chr_prefix=True,
     )
 
