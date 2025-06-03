@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "loqusdb"
-version = "2.7.20"
+version = "2.7.21"
 description = "A simple observation count database"
 authors = ["Your Name <you@example.com>"]
 license = "MIT"

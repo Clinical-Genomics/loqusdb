@@ -4,7 +4,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
-## [unreleased]
+## [2.7.21]
 ### Changed
 - variant query using the `variant` command will now check the database using alternative representations of the chromosome (with or without the 'chr' prefix) if the variant is not found with the provided representation.
 
