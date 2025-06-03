@@ -126,7 +126,7 @@ def variants(
     if end_chromosome:
         if end_chromosome.startswith("chr"):
             end_chromosomes = [end_chromosome, end_chromosome[3:]]
-        elif not chromosome.startswith("chr"):
+        elif not end_chromosome.startswith("chr"):
             end_chromosomes = [end_chromosome, "chr" + end_chromosome]
     else:
         end_chromosomes = [None, None]
