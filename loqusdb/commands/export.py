@@ -58,8 +58,8 @@ def export(ctx, outfile, variant_type, freq):
                 existing_chromosomes.remove(chrom)
             elif genome == GRCH38:
                 if chrom[3:] in existing_chromosomes:
-                        ordered_chromosomes.append(chrom[3:])
-                        existing_chromosomes.remove(chrom[3:])
+                    ordered_chromosomes.append(chrom[3:])
+                    existing_chromosomes.remove(chrom[3:])
                 elif chrom in existing_chromosomes:
                     ordered_chromosomes.append(chrom)
                     existing_chromosomes.remove(chrom)
