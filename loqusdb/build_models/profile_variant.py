@@ -37,7 +37,7 @@ def build_profile_variant(variant, keep_chr_prefix=None):
 
     chrom = variant.CHROM
     if not keep_chr_prefix:
-        if chrom.startswith(("chr", "CHR", "Chr")):
+        if chrom.lower().startswith("chr"):
             chrom = chrom[3:]
 
     pos = int(variant.POS)
