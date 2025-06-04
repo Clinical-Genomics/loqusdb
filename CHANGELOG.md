@@ -4,7 +4,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
-## [unreleased]
+## [2.7.22]
 ### Changed
 - update export logic to better handle chromosomes for genome build GRCh38
   
