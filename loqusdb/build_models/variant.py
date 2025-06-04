@@ -114,6 +114,11 @@ def get_coords(variant, keep_chr_prefix, genome_build):
     coordinates["end"] = end
 
     sv_type = variant.INFO.get("SVTYPE")
+    if sv_type:
+        sv_type = sv_type.split(":")[0]
+    if sv_type in ["TDUP", "IDUP"]:
+        sv_type = "DUP"
+
     length = variant.INFO.get("SVLEN")
     sv_len = abs(length) if length else end - pos
     # Translocations will sometimes have a end chrom that differs from chrom

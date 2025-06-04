@@ -197,6 +197,44 @@ def test_format_dup_tandem_chrprefix(chr_duptandem_variant, case_obj):
     assert formated_variant["alt"] == variant.ALT[0]
     assert formated_variant["sv_type"] == "DUP"
 
+def test_format_tiddit_dup_tandem(duptandem_tiddit_variant, case_obj):
+    ## GIVEN a TIDDIT style notation, ie both SVTYPE info and alt field tag has subtype, eg DUP:TANDEM
+    variant = duptandem_tiddit_variant
+    case_id = case_obj["case_id"]
+    ## WHEN parsing the variant
+    formated_variant = build_variant(variant=variant, case_obj=case_obj, case_id=case_id)
+
+    ## THEN assert the sv is parsed correct
+    assert formated_variant["chrom"] == variant.CHROM
+    assert formated_variant["end_chrom"] == variant.CHROM
+    assert formated_variant["pos"] == variant.POS
+    assert formated_variant["end"] == variant.INFO["END"]
+    assert formated_variant["sv_len"] == abs(variant.INFO["SVLEN"])
+
+    assert formated_variant["ref"] == variant.REF
+    assert formated_variant["alt"] == variant.ALT[0]
+    assert formated_variant["sv_type"] == "DUP"
+
+
+def test_format_old_tiddit_dup_tandem(duptandem_old_tiddit_variant, case_obj):
+    ## GIVEN a dup with older TIDDIT notation (TDUP, IDUP, ...)
+    variant = duptandem_old_tiddit_variant
+    case_id = case_obj["case_id"]
+    ## WHEN parsing the variant
+    formated_variant = build_variant(variant=variant, case_obj=case_obj, case_id=case_id)
+
+    ## THEN assert the sv is parsed correct
+    assert formated_variant["chrom"] == variant.CHROM
+    assert formated_variant["end_chrom"] == variant.CHROM
+    assert formated_variant["pos"] == variant.POS
+    assert formated_variant["end"] == variant.INFO["END"]
+    assert formated_variant["sv_len"] == abs(variant.INFO["SVLEN"])
+
+    assert formated_variant["ref"] == variant.REF
+    assert formated_variant["alt"] == variant.ALT[0]
+    assert formated_variant["sv_type"] == "DUP"
+
+
 
 def test_format_translocation(translocation_variant, case_obj):
     ## GIVEN a small insertion (This means that the insertion is included in ALT field)
