@@ -99,7 +99,7 @@ def get_coords(variant, keep_chr_prefix, genome_build):
     }
     chrom = variant.CHROM
     if not keep_chr_prefix:
-        if chrom.startswith(("chr", "CHR", "Chr")):
+        if chrom.lower().startswith("chr"):
             chrom = chrom[3:]
     coordinates["chrom"] = chrom
     end_chrom = chrom
@@ -121,7 +121,7 @@ def get_coords(variant, keep_chr_prefix, genome_build):
         other_coordinates = alt.strip("ATCGN").strip("[]").split(":")
         end_chrom = other_coordinates[0]
         if not keep_chr_prefix:
-            if end_chrom.startswith(("chr", "CHR", "Chr")):
+            if chrom.lower().startswith("chr"):
                 end_chrom = end_chrom[3:]
 
         end = int(other_coordinates[1])
