@@ -1,10 +1,14 @@
-[tool.poetry]
+[project]
 name = "loqusdb"
-version = "2.7.22"
+
 description = "A simple observation count database"
-authors = ["Your Name <you@example.com>"]
+authors = [{name="Mans Magnuson", email="monsunas@gmail.com"}, {name="Adam Rosenbaum", email="adam.rosenbaum@regionvasterbotten.se"}, {name="Daniel Nilsson", email="daniel.nilsson@ki.se"}, {name="Chiara Rasi", email="chiara.rasi@scilifelab.se"}, {name="Jesper Eisfeldt", email="jesper.eisfeldt@scilifelab.se"}, {name="Henrik Stranneheim"},]
+maintainers = [ {name="Clinical Genomics Bioinformatics Team"}, {name="Clinical Genomics System Development Team"}, {name="Clinical Genomics Scout Team"}]
 license = "MIT"
 readme = "README.md"
+version = "2.7.23"
+
+[tool.poetry]
 include = [
   "README.md",
   "loqusdb/**/*",
@@ -30,6 +34,11 @@ mongomock = "*"
 pre-commit = "*"
 pytest = "*"
 pytest-cov = "*"
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = "*"
+mkdocs-material = "*"
+markdown-include = "*"
 
 [tool.poetry.scripts]
 loqusdb = "loqusdb.commands.cli:cli"

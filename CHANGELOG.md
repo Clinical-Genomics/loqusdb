@@ -8,6 +8,10 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 ### Changed
 - migrate from deprecated setuptools resources to importlib resources
 
+## [2.7.23]
+### Fixed
+- Automation includes docs publishing
+
 ## [2.7.22]
 ### Changed
 - update export logic to better handle chromosomes for genome build GRCh38
