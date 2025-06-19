@@ -6,7 +6,7 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
 ## [unreleased]
 ### Changed
-- migrate from deprecated setuptools resources to importlib resources
+- Migrate from deprecated setuptools resources to importlib resources
 
 ## [2.7.23]
 ### Fixed
