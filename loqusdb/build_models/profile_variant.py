@@ -24,23 +24,25 @@ def get_maf(variant):
     return variant.INFO.get("MAF")
 
 
-def build_profile_variant(variant):
+def build_profile_variant(variant, keep_chr_prefix=None):
     """Returns a ProfileVariant object
 
     Args:
         variant (cyvcf2.Variant)
+        keep_chr_prefix(bool): Retain chr/CHR/Chr prefix when present
 
     Returns:
         variant (models.ProfileVariant)
     """
 
     chrom = variant.CHROM
-    if chrom.startswith(("chr", "CHR", "Chr")):
-        chrom = chrom[3:]
+    if not keep_chr_prefix:
+        if chrom.lower().startswith("chr"):
+            chrom = chrom[3:]
 
     pos = int(variant.POS)
 
-    variant_id = get_variant_id(variant)
+    variant_id = get_variant_id(variant, keep_chr_prefix)
 
     ref = variant.REF
     alt = variant.ALT[0]

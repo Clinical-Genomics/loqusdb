@@ -8,6 +8,30 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 ### Fixed
 - Automation includes docs publishing
 
+## [2.7.22]
+### Changed
+- update export logic to better handle chromosomes for genome build GRCh38
+  
+## [2.7.21]
+### Changed
+- variant query using the `variant` command will now check the database using alternative representations of the chromosome (with or without the 'chr' prefix) if the variant is not found with the provided representation.
+
+## [2.7.20]
+### Added
+- Representation of chromsomes from GRCh38
+
+## [2.7.19]
+### Added
+- Flag to retain chr/CHR/Chr prefixes when they are present
+
+## [2.7.18]
+### Added
+- `ignore-gq-if-unset` flag to ignore GQ threshold check when GQ or QUAL field is unset for some variants in a VCF file.
+
+## [2.7.17]
+### Added
+- Flag to skip GQ check on SV files
+
 ## [2.7.16]
 ### Fixed 
 - Fixed changelog

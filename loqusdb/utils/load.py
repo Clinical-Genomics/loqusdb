@@ -31,6 +31,8 @@ def load_database(
     family_type="ped",
     skip_case_id=False,
     gq_threshold=None,
+    snv_gq_only=False,
+    keep_chr_prefix=False,
     qual_gq=False,
     case_id=None,
     max_window=3000,
@@ -38,6 +40,7 @@ def load_database(
     hard_threshold=0.95,
     soft_threshold=0.9,
     genome_build=None,
+    ignore_gq_if_unset=False,
 ):
     """Load the database with a case and its variants
 
@@ -49,12 +52,15 @@ def load_database(
           family_type(str): Format of family file
           skip_case_id(bool): If no case information should be added to variants
           gq_threshold(int): If only quality variants should be considered
+          keep_chr_prefix(bool): Retain chr/CHR/Chr prefix when present
           qual_gq(bool): Use QUAL field instead of GQ format tag to gate quality
           case_id(str): If different case id than the one in family file should be used
           max_window(int): Specify the max size for sv windows
           check_profile(bool): Does profile check if True
           hard_threshold(float): Rejects load if hamming distance above this is found
           soft_threshold(float): Stores similar samples if hamming distance above this is found
+          genome_build(str): Store the genome version
+          ignore_gq_if_unset(str): Ignore the gq threhsold check for variants that do not have a GQ or QUAL set
 
     Returns:
           nr_inserted(int)
@@ -64,7 +70,7 @@ def load_database(
     nr_variants = None
     vcf_individuals = None
     if variant_file:
-        vcf_info = check_vcf(variant_file)
+        vcf_info = check_vcf(variant_file, keep_chr_prefix)
         nr_variants = vcf_info["nr_variants"]
         variant_type = vcf_info["variant_type"]
         vcf_files.append(variant_file)
@@ -74,7 +80,7 @@ def load_database(
     nr_sv_variants = None
     sv_individuals = None
     if sv_file:
-        vcf_info = check_vcf(sv_file, "sv")
+        vcf_info = check_vcf(sv_file, keep_chr_prefix, "sv")
         nr_sv_variants = vcf_info["nr_variants"]
         vcf_files.append(sv_file)
         sv_individuals = vcf_info["individuals"]
@@ -82,17 +88,19 @@ def load_database(
     profiles = None
     matches = None
     if profile_file:
-        profiles = get_profiles(adapter, profile_file)
+        profiles = get_profiles(adapter, profile_file, keep_chr_prefix)
         ###Check if any profile already exists
         matches = profile_match(
             adapter, profiles, hard_threshold=hard_threshold, soft_threshold=soft_threshold
         )
 
-    # If a gq threshold is used the variants needs to have GQ
+    # If a gq threshold is used the variants need to have GQ (only SNVs if snv_gq_only)
     for _vcf_file in vcf_files:
-        # Get a cyvcf2.VCF object
-        vcf = get_vcf(_vcf_file)
+        is_sv = _vcf_file == sv_file
+        if snv_gq_only and is_sv:
+            continue  # skip GQ check for SV VCF
 
+        vcf = get_vcf(_vcf_file)
         if gq_threshold and not vcf.contains("GQ") and not qual_gq:
             LOG.warning("Set gq-threshold to 0 or add info to vcf {0}".format(_vcf_file))
             raise SyntaxError("GQ is not defined in vcf header")
@@ -144,11 +152,13 @@ def load_database(
                 vcf_obj=vcf_obj,
                 case_obj=case_obj,
                 skip_case_id=skip_case_id,
-                gq_threshold=gq_threshold,
+                gq_threshold=gq_threshold if not snv_gq_only or variant_type == "snv" else None,
                 qual_gq=qual_gq,
+                keep_chr_prefix=keep_chr_prefix,
                 max_window=max_window,
                 variant_type=variant_type,
                 genome_build=genome_build,
+                ignore_gq_if_unset=ignore_gq_if_unset,
             )
         except Exception as err:
             # If something went wrong do a rollback
@@ -193,21 +203,27 @@ def load_variants(
     skip_case_id=False,
     gq_threshold=None,
     qual_gq=False,
+    keep_chr_prefix=False,
     max_window=3000,
     variant_type="snv",
     genome_build=None,
+    ignore_gq_if_unset=False,
 ):
     """Load variants for a family into the database.
 
     Args:
         adapter (loqusdb.plugins.Adapter): initialized plugin
+        vcf_obj(cyvcf2.VCF): Iterable with cyvcf2.Variant
         case_obj(Case): dict with case information
-        nr_variants(int)
         skip_case_id (bool): whether to include the case id on variant level
                              or not
+        keep_chr_prefix(bool): Retain chr/CHR/Chr prefix when present
         gq_threshold(int)
+        qual_gq(bool): whether to use QUAL instead of GQ
         max_window(int): Specify the max size for sv windows
         variant_type(str): 'sv' or 'snv'
+        genome_build(str): Genome version. Ex. GRCH37
+        ignore_gq_if_unset (bool): whether to add entries that have missing GQ or QUAL field
 
     Returns:
         nr_inserted(int)
@@ -226,7 +242,14 @@ def load_variants(
 
         variants = (
             build_variant(
-                variant, case_obj, case_id, gq_threshold, qual_gq, genome_build=genome_build
+                variant,
+                case_obj,
+                case_id,
+                gq_threshold,
+                qual_gq,
+                keep_chr_prefix,
+                ignore_gq_if_unset,
+                genome_build=genome_build,
             )
             for variant in bar
         )
@@ -246,7 +269,7 @@ def load_variants(
     return nr_inserted
 
 
-def load_profile_variants(adapter, variant_file):
+def load_profile_variants(adapter, variant_file, keep_chr_prefix=None):
     """
 
     Loads variants used for profiling
@@ -258,7 +281,7 @@ def load_profile_variants(adapter, variant_file):
 
     """
 
-    vcf_info = check_vcf(variant_file)
+    vcf_info = check_vcf(variant_file, keep_chr_prefix)
     variant_type = vcf_info["variant_type"]
 
     if variant_type != "snv":
@@ -267,5 +290,5 @@ def load_profile_variants(adapter, variant_file):
 
     vcf = get_vcf(variant_file)
 
-    profile_variants = [build_profile_variant(variant) for variant in vcf]
+    profile_variants = [build_profile_variant(variant, keep_chr_prefix) for variant in vcf]
     adapter.add_profile_variants(profile_variants)

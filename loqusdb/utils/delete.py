@@ -9,7 +9,9 @@ from loqusdb.build_models.variant import build_variant
 LOG = logging.getLogger(__name__)
 
 
-def delete(adapter, case_obj, update=False, existing_case=False, genome_build=None):
+def delete(
+    adapter, case_obj, keep_chr_prefix=None, update=False, existing_case=False, genome_build=None
+):
     """Delete a case and all of it's variants from the database.
 
     Args:
@@ -18,6 +20,8 @@ def delete(adapter, case_obj, update=False, existing_case=False, genome_build=No
         update(bool): If we are in the middle of an update
         existing_case(models.Case): If something failed during an update we need to revert
                                     to the original case
+        keep_chr_prefix(bool): Retain chr/CHR/Chr prefixes in chromosome IDs when they are present
+        genome_build(str): Genome build. Ex. GRCh37 or GRCh38
 
     """
     # This will overwrite the updated case with the previous one
@@ -36,7 +40,11 @@ def delete(adapter, case_obj, update=False, existing_case=False, genome_build=No
         if file_type == "vcf_path":
             LOG.info("deleting variants")
             delete_variants(
-                adapter=adapter, vcf_obj=vcf_obj, case_obj=case_obj, genome_build=genome_build
+                adapter=adapter,
+                vcf_obj=vcf_obj,
+                keep_chr_prefix=keep_chr_prefix,
+                case_obj=case_obj,
+                genome_build=genome_build,
             )
         elif file_type == "vcf_sv_path":
             LOG.info("deleting structural variants")
@@ -44,10 +52,14 @@ def delete(adapter, case_obj, update=False, existing_case=False, genome_build=No
                 adapter=adapter,
                 vcf_obj=vcf_obj,
                 case_obj=case_obj,
+                keep_chr_prefix=keep_chr_prefix,
+                genome_build=genome_build,
             )
 
 
-def delete_variants(adapter, vcf_obj, case_obj, case_id=None, genome_build=None):
+def delete_variants(
+    adapter, vcf_obj, case_obj, keep_chr_prefix=None, case_id=None, genome_build=None
+):
     """Delete variants for a case in the database
 
     Args:
@@ -55,6 +67,7 @@ def delete_variants(adapter, vcf_obj, case_obj, case_id=None, genome_build=None)
         vcf_obj(iterable(dict))
         ind_positions(dict)
         case_id(str)
+        genome_build(str): Genome build. Ex. GRCh37 or GRCh38
 
     Returns:
         nr_deleted (int): Number of deleted variants
@@ -69,7 +82,11 @@ def delete_variants(adapter, vcf_obj, case_obj, case_id=None, genome_build=None)
     variant_list = []
     for variant in vcf_obj:
         formated_variant = build_variant(
-            variant=variant, case_obj=case_obj, case_id=case_id, genome_build=genome_build
+            variant=variant,
+            case_obj=case_obj,
+            keep_chr_prefix=keep_chr_prefix,
+            case_id=case_id,
+            genome_build=genome_build,
         )
 
         if not formated_variant:
@@ -109,7 +126,9 @@ def delete_variants(adapter, vcf_obj, case_obj, case_id=None, genome_build=None)
     return nr_deleted
 
 
-def delete_structural_variants(adapter, vcf_obj, case_obj, case_id=None):
+def delete_structural_variants(
+    adapter, vcf_obj, case_obj, genome_build, keep_chr_prefix=None, case_id=None
+):
     """Delete structural variants for a case in the database
 
     Args:
@@ -117,6 +136,7 @@ def delete_structural_variants(adapter, vcf_obj, case_obj, case_id=None):
         vcf_obj(iterable(dict))
         ind_positions(dict)
         case_id(str)
+        genome_build(str): Genome build. Ex. GRCh37 or GRCh38
 
     Returns:
         nr_deleted (int): Number of deleted variants"""
@@ -133,6 +153,8 @@ def delete_structural_variants(adapter, vcf_obj, case_obj, case_id=None):
             variant=variant,
             case_obj=case_obj,
             case_id=case_id,
+            genome_build=genome_build,
+            keep_chr_prefix=keep_chr_prefix,
         )
 
         if not formated_variant:
