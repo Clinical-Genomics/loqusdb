@@ -4,6 +4,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
+## [unreleased]
+### Fixed
+- Update poetry lockfile with current versions of dependencies, fixing some issues that dependabot noticed
+
 ## [2.7.24]
 ### Changed
 - Migrate from deprecated setuptools resources to importlib resources
