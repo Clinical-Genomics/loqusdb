@@ -6,7 +6,7 @@ authors = [{name="Mans Magnuson", email="monsunas@gmail.com"}, {name="Adam Rosen
 maintainers = [ {name="Clinical Genomics Bioinformatics Team"}, {name="Clinical Genomics System Development Team"}, {name="Clinical Genomics Scout Team"}]
 license = "MIT"
 readme = "README.md"
-version = "2.7.22"
+version = "2.7.23"
 
 [tool.poetry]
 include = [
