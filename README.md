@@ -10,6 +10,8 @@ Right now **Locusdb** uses [mongodb][mongodb] as backend for
 storing variants, but there should not be a huge difference to use another
 database manager.
 
+Find more detailed instructions and examples in the [documentation][docs].
+
 ## Installation ##
 
 
@@ -142,6 +144,7 @@ The collections are defined as follows:
 }
 ```
 
+[docs]: https://clinical-genomics.github.io/loqusdb
 [mongodb]: https://www.mongodb.org
 [publication]: https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-020-03609-z
 [pypi-img]: https://img.shields.io/pypi/v/loqusdb.svg?style=flat-square
