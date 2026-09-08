@@ -106,3 +106,36 @@ def test_load_database_wrong_ped_grch38(vcf_path, funny_ped_path, real_mongo_ada
             family_type="ped",
             genome_build=GRCH38,
         )
+
+
+def test_add_to_existing_snv(vcf_path, ped_path, real_mongo_adapter, case_id):
+    mongo_adapter = real_mongo_adapter
+
+    load_database(
+        adapter=mongo_adapter,
+        variant_file=vcf_path,
+        family_file=ped_path,
+        family_type="ped",
+        genome_build=GRCH37,
+    )
+    existing_case = dict(mongo_adapter.case({"case_id": case_id}))
+    existing_variants = list(mongo_adapter.db.variant.find())
+
+    nr_inserted = load_database(
+        adapter=mongo_adapter,
+        variant_file=vcf_path,
+        family_file=ped_path,
+        family_type="ped",
+        genome_build=GRCH37,
+        add_to_existing_snv=True,
+    )
+
+    assert nr_inserted == 0
+    assert mongo_adapter.case({"case_id": case_id}) == existing_case
+    updated_variants = {
+        variant["_id"]: variant for variant in mongo_adapter.db.variant.find()
+    }
+    assert all(
+        updated_variants[variant["_id"]]["observations"] == variant["observations"]
+        for variant in existing_variants
+    )

@@ -24,6 +24,22 @@ def test_load_command(vcf_path, ped_path, real_mongo_adapter, real_db_name):
     assert sum([1 for case in real_mongo_adapter.cases()]) == 1
 
 
+def test_load_command_add_to_existing_snv(vcf_path, ped_path, real_mongo_adapter, real_db_name):
+    runner = CliRunner()
+    load_command = ["--database", real_db_name, "load", "--variant-file", vcf_path, "-f", ped_path]
+    result = runner.invoke(base_command, load_command)
+    assert result.exit_code == 0
+
+    case_before = dict(real_mongo_adapter.db.case.find_one())
+    result = runner.invoke(
+        base_command,
+        load_command + ["--add-to-existing-snv"],
+    )
+
+    assert result.exit_code == 0
+    assert real_mongo_adapter.case({"case_id": case_before["case_id"]}) == case_before
+
+
 def test_load_command_no_ped_case_id(vcf_path, case_id, real_mongo_adapter, real_db_name):
     ## GIVEN a vcf_path a ped_path and a empty database
     assert real_mongo_adapter.case({"case_id": case_id}) is None

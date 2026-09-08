@@ -11,6 +11,10 @@ When loading a case for the first time one could do any of the following:
 
 It is possible to add a file after a case is loaded with `loqusdb update`
 
+To add another SNV VCF to a case that already has an SNV VCF, use
+`loqusdb load --add-to-existing-snv`. The existing case metadata and original
+SNV VCF are retained; variants from the new VCF are added to the database.
+
 
 A case is loaded with:
 
@@ -44,6 +48,8 @@ Options:
                                   (0-1)
   --soft-threshold FLOAT          profile hamming distance to store similar
                                   individuals (0-1)
+  --add-to-existing-snv           Add SNVs to an existing case without replacing
+                                  its stored SNV VCF
   --help                          Show this message and exit.
 ```
 

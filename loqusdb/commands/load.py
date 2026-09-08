@@ -102,6 +102,13 @@ def validate_profile_threshold(ctx, param, value):
     show_default=True,
     help="Ignore GQ threshold if GQ (or the QUAL field for --qual-gq) is unset in VCF",
 )
+@click.option(
+    "--add-to-existing-snv",
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="Add SNVs to an existing case without replacing its stored SNV VCF",
+)
 @click.pass_context
 def load(
     ctx,
@@ -120,6 +127,7 @@ def load(
     qual_gq,
     snv_gq_only,
     ignore_gq_if_unset,
+    add_to_existing_snv,
 ):
     """Load the variants of a case
 
@@ -132,6 +140,10 @@ def load(
 
     if not (variant_file or sv_variants):
         LOG.warning("Please provide a VCF file")
+        ctx.abort()
+
+    if add_to_existing_snv and (not variant_file or sv_variants):
+        LOG.warning("--add-to-existing-snv requires --variant-file and no --sv-variants")
         ctx.abort()
 
     variant_path = None
@@ -170,6 +182,7 @@ def load(
             soft_threshold=soft_threshold,
             genome_build=genome_build,
             ignore_gq_if_unset=ignore_gq_if_unset,
+            add_to_existing_snv=add_to_existing_snv,
         )
     except (SyntaxError, CaseError, IOError) as error:
         LOG.warning(error)
