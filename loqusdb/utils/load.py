@@ -138,7 +138,9 @@ def load_database(
         if not existing_case:
             raise CaseError("Case {0} does not exist in database".format(case_obj["case_id"]))
         if not existing_case.get("vcf_path"):
-            raise CaseError("Case {0} does not have an existing SNV VCF".format(case_obj["case_id"]))
+            raise CaseError(
+                "Case {0} does not have an existing SNV VCF".format(case_obj["case_id"])
+            )
 
         return load_variants(
             adapter=adapter,

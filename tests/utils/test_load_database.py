@@ -132,9 +132,7 @@ def test_add_to_existing_snv(vcf_path, ped_path, real_mongo_adapter, case_id):
 
     assert nr_inserted == 0
     assert mongo_adapter.case({"case_id": case_id}) == existing_case
-    updated_variants = {
-        variant["_id"]: variant for variant in mongo_adapter.db.variant.find()
-    }
+    updated_variants = {variant["_id"]: variant for variant in mongo_adapter.db.variant.find()}
     assert all(
         updated_variants[variant["_id"]]["observations"] == variant["observations"]
         for variant in existing_variants
