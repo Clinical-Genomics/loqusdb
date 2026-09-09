@@ -55,6 +55,13 @@ LOG = logging.getLogger(__name__)
     show_default=True,
     help="Specify the maximum window size for svs",
 )
+@click.option(
+    "--add-to-existing-snv",
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="Add SNVs to an existing case without replacing its stored SNV VCF",
+)
 @click.pass_context
 def update(
     ctx,
@@ -67,6 +74,7 @@ def update(
     case_id,
     ensure_index,
     max_window,
+    add_to_existing_snv,
 ):
     """Load the variants of a case
 
@@ -79,6 +87,10 @@ def update(
 
     if not (variant_file or sv_variants):
         LOG.warning("Please provide a VCF file")
+        ctx.abort()
+
+    if add_to_existing_snv and (not variant_file or sv_variants):
+        LOG.warning("--add-to-existing-snv requires --variant-file and no --sv-variants")
         ctx.abort()
 
     variant_path = None
@@ -104,6 +116,7 @@ def update(
             case_id=case_id,
             gq_threshold=gq_threshold,
             max_window=max_window,
+            add_to_existing_snv=add_to_existing_snv,
         )
     except (SyntaxError, CaseError, IOError, VcfError) as error:
         LOG.warning(error)

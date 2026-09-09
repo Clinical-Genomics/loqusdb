@@ -41,7 +41,6 @@ def load_database(
     soft_threshold=0.9,
     genome_build=None,
     ignore_gq_if_unset=False,
-    add_to_existing_snv=False,
 ):
     """Load the database with a case and its variants
 
@@ -62,7 +61,6 @@ def load_database(
           soft_threshold(float): Stores similar samples if hamming distance above this is found
           genome_build(str): Store the genome version
           ignore_gq_if_unset(str): Ignore the gq threhsold check for variants that do not have a GQ or QUAL set
-          add_to_existing_snv(bool): Add SNVs without replacing the case's stored SNV VCF
 
     Returns:
           nr_inserted(int)
@@ -132,29 +130,6 @@ def load_database(
         matches=matches,
         profile_path=profile_file,
     )
-
-    if add_to_existing_snv:
-        existing_case = adapter.case(case_obj)
-        if not existing_case:
-            raise CaseError("Case {0} does not exist in database".format(case_obj["case_id"]))
-        if not existing_case.get("vcf_path"):
-            raise CaseError(
-                "Case {0} does not have an existing SNV VCF".format(case_obj["case_id"])
-            )
-
-        return load_variants(
-            adapter=adapter,
-            vcf_obj=get_vcf(variant_file),
-            case_obj=case_obj,
-            skip_case_id=skip_case_id,
-            gq_threshold=gq_threshold,
-            qual_gq=qual_gq,
-            keep_chr_prefix=keep_chr_prefix,
-            variant_type="snv",
-            genome_build=genome_build,
-            ignore_gq_if_unset=ignore_gq_if_unset,
-            skip_existing_case=True,
-        )
 
     # Build and load a new case, or update an existing one
     load_case(

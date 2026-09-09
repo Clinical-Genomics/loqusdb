@@ -24,7 +24,7 @@ def test_load_command(vcf_path, ped_path, real_mongo_adapter, real_db_name):
     assert sum([1 for case in real_mongo_adapter.cases()]) == 1
 
 
-def test_load_command_add_to_existing_snv(vcf_path, ped_path, real_mongo_adapter, real_db_name):
+def test_update_command_add_to_existing_snv(vcf_path, ped_path, real_mongo_adapter, real_db_name):
     runner = CliRunner()
     load_command = ["--database", real_db_name, "load", "--variant-file", vcf_path, "-f", ped_path]
     result = runner.invoke(base_command, load_command)
@@ -33,7 +33,16 @@ def test_load_command_add_to_existing_snv(vcf_path, ped_path, real_mongo_adapter
     case_before = dict(real_mongo_adapter.db.case.find_one())
     result = runner.invoke(
         base_command,
-        load_command + ["--add-to-existing-snv"],
+        [
+            "--database",
+            real_db_name,
+            "update",
+            "--variant-file",
+            vcf_path,
+            "-f",
+            ped_path,
+            "--add-to-existing-snv",
+        ],
     )
 
     assert result.exit_code == 0

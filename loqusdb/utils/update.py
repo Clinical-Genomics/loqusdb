@@ -31,6 +31,7 @@ def update_database(
     gq_threshold=None,
     case_id=None,
     max_window=3000,
+    add_to_existing_snv=False,
 ):
     """Update a case in the database
 
@@ -44,6 +45,7 @@ def update_database(
           gq_threshold(int): If only quality variants should be considered
           case_id(str): If different case id than the one in family file should be used
           max_window(int): Specify the max size for sv windows
+          add_to_existing_snv(bool): Add SNVs without replacing the case's stored SNV VCF
 
     Returns:
           nr_inserted(int)
@@ -103,6 +105,26 @@ def update_database(
     existing_case = adapter.case(case_obj)
     if not existing_case:
         raise CaseError("Case {} does not exist in database".format(case_obj["case_id"]))
+
+    if add_to_existing_snv:
+        if not existing_case.get("vcf_path"):
+            raise CaseError(
+                "Case {0} does not have an existing SNV VCF".format(case_obj["case_id"])
+            )
+
+        nr_inserted = load_variants(
+            adapter=adapter,
+            vcf_obj=get_vcf(variant_file),
+            case_obj=case_obj,
+            skip_case_id=skip_case_id,
+            gq_threshold=gq_threshold,
+            variant_type="snv",
+            skip_existing_case=True,
+        )
+        existing_case["nr_variants"] = existing_case.get("nr_variants") or 0
+        existing_case["nr_variants"] += nr_inserted
+        adapter.add_case(existing_case, update=True)
+        return nr_inserted
 
     # Update the existing case in database
     case_obj = load_case(

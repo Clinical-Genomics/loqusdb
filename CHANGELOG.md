@@ -6,7 +6,7 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
 ## [x.x.xx]
 ### Added
-- Added `--add-to-existing-snv` to append SNVs to an existing case without replacing its original SNV upload.
+- Added `loqusdb update --add-to-existing-snv` to append SNVs to an existing case without replacing its original SNV upload.
 
 ## [2.7.25]
 ### Fixed
