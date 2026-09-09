@@ -125,7 +125,8 @@ def test_update_add_to_existing_snv(vcf_path, ped_path, real_mongo_adapter, case
     with open(vcf_path) as original_vcf:
         original_vcf_content = original_vcf.read()
     additional_vcf.write_text(
-        original_vcf_content
+        original_vcf_content.rstrip("\n")
+        + "\n"
         + "1\t999999\t.\tA\tC\t100\tPASS\tMQ=1\tGT:AD:GQ\t"
         + "\t".join(["0/1:10,10:60"] * 6)
         + "\n"
