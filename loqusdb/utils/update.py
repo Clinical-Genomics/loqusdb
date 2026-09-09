@@ -31,6 +31,8 @@ def update_database(
     gq_threshold=None,
     case_id=None,
     max_window=3000,
+    genome_build=None,
+    keep_chr_prefix=False,
     add_to_existing_snv=False,
 ):
     """Update a case in the database
@@ -45,6 +47,8 @@ def update_database(
           gq_threshold(int): If only quality variants should be considered
           case_id(str): If different case id than the one in family file should be used
           max_window(int): Specify the max size for sv windows
+          genome_build(str): Genome version
+          keep_chr_prefix(bool): Retain chr/CHR/Chr prefixes when present
           add_to_existing_snv(bool): Add SNVs without replacing the case's stored SNV VCF
 
     Returns:
@@ -54,7 +58,7 @@ def update_database(
     nr_variants = None
     vcf_individuals = None
     if variant_file:
-        vcf_info = check_vcf(variant_file)
+        vcf_info = check_vcf(variant_file, keep_chr_prefix)
         nr_variants = vcf_info["nr_variants"]
         variant_type = vcf_info["variant_type"]
         vcf_files.append(variant_file)
@@ -64,7 +68,7 @@ def update_database(
     nr_sv_variants = None
     sv_individuals = None
     if sv_file:
-        vcf_info = check_vcf(sv_file, "sv")
+        vcf_info = check_vcf(sv_file, keep_chr_prefix, "sv")
         nr_sv_variants = vcf_info["nr_variants"]
         vcf_files.append(sv_file)
         sv_individuals = vcf_info["individuals"]
@@ -118,6 +122,8 @@ def update_database(
             case_obj=case_obj,
             skip_case_id=skip_case_id,
             gq_threshold=gq_threshold,
+            keep_chr_prefix=keep_chr_prefix,
+            genome_build=genome_build,
             variant_type="snv",
             skip_existing_case=True,
         )
@@ -150,6 +156,8 @@ def update_database(
                 case_obj=case_obj,
                 skip_case_id=skip_case_id,
                 gq_threshold=gq_threshold,
+                keep_chr_prefix=keep_chr_prefix,
+                genome_build=genome_build,
                 max_window=max_window,
                 variant_type=variant_type,
             )

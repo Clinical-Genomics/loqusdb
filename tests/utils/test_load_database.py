@@ -136,6 +136,7 @@ def test_update_add_to_existing_snv(vcf_path, ped_path, real_mongo_adapter, case
         variant_file=str(additional_vcf),
         family_file=ped_path,
         family_type="ped",
+        genome_build=GRCH37,
         add_to_existing_snv=True,
     )
 

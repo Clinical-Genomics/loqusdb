@@ -102,6 +102,8 @@ def update(
         variant_sv_path = os.path.abspath(sv_variants)
 
     adapter = ctx.obj["adapter"]
+    genome_build = ctx.obj["genome_build"]
+    keep_chr_prefix = ctx.obj["keep_chr_prefix"]
 
     start_inserting = datetime.now()
 
@@ -116,6 +118,8 @@ def update(
             case_id=case_id,
             gq_threshold=gq_threshold,
             max_window=max_window,
+            genome_build=genome_build,
+            keep_chr_prefix=keep_chr_prefix,
             add_to_existing_snv=add_to_existing_snv,
         )
     except (SyntaxError, CaseError, IOError, VcfError) as error:
