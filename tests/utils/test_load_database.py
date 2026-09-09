@@ -152,9 +152,7 @@ def test_update_add_to_existing_snv(vcf_path, ped_path, real_mongo_adapter, case
     )
 
 
-def test_update_ignore_gq_if_unset(
-    vcf_path, ped_path, real_mongo_adapter, case_id, profile_vcf_path
-):
+def test_update_ignore_gq_if_unset(vcf_path, ped_path, real_mongo_adapter, case_id, tmp_path):
     load_database(
         adapter=real_mongo_adapter,
         variant_file=vcf_path,
@@ -162,10 +160,19 @@ def test_update_ignore_gq_if_unset(
         family_type="ped",
         genome_build=GRCH37,
     )
+    no_gq_vcf = tmp_path / "no-gq.vcf"
+    with open(vcf_path) as original_vcf:
+        no_gq_content = original_vcf.read()
+    no_gq_content = no_gq_content.replace(
+        '##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype Quality">\n', ""
+    )
+    no_gq_content = no_gq_content.replace("GT:AD:GQ", "GT:AD").replace(":60", "")
+    with open(no_gq_vcf, "w") as no_gq_file:
+        no_gq_file.write(no_gq_content)
 
     nr_inserted = update_database(
         adapter=real_mongo_adapter,
-        variant_file=profile_vcf_path,
+        variant_file=str(no_gq_vcf),
         case_id=case_id,
         gq_threshold=20,
         genome_build=GRCH37,
