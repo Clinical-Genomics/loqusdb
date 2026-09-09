@@ -150,3 +150,27 @@ def test_update_add_to_existing_snv(vcf_path, ped_path, real_mongo_adapter, case
         updated_variants[variant["_id"]]["observations"] == variant["observations"]
         for variant in existing_variants
     )
+
+
+def test_update_ignore_gq_if_unset(
+    vcf_path, ped_path, real_mongo_adapter, case_id, profile_vcf_path
+):
+    load_database(
+        adapter=real_mongo_adapter,
+        variant_file=vcf_path,
+        family_file=ped_path,
+        family_type="ped",
+        genome_build=GRCH37,
+    )
+
+    nr_inserted = update_database(
+        adapter=real_mongo_adapter,
+        variant_file=profile_vcf_path,
+        case_id=case_id,
+        gq_threshold=20,
+        genome_build=GRCH37,
+        add_to_existing_snv=True,
+        ignore_gq_if_unset=True,
+    )
+
+    assert nr_inserted == 0

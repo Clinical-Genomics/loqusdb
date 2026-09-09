@@ -34,6 +34,7 @@ def update_database(
     genome_build=None,
     keep_chr_prefix=False,
     add_to_existing_snv=False,
+    ignore_gq_if_unset=False,
 ):
     """Update a case in the database
 
@@ -50,6 +51,7 @@ def update_database(
           genome_build(str): Genome version
           keep_chr_prefix(bool): Retain chr/CHR/Chr prefixes when present
           add_to_existing_snv(bool): Add SNVs without replacing the case's stored SNV VCF
+          ignore_gq_if_unset(bool): Ignore GQ threshold when GQ is unset in VCF
 
     Returns:
           nr_inserted(int)
@@ -78,7 +80,7 @@ def update_database(
         # Get a cyvcf2.VCF object
         vcf = get_vcf(_vcf_file)
 
-        if gq_threshold:
+        if gq_threshold and not ignore_gq_if_unset:
             if not vcf.contains("GQ"):
                 LOG.warning("Set gq-threshold to 0 or add info to vcf {0}".format(_vcf_file))
                 raise SyntaxError("GQ is not defined in vcf header")
@@ -124,6 +126,7 @@ def update_database(
             gq_threshold=gq_threshold,
             keep_chr_prefix=keep_chr_prefix,
             genome_build=genome_build,
+            ignore_gq_if_unset=ignore_gq_if_unset,
             variant_type="snv",
             skip_existing_case=True,
         )
@@ -158,6 +161,7 @@ def update_database(
                 gq_threshold=gq_threshold,
                 keep_chr_prefix=keep_chr_prefix,
                 genome_build=genome_build,
+                ignore_gq_if_unset=ignore_gq_if_unset,
                 max_window=max_window,
                 variant_type=variant_type,
             )
