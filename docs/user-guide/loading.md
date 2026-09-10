@@ -11,6 +11,11 @@ When loading a case for the first time one could do any of the following:
 
 It is possible to add a file after a case is loaded with `loqusdb update`
 
+To add another SNV VCF to a case that already has an SNV VCF, use
+`loqusdb update --add-to-existing-snv`. The existing case metadata and original
+SNV VCF are retained; variants from the new VCF are added to the database.
+Use `--ignore-gq-if-unset` when the update VCF does not define a GQ field.
+
 
 A case is loaded with:
 

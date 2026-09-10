@@ -130,6 +130,7 @@ def load_database(
         matches=matches,
         profile_path=profile_file,
     )
+
     # Build and load a new case, or update an existing one
     load_case(
         adapter=adapter,
@@ -208,6 +209,7 @@ def load_variants(
     variant_type="snv",
     genome_build=None,
     ignore_gq_if_unset=False,
+    skip_existing_case=False,
 ):
     """Load variants for a family into the database.
 
@@ -262,6 +264,14 @@ def load_variants(
             nr_inserted += 1
 
     if variant_type == "snv":
+        if skip_existing_case:
+            variants = (
+                variant
+                for variant in variants
+                if variant
+                and case_obj["case_id"]
+                not in (adapter.get_variant(variant) or {}).get("families", [])
+            )
         nr_inserted = adapter.add_variants(variants)
 
     LOG.info("Inserted %s variants of type %s", nr_inserted, variant_type)

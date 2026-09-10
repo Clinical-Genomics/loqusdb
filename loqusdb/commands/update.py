@@ -55,6 +55,20 @@ LOG = logging.getLogger(__name__)
     show_default=True,
     help="Specify the maximum window size for svs",
 )
+@click.option(
+    "--add-to-existing-snv",
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="Add SNVs to an existing case without replacing its stored SNV VCF",
+)
+@click.option(
+    "--ignore-gq-if-unset",
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="Ignore GQ threshold if GQ is unset in VCF",
+)
 @click.pass_context
 def update(
     ctx,
@@ -67,6 +81,8 @@ def update(
     case_id,
     ensure_index,
     max_window,
+    add_to_existing_snv,
+    ignore_gq_if_unset,
 ):
     """Load the variants of a case
 
@@ -81,6 +97,10 @@ def update(
         LOG.warning("Please provide a VCF file")
         ctx.abort()
 
+    if add_to_existing_snv and (not variant_file or sv_variants):
+        LOG.warning("--add-to-existing-snv requires --variant-file and no --sv-variants")
+        ctx.abort()
+
     variant_path = None
     if variant_file:
         variant_path = os.path.abspath(variant_file)
@@ -90,6 +110,8 @@ def update(
         variant_sv_path = os.path.abspath(sv_variants)
 
     adapter = ctx.obj["adapter"]
+    genome_build = ctx.obj["genome_build"]
+    keep_chr_prefix = ctx.obj["keep_chr_prefix"]
 
     start_inserting = datetime.now()
 
@@ -104,6 +126,10 @@ def update(
             case_id=case_id,
             gq_threshold=gq_threshold,
             max_window=max_window,
+            genome_build=genome_build,
+            keep_chr_prefix=keep_chr_prefix,
+            add_to_existing_snv=add_to_existing_snv,
+            ignore_gq_if_unset=ignore_gq_if_unset,
         )
     except (SyntaxError, CaseError, IOError, VcfError) as error:
         LOG.warning(error)

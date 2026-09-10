@@ -31,6 +31,10 @@ def update_database(
     gq_threshold=None,
     case_id=None,
     max_window=3000,
+    genome_build=None,
+    keep_chr_prefix=False,
+    add_to_existing_snv=False,
+    ignore_gq_if_unset=False,
 ):
     """Update a case in the database
 
@@ -44,6 +48,10 @@ def update_database(
           gq_threshold(int): If only quality variants should be considered
           case_id(str): If different case id than the one in family file should be used
           max_window(int): Specify the max size for sv windows
+          genome_build(str): Genome version
+          keep_chr_prefix(bool): Retain chr/CHR/Chr prefixes when present
+          add_to_existing_snv(bool): Add SNVs without replacing the case's stored SNV VCF
+          ignore_gq_if_unset(bool): Ignore GQ threshold when GQ is unset in VCF
 
     Returns:
           nr_inserted(int)
@@ -52,7 +60,7 @@ def update_database(
     nr_variants = None
     vcf_individuals = None
     if variant_file:
-        vcf_info = check_vcf(variant_file)
+        vcf_info = check_vcf(variant_file, keep_chr_prefix)
         nr_variants = vcf_info["nr_variants"]
         variant_type = vcf_info["variant_type"]
         vcf_files.append(variant_file)
@@ -62,7 +70,7 @@ def update_database(
     nr_sv_variants = None
     sv_individuals = None
     if sv_file:
-        vcf_info = check_vcf(sv_file, "sv")
+        vcf_info = check_vcf(sv_file, keep_chr_prefix, "sv")
         nr_sv_variants = vcf_info["nr_variants"]
         vcf_files.append(sv_file)
         sv_individuals = vcf_info["individuals"]
@@ -72,7 +80,7 @@ def update_database(
         # Get a cyvcf2.VCF object
         vcf = get_vcf(_vcf_file)
 
-        if gq_threshold:
+        if gq_threshold and not ignore_gq_if_unset:
             if not vcf.contains("GQ"):
                 LOG.warning("Set gq-threshold to 0 or add info to vcf {0}".format(_vcf_file))
                 raise SyntaxError("GQ is not defined in vcf header")
@@ -104,6 +112,29 @@ def update_database(
     if not existing_case:
         raise CaseError("Case {} does not exist in database".format(case_obj["case_id"]))
 
+    if add_to_existing_snv:
+        if not existing_case.get("vcf_path"):
+            raise CaseError(
+                "Case {0} does not have an existing SNV VCF".format(case_obj["case_id"])
+            )
+
+        nr_inserted = load_variants(
+            adapter=adapter,
+            vcf_obj=get_vcf(variant_file),
+            case_obj=case_obj,
+            skip_case_id=skip_case_id,
+            gq_threshold=gq_threshold,
+            keep_chr_prefix=keep_chr_prefix,
+            genome_build=genome_build,
+            ignore_gq_if_unset=ignore_gq_if_unset,
+            variant_type="snv",
+            skip_existing_case=True,
+        )
+        existing_case["nr_variants"] = existing_case.get("nr_variants") or 0
+        existing_case["nr_variants"] += nr_inserted
+        adapter.add_case(existing_case, update=True)
+        return nr_inserted
+
     # Update the existing case in database
     case_obj = load_case(
         adapter=adapter,
@@ -128,6 +159,9 @@ def update_database(
                 case_obj=case_obj,
                 skip_case_id=skip_case_id,
                 gq_threshold=gq_threshold,
+                keep_chr_prefix=keep_chr_prefix,
+                genome_build=genome_build,
+                ignore_gq_if_unset=ignore_gq_if_unset,
                 max_window=max_window,
                 variant_type=variant_type,
             )

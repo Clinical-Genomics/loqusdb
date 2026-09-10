@@ -4,6 +4,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
+## [x.x.xx]
+### Added
+- Added `loqusdb update --add-to-existing-snv` to append SNVs to an existing case without replacing its original SNV upload.
+- Added `--ignore-gq-if-unset` support to `loqusdb update`.
+### Changed
+- `loqusdb update` now accepts the global `--genome-build` and `--keep-chr-prefix` options.
+
 ## [2.7.25]
 ### Fixed
 - Update poetry lockfile with current versions of dependencies, fixing some issues that dependabot noticed

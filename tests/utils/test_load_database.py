@@ -1,6 +1,7 @@
 import pytest
 from loqusdb.exceptions import CaseError
 from loqusdb.utils.load import load_database
+from loqusdb.utils.update import update_database
 from loqusdb.constants import GRCH37, GRCH38
 
 
@@ -106,3 +107,77 @@ def test_load_database_wrong_ped_grch38(vcf_path, funny_ped_path, real_mongo_ada
             family_type="ped",
             genome_build=GRCH38,
         )
+
+
+def test_update_add_to_existing_snv(vcf_path, ped_path, real_mongo_adapter, case_id, tmp_path):
+    mongo_adapter = real_mongo_adapter
+
+    load_database(
+        adapter=mongo_adapter,
+        variant_file=vcf_path,
+        family_file=ped_path,
+        family_type="ped",
+        genome_build=GRCH37,
+    )
+    existing_case = dict(mongo_adapter.case({"case_id": case_id}))
+    existing_variants = list(mongo_adapter.db.variant.find())
+    additional_vcf = tmp_path / "additional.vcf"
+    with open(vcf_path) as original_vcf:
+        original_vcf_content = original_vcf.read()
+    additional_vcf.write_text(
+        original_vcf_content.rstrip("\n")
+        + "\n"
+        + "1\t999999\t.\tA\tC\t100\tPASS\tMQ=1\tGT:AD:GQ\t"
+        + "\t".join(["0/1:10,10:60"] * 6)
+        + "\n"
+    )
+
+    nr_inserted = update_database(
+        adapter=mongo_adapter,
+        variant_file=str(additional_vcf),
+        family_file=ped_path,
+        family_type="ped",
+        genome_build=GRCH37,
+        add_to_existing_snv=True,
+    )
+
+    assert nr_inserted == 1
+    updated_case = mongo_adapter.case({"case_id": case_id})
+    assert updated_case["nr_variants"] == existing_case["nr_variants"] + nr_inserted
+    assert updated_case["vcf_path"] == existing_case["vcf_path"]
+    updated_variants = {variant["_id"]: variant for variant in mongo_adapter.db.variant.find()}
+    assert all(
+        updated_variants[variant["_id"]]["observations"] == variant["observations"]
+        for variant in existing_variants
+    )
+
+
+def test_update_ignore_gq_if_unset(vcf_path, ped_path, real_mongo_adapter, case_id, tmp_path):
+    load_database(
+        adapter=real_mongo_adapter,
+        variant_file=vcf_path,
+        family_file=ped_path,
+        family_type="ped",
+        genome_build=GRCH37,
+    )
+    no_gq_vcf = tmp_path / "no-gq.vcf"
+    with open(vcf_path) as original_vcf:
+        no_gq_content = original_vcf.read()
+    no_gq_content = no_gq_content.replace(
+        '##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype Quality">\n', ""
+    )
+    no_gq_content = no_gq_content.replace("GT:AD:GQ", "GT:AD").replace(":60", "")
+    with open(no_gq_vcf, "w") as no_gq_file:
+        no_gq_file.write(no_gq_content)
+
+    nr_inserted = update_database(
+        adapter=real_mongo_adapter,
+        variant_file=str(no_gq_vcf),
+        case_id=case_id,
+        gq_threshold=20,
+        genome_build=GRCH37,
+        add_to_existing_snv=True,
+        ignore_gq_if_unset=True,
+    )
+
+    assert nr_inserted == 0
