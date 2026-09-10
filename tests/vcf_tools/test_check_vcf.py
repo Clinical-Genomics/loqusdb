@@ -62,3 +62,22 @@ def test_check_vcf_wrong_type(sv_vcf_path):
     ## THEN assert that a VcfError is raised
     with pytest.raises(VcfError):
         vcf_info = check_vcf(sv_vcf_path, "snv")
+
+
+def test_check_mixed_manta_and_gatk_sv_vcf(tmp_path):
+    vcf_path = tmp_path / "mixed.sv.vcf"
+    vcf_path.write_text(
+        "##fileformat=VCFv4.2\n"
+        "##contig=<ID=1,length=1000000>\n"
+        '##INFO=<ID=END,Number=1,Type=Integer,Description="End position">\n'
+        '##INFO=<ID=SVTYPE,Number=1,Type=String,Description="SV type">\n'
+        '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">\n'
+        "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tsample\n"
+        "1\t100\tmanta1\tN\t<DEL>\t100\tPASS\tEND=200;SVTYPE=DEL\tGT\t0/1\n"
+        "1\t300\tgatk1\tN\t<DUP:TANDEM>\t100\tPASS\tEND=400\tGT\t0/1\n"
+    )
+
+    vcf_info = check_vcf(str(vcf_path), expected_type="sv")
+
+    assert vcf_info["variant_type"] == "sv"
+    assert vcf_info["nr_variants"] == 2
