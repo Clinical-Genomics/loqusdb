@@ -12,6 +12,29 @@ LOG = logging.getLogger(__name__)
 Position = namedtuple("Position", "chrom pos")
 
 
+def infer_sv_type(variant):
+    """Return the structural variant type using legacy and fallback annotations."""
+    # Preserve the original cyvcf2/SVTYPE path exactly.
+    if variant.var_type == "sv":
+        sv_type = variant.INFO.get("SVTYPE")
+        if sv_type:
+            return str(sv_type)
+
+    # Some SV records are not classified as SV by cyvcf2, so use their VCF
+    # annotations as a fallback.
+    sv_type = variant.INFO.get("SVTYPE")
+    if sv_type:
+        return str(sv_type)
+
+    alt = variant.ALT[0]
+    if alt.startswith("<") and alt.endswith(">"):
+        return alt[1:-1].split(":", 1)[0]
+    if "[" in alt or "]" in alt:
+        return "BND"
+
+    return None
+
+
 # These are coordinate for the pseudo autosomal regions in GRCh37
 
 
@@ -113,7 +136,7 @@ def get_coords(variant, keep_chr_prefix, genome_build):
     end = int(end_pos) if end_pos else int(variant.end)
     coordinates["end"] = end
 
-    sv_type = variant.INFO.get("SVTYPE")
+    sv_type = infer_sv_type(variant)
     length = variant.INFO.get("SVLEN")
     sv_len = abs(length) if length else end - pos
     # Translocations will sometimes have a end chrom that differs from chrom
@@ -189,10 +212,9 @@ def build_variant(
     """
     variant_obj = None
 
-    sv = False
-    # Let cyvcf2 tell if it is a Structural Variant or not
-    if variant.var_type == "sv":
-        sv = True
+    # Keep cyvcf2's legacy SV classification for the loading path. The helper
+    # supplies the subtype when the record contains enough information for it.
+    sv = variant.var_type == "sv" or infer_sv_type(variant) is not None
 
     # chrom_pos_ref_alt
     variant_id = get_variant_id(variant, keep_chr_prefix)

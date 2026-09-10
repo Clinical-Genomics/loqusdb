@@ -2,7 +2,7 @@ import logging
 import os
 
 from cyvcf2 import VCF
-from loqusdb.build_models.variant import get_variant_id
+from loqusdb.build_models.variant import get_variant_id, infer_sv_type
 from loqusdb.exceptions import VcfError
 
 LOG = logging.getLogger(__name__)
@@ -118,8 +118,11 @@ def check_vcf(vcf_path, keep_chr_prefix=None, expected_type="snv"):
     nr_variants = 0
     for nr_variants, variant in enumerate(vcf, 1):
 
-        # Check the type of variant
-        current_type = "sv" if variant.var_type == "sv" else "snv"
+        # Classify the record as SNV or SV, retaining cyvcf2's legacy decision.
+        sv_type = infer_sv_type(variant)
+        current_type = "sv" if variant.var_type == "sv" or sv_type else "snv"
+        if expected_type == "sv" and not sv_type:
+            raise VcfError("Could not determine SV type for variant in vcf {0}".format(vcf_path))
         if not variant_type:
             variant_type = current_type
 
