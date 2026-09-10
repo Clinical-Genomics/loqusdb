@@ -212,7 +212,9 @@ def build_variant(
     """
     variant_obj = None
 
-    sv = infer_sv_type(variant) is not None
+    # Keep cyvcf2's legacy SV classification for the loading path. The helper
+    # supplies the subtype when the record contains enough information for it.
+    sv = variant.var_type == "sv" or infer_sv_type(variant) is not None
 
     # chrom_pos_ref_alt
     variant_id = get_variant_id(variant, keep_chr_prefix)
