@@ -46,3 +46,7 @@ def test_build_variant_from_symbolic_alt(del_variant, case_obj):
 
     assert variant_obj["is_sv"] is True
     assert variant_obj["sv_type"] == "DEL"
+
+
+def test_infer_sv_type_preserves_cyvcf2_svtype(del_variant):
+    assert infer_sv_type(del_variant) == "DEL"

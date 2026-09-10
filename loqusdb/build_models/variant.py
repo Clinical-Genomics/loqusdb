@@ -13,7 +13,7 @@ Position = namedtuple("Position", "chrom pos")
 
 
 def infer_sv_type(variant):
-    """Return the structural variant type from INFO/SVTYPE or ALT notation."""
+    """Return the structural variant type using legacy and fallback annotations."""
     sv_type = variant.INFO.get("SVTYPE")
     if sv_type:
         return str(sv_type).split(":", 1)[0]
@@ -23,6 +23,11 @@ def infer_sv_type(variant):
         return alt[1:-1].split(":", 1)[0]
     if "[" in alt or "]" in alt:
         return "BND"
+
+    # Preserve the legacy cyvcf2 classification, but without a subtype there
+    # is not enough information to safely store the structural variant.
+    if variant.var_type == "sv":
+        return None
 
     return None
 
