@@ -14,20 +14,23 @@ Position = namedtuple("Position", "chrom pos")
 
 def infer_sv_type(variant):
     """Return the structural variant type using legacy and fallback annotations."""
+    # Preserve the original cyvcf2/SVTYPE path exactly.
+    if variant.var_type == "sv":
+        sv_type = variant.INFO.get("SVTYPE")
+        if sv_type:
+            return str(sv_type)
+
+    # Some SV records are not classified as SV by cyvcf2, so use their VCF
+    # annotations as a fallback.
     sv_type = variant.INFO.get("SVTYPE")
     if sv_type:
-        return str(sv_type).split(":", 1)[0]
+        return str(sv_type)
 
     alt = variant.ALT[0]
     if alt.startswith("<") and alt.endswith(">"):
         return alt[1:-1].split(":", 1)[0]
     if "[" in alt or "]" in alt:
         return "BND"
-
-    # Preserve the legacy cyvcf2 classification, but without a subtype there
-    # is not enough information to safely store the structural variant.
-    if variant.var_type == "sv":
-        return None
 
     return None
 
