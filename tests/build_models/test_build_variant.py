@@ -31,6 +31,7 @@ def test_get_coords_for_BND_grch38(bnd_variant):
 
 
 def test_infer_sv_type_from_symbolic_alt(del_variant):
+    # No SVTYPE and cyvcf2 misclassifying as "snv": only the symbolic ALT is left to infer from.
     del_variant.INFO = {"END": del_variant.end}
     del_variant.var_type = "snv"
 
@@ -39,6 +40,7 @@ def test_infer_sv_type_from_symbolic_alt(del_variant):
 
 
 def test_build_variant_from_symbolic_alt(del_variant, case_obj):
+    # Same cyvcf2-misclassification scenario, verified end-to-end through build_variant.
     del_variant.INFO = {"END": del_variant.end}
     del_variant.var_type = "snv"
 

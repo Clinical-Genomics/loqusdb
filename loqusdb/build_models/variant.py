@@ -12,7 +12,7 @@ LOG = logging.getLogger(__name__)
 Position = namedtuple("Position", "chrom pos")
 
 
-def infer_sv_type([variant](variant: cyvcf2.Variant)) -> Optional[str]:
+def infer_sv_type(variant: cyvcf2.Variant) -> Optional[str]:
     """Return the structural variant type using legacy and fallback annotations."""
     # Preserve the original cyvcf2/SVTYPE path exactly.
     if variant.var_type == "sv":
@@ -20,8 +20,8 @@ def infer_sv_type([variant](variant: cyvcf2.Variant)) -> Optional[str]:
         if sv_type:
             return str(sv_type)
 
-    # Some SV records are not classified as SV by cyvcf2, so use their VCF
-    # annotations as a fallback.
+    # Some SV records are not classified as SV by cyvcf2, due to not having this info in the INFO column, so use their VCF
+    # ALT annotations as a fallback.
     sv_type = variant.INFO.get("SVTYPE")
     if sv_type:
         return str(sv_type)
