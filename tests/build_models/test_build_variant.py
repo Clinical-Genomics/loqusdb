@@ -58,3 +58,19 @@ def test_infer_sv_type_preserves_legacy_svtype_value(duptandem_variant):
     duptandem_variant.INFO["SVTYPE"] = "DUP:TANDEM"
 
     assert infer_sv_type(duptandem_variant) == "DUP:TANDEM"
+
+
+def test_infer_sv_type_from_single_breakend(single_bnd_variant):
+    # No SVTYPE, no brackets: only the trailing "." marks this as an unpaired breakend.
+    single_bnd_variant.INFO = {}
+
+    assert infer_sv_type(single_bnd_variant) == "BND"
+
+
+def test_get_coords_for_single_breakend(single_bnd_variant):
+    # No partner locus is encoded, so end coordinates fall back to the variant's own position.
+    coords = get_coords(single_bnd_variant, True, GRCH37)
+    assert coords["pos"] == coords["end"]
+    assert coords["end_chrom"] == coords["chrom"]
+    assert coords["sv_length"] == float("inf")
+    assert coords["sv_type"] == "BND"

@@ -14,22 +14,19 @@ Position = namedtuple("Position", "chrom pos")
 
 def infer_sv_type(variant: cyvcf2.Variant) -> Optional[str]:
     """Return the structural variant type using legacy and fallback annotations."""
-    # Preserve the original cyvcf2/SVTYPE path exactly.
-    if variant.var_type == "sv":
-        sv_type = variant.INFO.get("SVTYPE")
-        if sv_type:
-            return str(sv_type)
-
-    # Some SV records are not classified as SV by cyvcf2, due to not having this info in the INFO column, so use their VCF
-    # ALT annotations as a fallback.
     sv_type = variant.INFO.get("SVTYPE")
     if sv_type:
         return str(sv_type)
 
+    # Some SV records are not classified as SV by cyvcf2, due to not having this info in the INFO column, so use their VCF
+    # ALT annotations as a fallback.
     alt = variant.ALT[0]
     if alt.startswith("<") and alt.endswith(">"):
         return alt[1:-1].split(":", 1)[0]
     if "[" in alt or "]" in alt:
+        return "BND"
+    # Single breakends (unpaired mate) use a lone "." instead of bracket notation.
+    if alt != "." and (alt.startswith(".") or alt.endswith(".")):
         return "BND"
 
     return None
@@ -141,13 +138,18 @@ def get_coords(variant, keep_chr_prefix, genome_build):
     sv_len = abs(length) if length else end - pos
     # Translocations will sometimes have a end chrom that differs from chrom
     if sv_type == "BND":
-        other_coordinates = alt.strip("ATCGN").strip("[]").split(":")
-        end_chrom = other_coordinates[0]
-        if not keep_chr_prefix:
-            if chrom.lower().startswith("chr"):
-                end_chrom = end_chrom[3:]
+        if "[" in alt or "]" in alt:
+            other_coordinates = alt.strip("ATCGN").strip("[]").split(":")
+            end_chrom = other_coordinates[0]
+            if not keep_chr_prefix:
+                if chrom.lower().startswith("chr"):
+                    end_chrom = end_chrom[3:]
 
-        end = int(other_coordinates[1])
+            end = int(other_coordinates[1])
+        else:
+            # Single breakend (e.g. "G." or ".G"): no partner locus is given.
+            end_chrom = chrom
+            end = pos
 
         # Set 'infinity' to length if translocation
         sv_len = float("inf")

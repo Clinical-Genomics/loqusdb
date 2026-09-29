@@ -358,6 +358,18 @@ def bnd_variant(request):
 
 
 @pytest.fixture(scope="function")
+def single_bnd_variant(request):
+    return CyvcfVariant(
+        chrom="1",
+        pos=80000,
+        alt="N.",
+        ref="N",
+        end=80000,
+        info_dict={"SVTYPE": "BND"},
+    )
+
+
+@pytest.fixture(scope="function")
 def variant_no_gq(request):
     return CyvcfVariant(gt_quals=[-1, -1, -1])
 
