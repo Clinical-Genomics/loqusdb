@@ -12,7 +12,7 @@ LOG = logging.getLogger(__name__)
 Position = namedtuple("Position", "chrom pos")
 
 
-def infer_sv_type(variant):
+def infer_sv_type([variant](variant: cyvcf2.Variant)) -> Optional[str]:
     """Return the structural variant type using legacy and fallback annotations."""
     # Preserve the original cyvcf2/SVTYPE path exactly.
     if variant.var_type == "sv":
