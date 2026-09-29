@@ -118,9 +118,9 @@ def check_vcf(vcf_path, keep_chr_prefix=None, expected_type="snv"):
     nr_variants = 0
     for nr_variants, variant in enumerate(vcf, 1):
 
-        # Classify the record as SNV or SV, retaining cyvcf2's legacy decision.
+        # Classify the record as SNV or SV using inferred SVTYPE/ALT annotations.
         sv_type = infer_sv_type(variant)
-        current_type = "sv" if variant.var_type == "sv" or sv_type else "snv"
+        current_type = "sv" if sv_type else "snv"
         if expected_type == "sv" and not sv_type:
             raise VcfError("Could not determine SV type for variant in vcf {0}".format(vcf_path))
         if not variant_type:
