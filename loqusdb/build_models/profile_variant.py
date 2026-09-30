@@ -4,7 +4,6 @@ from loqusdb.build_models.variant import get_variant_id
 
 from loqusdb.models import ProfileVariant
 
-
 LOG = logging.getLogger(__name__)
 
 
