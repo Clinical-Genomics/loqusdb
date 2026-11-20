@@ -4,6 +4,14 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
+## [Unreleased]
+### Added
+- `--max-obs` option for `export` to only export SNVs or SVs observed in fewer than the given number of individuals (`Obs < MAX_OBS`). ([#196](https://github.com/Clinical-Genomics/loqusdb/pull/196))
+- `--include-case-ids` option for `export` to add the cases each variant was observed in as `Cases=` in INFO. ([#196](https://github.com/Clinical-Genomics/loqusdb/pull/196))
+### Fixed
+- `update` now validates SV files, uses the given genome build and only loads the VCF files passed in the update. ([#196](https://github.com/Clinical-Genomics/loqusdb/pull/196))
+- `identity` command no longer fails with an undefined name when a variant is found. ([#196](https://github.com/Clinical-Genomics/loqusdb/pull/196))
+
 ## [2.8.0]
 ### Changed
 - SV VCF validation now supports mixed Manta and GATK records by inferring structural variant types from `SVTYPE`, symbolic ALT values, and breakend notation.
