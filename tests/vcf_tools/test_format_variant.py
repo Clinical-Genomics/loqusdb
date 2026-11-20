@@ -152,13 +152,13 @@ def test_format_variant_chr_prefix_chrprefix(variant_chr, case_obj):
 def test_format_variant_no_family_id(het_variant, case_obj):
     ## GIVEN a parsed variant
     variant = het_variant
-    case_id = case_obj["case_id"]
+    case_obj["case_id"]
     ## WHEN parsing the variant telling that 'case_id' is None
     formated_variant = build_variant(
         variant=variant, case_obj=case_obj, case_id=None, genome_build=GRCH37
     )
     ## THEN assert that case_id was not added
-    assert formated_variant.get("case_id") == None
+    assert formated_variant.get("case_id") is None
     assert formated_variant["homozygote"] == 0
     assert formated_variant["hemizygote"] == 0
 
@@ -166,13 +166,13 @@ def test_format_variant_no_family_id(het_variant, case_obj):
 def test_format_variant_no_family_id_chrprefix(het_variant, case_obj):
     ## GIVEN a parsed variant
     variant = het_variant
-    case_id = case_obj["case_id"]
+    case_obj["case_id"]
     ## WHEN parsing the variant telling that 'case_id' is None
     formated_variant = build_variant(
         variant=variant, case_obj=case_obj, case_id=None, genome_build=GRCH38, keep_chr_prefix=True
     )
     ## THEN assert that case_id was not added
-    assert formated_variant.get("case_id") == None
+    assert formated_variant.get("case_id") is None
     assert formated_variant["homozygote"] == 0
     assert formated_variant["hemizygote"] == 0
 

@@ -13,7 +13,7 @@ def test_load_variants(real_mongo_adapter, het_variant, case_obj):
     vcf.append(het_variant)
     mongo_variant = db.variant.find_one()
 
-    assert mongo_variant == None
+    assert mongo_variant is None
 
     ## WHEN loading the variant into the database
     load_variants(adapter=mongo_adapter, vcf_obj=vcf, case_obj=case_obj, genome_build=GRCH37)
@@ -34,7 +34,7 @@ def test_load_homozygote(real_mongo_adapter, hom_variant, case_obj):
 
     vcf = []
     vcf.append(hom_variant)
-    assert db.variant.find_one() == None
+    assert db.variant.find_one() is None
 
     ## WHEN loading the variant into the database
     load_variants(adapter=mongo_adapter, vcf_obj=vcf, case_obj=case_obj, genome_build=GRCH37)
@@ -55,7 +55,7 @@ def test_load_hemizygote(real_mongo_adapter, hem_variant, case_obj):
     vcf = []
     vcf.append(hem_variant)
 
-    assert db.variant.find_one() == None
+    assert db.variant.find_one() is None
 
     ## WHEN loading the variant into the database
     load_variants(adapter=mongo_adapter, vcf_obj=vcf, case_obj=case_obj, genome_build=GRCH37)
@@ -77,7 +77,7 @@ def test_load_par_variant(real_mongo_adapter, par_variant, case_obj):
     vcf = []
     vcf.append(par_variant)
 
-    assert db.variant.find_one() == None
+    assert db.variant.find_one() is None
 
     ## WHEN loading the variant into the database
     load_variants(adapter=mongo_adapter, vcf_obj=vcf, case_obj=case_obj, genome_build=GRCH37)
@@ -128,7 +128,7 @@ def test_load_variants_skip_case_id(real_mongo_adapter, het_variant, case_obj):
     mongo_variant = db.variant.find_one()
 
     ## THEN assert that the variant is loaded correct
-    assert mongo_variant.get("families") == None
+    assert mongo_variant.get("families") is None
 
 
 def test_load_same_variant_different_case(real_mongo_adapter, het_variant, case_obj):
@@ -161,9 +161,7 @@ def test_load_case_variants(real_mongo_adapter, case_obj):
     ## GIVEN a mongo adatper with snv variant file
     vcf_obj = VCF(case_obj["vcf_path"])
     ## WHEN loading the variants
-    nr_variants = load_variants(
-        adapter=mongo_adapter, vcf_obj=vcf_obj, case_obj=case_obj, genome_build=GRCH37
-    )
+    load_variants(adapter=mongo_adapter, vcf_obj=vcf_obj, case_obj=case_obj, genome_build=GRCH37)
 
     nr_loaded = 0
     for nr_loaded, variant in enumerate(db.variant.find(), 1):
@@ -178,7 +176,7 @@ def test_load_sv_case_variants(mongo_adapter, sv_case_obj):
     ## GIVEN a mongo adatper with snv variant file
     vcf_obj = VCF(sv_case_obj["vcf_sv_path"])
     ## WHEN loading the variants
-    nr_variants = load_variants(
+    load_variants(
         adapter=mongo_adapter,
         vcf_obj=vcf_obj,
         case_obj=sv_case_obj,
@@ -207,7 +205,7 @@ def test_load_variants_grch38(real_mongo_adapter, het_variant, case_obj):
     vcf.append(het_variant)
     mongo_variant = db.variant.find_one()
 
-    assert mongo_variant == None
+    assert mongo_variant is None
 
     ## WHEN loading the variant into the database
     load_variants(adapter=mongo_adapter, vcf_obj=vcf, case_obj=case_obj, genome_build=GRCH38)
@@ -228,7 +226,7 @@ def test_load_homozygote_grch38(real_mongo_adapter, hom_variant, case_obj):
 
     vcf = []
     vcf.append(hom_variant)
-    assert db.variant.find_one() == None
+    assert db.variant.find_one() is None
 
     ## WHEN loading the variant into the database
     load_variants(adapter=mongo_adapter, vcf_obj=vcf, case_obj=case_obj, genome_build=GRCH38)
@@ -249,7 +247,7 @@ def test_load_hemizygote_grch38(real_mongo_adapter, variant_chr, case_obj):
     vcf = []
     vcf.append(variant_chr)
 
-    assert db.variant.find_one() == None
+    assert db.variant.find_one() is None
 
     ## WHEN loading the variant into the database
     load_variants(
@@ -277,7 +275,7 @@ def test_load_par_variant_grch38(real_mongo_adapter, par_variant, case_obj):
     vcf = []
     vcf.append(par_variant)
 
-    assert db.variant.find_one() == None
+    assert db.variant.find_one() is None
 
     ## WHEN loading the variant into the database
     load_variants(adapter=mongo_adapter, vcf_obj=vcf, case_obj=case_obj, genome_build=GRCH38)
@@ -328,7 +326,7 @@ def test_load_variants_skip_case_id_grch38(real_mongo_adapter, het_variant, case
     mongo_variant = db.variant.find_one()
 
     ## THEN assert that the variant is loaded correct
-    assert mongo_variant.get("families") == None
+    assert mongo_variant.get("families") is None
 
 
 def test_load_same_variant_different_case_grch38(real_mongo_adapter, het_variant, case_obj):
@@ -361,9 +359,7 @@ def test_load_case_variants_grch38(real_mongo_adapter, case_obj):
     ## GIVEN a mongo adatper with snv variant file
     vcf_obj = VCF(case_obj["vcf_path"])
     ## WHEN loading the variants
-    nr_variants = load_variants(
-        adapter=mongo_adapter, vcf_obj=vcf_obj, case_obj=case_obj, genome_build=GRCH38
-    )
+    load_variants(adapter=mongo_adapter, vcf_obj=vcf_obj, case_obj=case_obj, genome_build=GRCH38)
 
     nr_loaded = 0
     for nr_loaded, variant in enumerate(db.variant.find(), 1):
@@ -378,7 +374,7 @@ def test_load_sv_case_variants_grch38(mongo_adapter, sv_case_obj):
     ## GIVEN a mongo adatper with snv variant file
     vcf_obj = VCF(sv_case_obj["vcf_sv_path"])
     ## WHEN loading the variants
-    nr_variants = load_variants(
+    load_variants(
         adapter=mongo_adapter,
         vcf_obj=vcf_obj,
         case_obj=sv_case_obj,

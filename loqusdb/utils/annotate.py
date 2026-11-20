@@ -21,7 +21,6 @@ def annotate_variant(variant, var_obj=None):
         variant(cyvcf2.variant): Annotated variant
     """
     if var_obj:
-
         variant.INFO["Obs"] = var_obj["observations"]
         if var_obj.get("homozygote"):
             variant.INFO["Hom"] = var_obj["homozygote"]
@@ -66,7 +65,6 @@ def annotate_snvs(adapter, vcf_obj, keep_chr_prefix):
         variants[get_variant_id(variant, keep_chr_prefix)] = variant
         # If batch len == 1000 we annotate the batch
         if (nr_variants % 1000) == 0:
-
             for var_obj in adapter.search_variants(list(variants.keys())):
                 var_id = var_obj["_id"]
                 if var_id in variants:

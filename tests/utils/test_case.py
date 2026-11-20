@@ -31,4 +31,4 @@ def test_update_existing_vcf(case_obj):
     ## WHEN trying to update existing VCF information
     ## THEN assert that a CaseError is raised
     with pytest.raises(CaseError):
-        updated_case = update_case(case_obj, case_obj)
+        update_case(case_obj, case_obj)

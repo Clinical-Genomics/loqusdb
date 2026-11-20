@@ -10,6 +10,7 @@ This functions take an adapter which is the communication device for the databas
 import logging
 
 
+from loqusdb.constants import GRCH37
 from loqusdb.exceptions import CaseError
 
 from loqusdb.utils.case import get_case
@@ -31,6 +32,7 @@ def update_database(
     gq_threshold=None,
     case_id=None,
     max_window=3000,
+    genome_build=GRCH37,
 ):
     """Update a case in the database
 
@@ -44,6 +46,7 @@ def update_database(
           gq_threshold(int): If only quality variants should be considered
           case_id(str): If different case id than the one in family file should be used
           max_window(int): Specify the max size for sv windows
+          genome_build(str): Genome build of the variants. Ex. GRCH37
 
     Returns:
           nr_inserted(int)
@@ -62,7 +65,7 @@ def update_database(
     nr_sv_variants = None
     sv_individuals = None
     if sv_file:
-        vcf_info = check_vcf(sv_file, "sv")
+        vcf_info = check_vcf(sv_file, expected_type="sv")
         nr_sv_variants = vcf_info["nr_variants"]
         vcf_files.append(sv_file)
         sv_individuals = vcf_info["individuals"]
@@ -113,11 +116,13 @@ def update_database(
 
     nr_inserted = 0
     # If case was succesfully added we can store the variants
+    # Only load the files that were given in this update, files already in the case are kept
+    requested_files = {"vcf_path": variant_file, "vcf_sv_path": sv_file}
     for file_type in ["vcf_path", "vcf_sv_path"]:
         variant_type = "snv"
         if file_type == "vcf_sv_path":
             variant_type = "sv"
-        if case_obj.get(file_type) is None:
+        if not requested_files[file_type] or case_obj.get(file_type) is None:
             continue
 
         vcf_obj = get_vcf(case_obj[file_type])
@@ -130,6 +135,7 @@ def update_database(
                 gq_threshold=gq_threshold,
                 max_window=max_window,
                 variant_type=variant_type,
+                genome_build=genome_build,
             )
         except Exception as err:
             # If something went wrong do a rollback

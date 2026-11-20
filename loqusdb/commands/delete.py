@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import logging
-from datetime import datetime
 
 import click
 from loqusdb.exceptions import CaseError
@@ -58,7 +57,6 @@ def delete(ctx, family_file, family_type, case_id):
         return
 
     genome_build = ctx.obj["genome_build"]
-    start_deleting = datetime.now()
     try:
         delete_command(
             adapter=adapter,
