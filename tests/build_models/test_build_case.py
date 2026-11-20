@@ -53,7 +53,7 @@ def test_build_case_no_ped_no_case_id():
 
         vcf_individuals = ["mother", "proband"]
 
-        case_obj = build_case(
+        build_case(
             case=None,
             vcf_individuals=vcf_individuals,
         )

@@ -90,7 +90,7 @@ class SVMixin:
             sv_type=cluster["sv_type"], pos_mean=pos_mean, end_mean=end_mean, max_window=max_window
         )
 
-        res = self.db.structural_variant.find_one_and_update(
+        self.db.structural_variant.find_one_and_update(
             {"_id": cluster["_id"]},
             {
                 "$inc": {
@@ -116,7 +116,6 @@ class SVMixin:
         self.db.identity.insert_one(identity_obj)
 
     def delete_structural_variant(self, variant, max_window=3000):
-
         # This will return the cluster most similar to variant or None
         cluster = self.get_structural_variant(variant)
 
@@ -150,7 +149,7 @@ class SVMixin:
             sv_type=cluster["sv_type"], pos_mean=pos_mean, end_mean=end_mean, max_window=max_window
         )
 
-        res = self.db.structural_variant.find_one_and_update(
+        self.db.structural_variant.find_one_and_update(
             {"_id": cluster["_id"]},
             {
                 "$inc": {
@@ -286,7 +285,13 @@ class SVMixin:
         return match
 
     def get_sv_variants(
-        self, chromosome=None, end_chromosome=None, sv_type=None, pos=None, end=None
+        self,
+        chromosome=None,
+        end_chromosome=None,
+        sv_type=None,
+        pos=None,
+        end=None,
+        max_observations=None,
     ):
         """Return all structural variants in the database
 
@@ -296,6 +301,8 @@ class SVMixin:
             sv_type (str)
             pos (int): Left position of SV
             end (int): Right position of SV
+            max_observations (int): Only return variants observed in fewer
+                than this number of individuals
 
         Returns:
             variants (Iterable(Variant))
@@ -308,8 +315,10 @@ class SVMixin:
             query["end_chrom"] = end_chromosome
         if sv_type:
             query["sv_type"] = sv_type
+        if max_observations is not None:
+            query["observations"] = {"$lt": max_observations}
         if pos:
-            if not "$and" in query:
+            if "$and" not in query:
                 query["$and"] = []
             query["$and"].append({"pos_left": {"$lte": pos}})
             query["$and"].append({"pos_right": {"$gte": pos}})

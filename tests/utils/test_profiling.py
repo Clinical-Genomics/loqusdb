@@ -35,7 +35,7 @@ def test_profile_match(real_mongo_adapter, profile_vcf_path, profile_list, case_
     profiles = {"test_individual": profile_list}
 
     # Assert that error is raised
-    with pytest.raises(ProfileError) as error:
+    with pytest.raises(ProfileError):
         profile_match(real_mongo_adapter, profiles)
 
 

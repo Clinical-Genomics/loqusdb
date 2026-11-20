@@ -339,3 +339,27 @@ class TestRemoveSV_grch38:
         # And one identity documents
         mongo_identities = list(db.identity.find())
         assert len(mongo_identities) == 1
+
+
+class TestGetVariantsMaxObservations:
+    def test_max_observations_excludes_common_variants(self, mongo_adapter, simplest_variant):
+        """Variants observed in >= max_observations individuals are not returned"""
+        # GIVEN a variant observed in two individuals
+        mongo_adapter.add_variant(simplest_variant)
+        mongo_adapter.add_variant(simplest_variant)
+
+        # AND a variant observed in one individual
+        mongo_adapter.add_variant({"_id": "rare"})
+
+        # WHEN fetching variants observed in fewer than 2 individuals
+        variant_ids = [v["_id"] for v in mongo_adapter.get_variants(max_observations=2)]
+
+        # THEN only the rare variant is returned
+        assert variant_ids == ["rare"]
+
+    def test_no_max_observations_returns_all(self, mongo_adapter, simplest_variant):
+        """Without max_observations all variants are returned"""
+        mongo_adapter.add_variant(simplest_variant)
+        mongo_adapter.add_variant(simplest_variant)
+
+        assert len(list(mongo_adapter.get_variants())) == 1

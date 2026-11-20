@@ -39,7 +39,7 @@ def restore(ctx, filename):
     LOG.info("Restoring database from %s", filename)
     start_time = datetime.now()
     try:
-        completed = subprocess.run(call, check=True)
+        subprocess.run(call, check=True)
     except subprocess.CalledProcessError as err:
         LOG.warning(err)
         ctx.abort()
