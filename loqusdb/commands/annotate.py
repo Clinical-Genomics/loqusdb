@@ -28,7 +28,7 @@ def annotate(ctx, variant_file, sv):
     expected_type = "sv" if sv else "snv"
 
     nr_cases = adapter.nr_cases(sv_cases=True)
-    LOG.info("Found {0} {1} cases in database".format(nr_cases, expected_type))
+    LOG.info("Found %s %s cases in database", nr_cases, expected_type)
 
     vcf_obj = get_file_handle(variant_path)
     add_headers(vcf_obj, nr_cases=nr_cases, sv=sv)
@@ -38,7 +38,7 @@ def annotate(ctx, variant_file, sv):
             continue
         click.echo(header_line)
 
-    start_inserting = datetime.now()
+    start_time = datetime.now()
 
     if sv:
         annotated_variants = annotate_svs(adapter, vcf_obj, keep_chr_prefix)
@@ -47,3 +47,4 @@ def annotate(ctx, variant_file, sv):
     # try:
     for variant in annotated_variants:
         click.echo(str(variant).rstrip())
+    LOG.info("Annotation completed in %s", datetime.now() - start_time)

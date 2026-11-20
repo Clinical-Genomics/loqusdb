@@ -58,7 +58,7 @@ def delete(ctx, family_file, family_type, case_id):
         return
 
     genome_build = ctx.obj["genome_build"]
-    start_deleting = datetime.now()
+    start_time = datetime.now()
     try:
         delete_command(
             adapter=adapter,
