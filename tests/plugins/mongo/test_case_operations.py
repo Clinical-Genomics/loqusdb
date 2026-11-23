@@ -11,7 +11,7 @@ class TestDeleteCase:
 
         mongo_case = db.case.find_one()
 
-        assert mongo_case == None
+        assert mongo_case is None
 
         db.case.insert_one(case_obj)
 
@@ -22,7 +22,7 @@ class TestDeleteCase:
 
         mongo_adapter.delete_case(case_obj)
 
-        assert db.case.find_one() == None
+        assert db.case.find_one() is None
 
     def test_delete_non_existing(self, mongo_adapter, case_obj):
         """Test to delete non exsting case"""
@@ -43,8 +43,6 @@ class TestInsertCase:
         assert mongo_case["vcf_path"] == case_obj["vcf_path"]
 
     def test_insert_one_case_twice(self, mongo_adapter, case_obj):
-        db = mongo_adapter.db
-
         mongo_adapter.add_case(case_obj)
 
         with pytest.raises(CaseError):
@@ -66,14 +64,12 @@ class TestGetCase:
     def test_get_non_existing(self, mongo_adapter, simple_case):
         """Test to get non existing case"""
 
-        db = mongo_adapter.db
-
         mongo_case = mongo_adapter.case(simple_case)
 
-        assert mongo_case == None
+        assert mongo_case is None
 
-    def test_get_multiple_cases(self, mongo_adapter):
-        """Test to get non existing case"""
+    def test_cases_returns_all_cases(self, mongo_adapter):
+        """Test that cases() returns every case in the database"""
 
         db = mongo_adapter.db
         case_1 = {"case_id": "test", "vcf_path": "test.vcf"}

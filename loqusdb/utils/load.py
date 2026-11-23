@@ -239,7 +239,6 @@ def load_variants(
         case_id = None
     # Loop over the variants in the vcf
     with click.progressbar(vcf_obj, label="Inserting variants", length=nr_variants) as bar:
-
         variants = (
             build_variant(
                 variant,

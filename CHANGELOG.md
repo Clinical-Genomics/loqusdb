@@ -4,6 +4,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
+## [Unreleased]
+### Fixed
+- `identity` command no longer fails with an undefined name when a variant is found.
+
 ## [2.8.0]
 ### Changed
 - SV VCF validation now supports mixed Manta and GATK records by inferring structural variant types from `SVTYPE`, symbolic ALT values, and breakend notation.

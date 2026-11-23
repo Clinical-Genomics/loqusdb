@@ -18,7 +18,6 @@ def test_load_family(mongo_adapter, simple_case):
 
 def test_load_same_family_twice(mongo_adapter, simple_case):
     ## GIVEN a adapter to an empty database
-    db = mongo_adapter.db
 
     ## WHEN loading a family to the database twice
     mongo_adapter.add_case(simple_case)
@@ -51,7 +50,7 @@ def test_update_case_same_vcf(case_obj, sv_case_obj):
     ## WHEN merging the two case objs
     ## THEN assert that a CaseError is raised since we are trying to modify existing VCF
     with pytest.raises(CaseError):
-        updated_case = update_case(sv_case_obj, case_obj)
+        update_case(sv_case_obj, case_obj)
 
 
 def test_load_complete_case(mongo_adapter, complete_case_obj):
@@ -59,7 +58,7 @@ def test_load_complete_case(mongo_adapter, complete_case_obj):
     db = mongo_adapter.db
 
     ## WHEN loading the case
-    case_obj = load_case(mongo_adapter, complete_case_obj)
+    load_case(mongo_adapter, complete_case_obj)
     ## THEN assert that all info is added
     loaded_case = db.case.find_one()
 
