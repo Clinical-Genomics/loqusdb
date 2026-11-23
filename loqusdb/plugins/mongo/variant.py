@@ -134,7 +134,7 @@ class VariantMixin(SVMixin):
 
         return self.db.variant.find(query)
 
-    def get_variants(self, chromosome=None, start=None, end=None):
+    def get_variants(self, chromosome=None, start=None, end=None, max_observations=None):
         """Return all variants in the database
         If no region is specified all variants will be returned.
 
@@ -142,6 +142,8 @@ class VariantMixin(SVMixin):
             chromosome(str)
             start(int)
             end(int)
+            max_observations(int): Only return variants observed in fewer
+                than this number of individuals
 
 
         Returns:
@@ -153,6 +155,8 @@ class VariantMixin(SVMixin):
         if start:
             query["start"] = {"$lte": end}
             query["end"] = {"$gte": start}
+        if max_observations is not None:
+            query["observations"] = {"$lt": max_observations}
         LOG.info("Find all variants {}".format(query))
         return self.db.variant.find(query).sort([("start", ASCENDING)])
 
