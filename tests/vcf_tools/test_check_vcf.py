@@ -61,7 +61,7 @@ def test_check_vcf_wrong_type(sv_vcf_path):
     ## WHEN collecting the VCF info with wrong variant type
     ## THEN assert that a VcfError is raised
     with pytest.raises(VcfError):
-        vcf_info = check_vcf(sv_vcf_path, "snv")
+        check_vcf(sv_vcf_path, "snv")
 
 
 def test_check_mixed_manta_and_gatk_sv_vcf(tmp_path):

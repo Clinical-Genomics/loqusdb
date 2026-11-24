@@ -4,7 +4,7 @@ from typing import Optional
 
 import cyvcf2
 
-from loqusdb.constants import CHROM_TO_INT, GENOTYPE_MAP, GRCH37, PAR
+from loqusdb.constants import CHROM_TO_INT, GENOTYPE_MAP, PAR
 from loqusdb.models import Case, Variant
 
 LOG = logging.getLogger(__name__)

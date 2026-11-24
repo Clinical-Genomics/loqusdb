@@ -183,13 +183,12 @@ class VariantMixin(SVMixin):
         mongo_variant = self.get_variant(variant)
 
         if mongo_variant:
-
             if mongo_variant["observations"] == 1:
                 LOG.debug("Removing variant {0}".format(mongo_variant.get("_id")))
-                message = self.db.variant.delete_one({"_id": variant["_id"]})
+                self.db.variant.delete_one({"_id": variant["_id"]})
             else:
                 LOG.debug("Decreasing observations for {0}".format(mongo_variant.get("_id")))
-                message = self.db.variant.update_one(
+                self.db.variant.update_one(
                     {"_id": mongo_variant["_id"]},
                     {
                         "$inc": {

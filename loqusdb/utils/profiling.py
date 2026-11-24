@@ -29,7 +29,6 @@ def get_profiles(adapter, vcf_file, keep_chr_prefix):
     profiles = {individual: [] for individual in individuals}
 
     for profile_variant in adapter.profile_variants():
-
         ref = profile_variant["ref"]
         alt = profile_variant["alt"]
 
@@ -43,7 +42,6 @@ def get_profiles(adapter, vcf_file, keep_chr_prefix):
 
         found_variant = False
         for variant in vcf(region):
-
             variant_id = get_variant_id(variant, keep_chr_prefix)
 
             # If variant id i.e. chrom_pos_ref_alt matches
@@ -51,7 +49,6 @@ def get_profiles(adapter, vcf_file, keep_chr_prefix):
                 found_variant = True
                 # find genotype for each individual in vcf
                 for i, individual in enumerate(individuals):
-
                     genotype = GENOTYPE_MAP[variant.gt_types[i]]
                     if genotype == "hom_alt":
                         gt_str = f"{alt}{alt}"
@@ -91,16 +88,12 @@ def profile_match(adapter, profiles, hard_threshold=0.95, soft_threshold=0.9):
     """
     matches = {sample: [] for sample in profiles.keys()}
     for case in adapter.cases():
-
         if case.get("individuals") is None:
             continue
 
         for individual in case["individuals"]:
-
             for sample in profiles.keys():
-
                 if individual.get("profile"):
-
                     similarity = compare_profiles(profiles[sample], individual["profile"])
 
                     if similarity >= hard_threshold:
@@ -136,16 +129,12 @@ def check_duplicates(adapter, profiles, hard_threshold):
     """
 
     for case in adapter.cases():
-
         if case.get("individuals") is None:
             continue
 
         for individual in case["individuals"]:
-
             for sample in profiles.keys():
-
                 if individual.get("profile"):
-
                     similarity = compare_profiles(profiles[sample], individual["profile"])
 
                     if similarity >= hard_threshold:
@@ -193,11 +182,9 @@ def update_profiles(adapter, keep_chr_prefix):
     """
 
     for case in adapter.cases():
-
         # If the case has a vcf_path, get the profiles and update the
         # case with new profiled individuals.
         if case.get("profile_path"):
-
             profiles = get_profiles(adapter, case["profile_path"], keep_chr_prefix)
             profiled_individuals = deepcopy(case["individuals"])
 
@@ -240,9 +227,7 @@ def profile_stats(adapter, threshold=0.9):
     distance_dict = {key: 0 for key in HAMMING_RANGES.keys()}
 
     for case in adapter.cases():
-
         for individual in case["individuals"]:
-
             if individual.get("profile"):
                 # Make sample name <case_id>.<sample_id>
                 sample_id = f"{case['case_id']}.{individual['ind_id']}"
@@ -252,7 +237,6 @@ def profile_stats(adapter, threshold=0.9):
                 distance_array = np.array([], dtype=np.float)
 
                 for sample, profile in zip(samples, profiles):
-
                     # Get distance and append to distance array
                     distance = compare_profiles(ind_profile, profile)
                     distance_array = np.append(distance_array, distance)

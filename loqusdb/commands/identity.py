@@ -25,5 +25,6 @@ def identity(ctx, variant_id):
         LOG.info(f"No hits for variant {variant_id}")
         return
 
+    result = adapter.get_clusters(variant_id)
     for res in result:
         click.echo(res)

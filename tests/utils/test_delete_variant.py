@@ -67,7 +67,7 @@ def test_delete_non_existing_variant(mongo_adapter, het_variant, case_obj):
     """docstring for test_load_variants"""
     ## GIVEN a mongo adapter to an empty database
     db = mongo_adapter.db
-    case_id = case_obj["case_id"]
+    case_obj["case_id"]
 
     ## WHEN deleting the variants
     delete_variants(
@@ -77,7 +77,7 @@ def test_delete_non_existing_variant(mongo_adapter, het_variant, case_obj):
     # THEN assert nothing happens
     mongo_variant = db.variant.find_one()
 
-    assert mongo_variant == None
+    assert mongo_variant is None
 
 
 def test_delete_variants_grch38(real_mongo_adapter, het_variant, case_obj):
@@ -144,7 +144,7 @@ def test_delete_non_existing_variant_grch38(mongo_adapter, het_variant, case_obj
     """docstring for test_load_variants"""
     ## GIVEN a mongo adapter to an empty database
     db = mongo_adapter.db
-    case_id = case_obj["case_id"]
+    case_obj["case_id"]
 
     ## WHEN deleting the variants
     delete_variants(
@@ -154,4 +154,4 @@ def test_delete_non_existing_variant_grch38(mongo_adapter, het_variant, case_obj
     # THEN assert nothing happens
     mongo_variant = db.variant.find_one()
 
-    assert mongo_variant == None
+    assert mongo_variant is None
