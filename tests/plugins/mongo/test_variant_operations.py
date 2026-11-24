@@ -343,7 +343,7 @@ class TestRemoveSV_grch38:
 
 class TestGetVariantsMaxObservations:
     def test_max_observations_excludes_common_variants(self, mongo_adapter, simplest_variant):
-        """Variants observed in >= max_observations individuals are not returned"""
+        """Variants observed in more than max_observations individuals are not returned"""
         # GIVEN a variant observed in two individuals
         mongo_adapter.add_variant(simplest_variant)
         mongo_adapter.add_variant(simplest_variant)
@@ -351,11 +351,23 @@ class TestGetVariantsMaxObservations:
         # AND a variant observed in one individual
         mongo_adapter.add_variant({"_id": "rare"})
 
-        # WHEN fetching variants observed in fewer than 2 individuals
-        variant_ids = [v["_id"] for v in mongo_adapter.get_variants(max_observations=2)]
+        # WHEN fetching variants observed in at most 1 individual
+        variant_ids = [v["_id"] for v in mongo_adapter.get_variants(max_observations=1)]
 
         # THEN only the rare variant is returned
         assert variant_ids == ["rare"]
+
+    def test_max_observations_includes_equal_count(self, mongo_adapter, simplest_variant):
+        """Variants observed exactly max_observations times are returned"""
+        # GIVEN a variant observed in two individuals
+        mongo_adapter.add_variant(simplest_variant)
+        mongo_adapter.add_variant(simplest_variant)
+
+        # WHEN fetching variants observed in at most 2 individuals
+        variant_ids = [v["_id"] for v in mongo_adapter.get_variants(max_observations=2)]
+
+        # THEN the variant is returned
+        assert variant_ids == [simplest_variant["_id"]]
 
     def test_no_max_observations_returns_all(self, mongo_adapter, simplest_variant):
         """Without max_observations all variants are returned"""

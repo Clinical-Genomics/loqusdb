@@ -63,7 +63,7 @@ def test_get_translocation_grch38(chr_translocation_variant, mongo_adapter, case
 
 
 def test_get_sv_variants_max_observations(small_insert_variant, mongo_adapter, case_obj):
-    """Structural variants observed in >= max_observations individuals are excluded"""
+    """Structural variants observed in more than max_observations individuals are excluded"""
     adapter = mongo_adapter
     ## GIVEN a mongo adapter with a structural variant observed once
     case_id = case_obj["case_id"]
@@ -74,9 +74,9 @@ def test_get_sv_variants_max_observations(small_insert_variant, mongo_adapter, c
     adapter.add_structural_variant(formated_variant)
 
     ## WHEN querying with max_observations equal to the observation count
-    ## THEN the variant is excluded
-    assert list(adapter.get_sv_variants(max_observations=1)) == []
-
-    ## WHEN querying with max_observations above the observation count
     ## THEN the variant is returned
-    assert len(list(adapter.get_sv_variants(max_observations=2))) == 1
+    assert len(list(adapter.get_sv_variants(max_observations=1))) == 1
+
+    ## WHEN querying with max_observations below the observation count
+    ## THEN the variant is excluded
+    assert list(adapter.get_sv_variants(max_observations=0)) == []

@@ -15,8 +15,8 @@ $loqusdb export --variant-type sv
 
 ### Filtering on observations
 
-To export only SNVs observed in fewer than a given number of individuals, use `--max-obs`.
-For example, to export variants with `Obs < 5`:
+To export only variants observed in at most a given number of individuals, use `--max-obs`.
+For example, to export variants with `Obs <= 5`:
 
 ```
 $loqusdb export --max-obs 5

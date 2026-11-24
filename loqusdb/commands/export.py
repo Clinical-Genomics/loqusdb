@@ -33,7 +33,7 @@ LOG = logging.getLogger(__name__)
     "--max-obs",
     type=click.IntRange(min=1),
     default=None,
-    help="Only export variants observed in fewer than this number of individuals (Obs < MAX_OBS)",
+    help="Only export variants observed in at most this number of individuals (Obs <= MAX_OBS)",
 )
 @click.option(
     "--include-case-ids",
