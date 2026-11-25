@@ -7,6 +7,7 @@ import click
 from pymongo.cursor import Cursor
 
 from loqusdb.commands.cli import cli as base_command
+from loqusdb.utils.variant import normalize_mei_type
 
 LOG = logging.getLogger(__name__)
 
@@ -16,7 +17,7 @@ LOG = logging.getLogger(__name__)
 @click.option("--to-json", is_flag=True)
 @click.option("--count", is_flag=True, help="Show number of cases in database")
 @click.option(
-    "--case-type", "-t", help="Specify the type of cases", type=click.Choice(["snv", "sv"])
+    "--case-type", "-t", help="Specify the type of cases", type=click.Choice(["snv", "sv", "mei"])
 )
 @click.pass_context
 def cases(ctx, case_id, to_json, count, case_type):
@@ -26,13 +27,13 @@ def cases(ctx, case_id, to_json, count, case_type):
     cases = []
 
     if count:
-        snv_cases = None
-        sv_cases = None
-        if case_type == "snv":
-            snv_cases = True
-        elif case_type == "sv":
-            sv_cases = True
-        click.echo(adapter.nr_cases(snv_cases=snv_cases, sv_cases=sv_cases))
+        click.echo(
+            adapter.nr_cases(
+                snv_cases=case_type == "snv",
+                sv_cases=case_type == "sv",
+                mei_cases=case_type == "mei",
+            )
+        )
         return
 
     if case_id:
@@ -57,7 +58,9 @@ def cases(ctx, case_id, to_json, count, case_type):
 
     for case_obj in cases:
         case_id = case_obj.get("case_id")
-        vcf_path = case_obj.get("vcf_path", case_obj.get("vcf_sv_path"))
+        vcf_path = (
+            case_obj.get("vcf_path") or case_obj.get("vcf_sv_path") or case_obj.get("vcf_mei_path")
+        )
         click.echo("{0}\t{1}".format(case_id, vcf_path))
 
 
@@ -71,12 +74,12 @@ def cases(ctx, case_id, to_json, count, case_type):
     "-t",
     "--variant-type",
     help="Variant type to search for",
-    type=click.Choice(["sv", "snv"]),
+    type=click.Choice(["sv", "snv", "mei"]),
     default="snv",
 )
 @click.option(
     "--sv-type",
-    help="Type of svs to search for",
+    help="Type of svs to search for. For meis, the element type e.g. ALU or INS:ME:ALU",
 )
 @click.option("--to-json", is_flag=True)
 @click.option("--case-count", is_flag=True, help="If number of cases should be included")
@@ -97,8 +100,10 @@ def variants(
     case_count,
 ):
     """Display variants in the database."""
-    if sv_type:
+    if sv_type and variant_type == "snv":
         variant_type = "sv"
+    if variant_type == "mei" and sv_type:
+        sv_type = normalize_mei_type(sv_type)
 
     adapter = ctx.obj["adapter"]
     variant = {}
@@ -109,14 +114,13 @@ def variants(
 
     nr_cases = None
     if case_count:
-        snv_cases = None
-        sv_cases = None
-        if variant_type == "snv":
-            snv_cases = True
-        if variant_type == "sv":
-            sv_cases = True
-        nr_cases = adapter.nr_cases(snv_cases=snv_cases, sv_cases=sv_cases)
+        nr_cases = adapter.nr_cases(
+            snv_cases=variant_type == "snv",
+            sv_cases=variant_type == "sv",
+            mei_cases=variant_type == "mei",
+        )
 
+    chromosomes = [None, None]
     if chromosome:
         if chromosome.startswith("chr"):
             chromosomes = [chromosome, chromosome[3:]]
@@ -132,30 +136,34 @@ def variants(
         end_chromosomes = [None, None]
 
     if variant_id:
-        if variant_type == "sv":
-            variant_query = {
-                "chrom": chromosomes[0],
-                "end_chrom": end_chromosomes[0] or chromosomes[0],
-                "sv_type": sv_type,
-                "pos": start,
-                "end": end,
-            }
-            variant = list(adapter.get_structural_variant(variant_query))
-            if len(variant) == 0:
+        if variant_type in ["sv", "mei"]:
+            if not (chromosome and start):
+                LOG.warning("SV and MEI variants must be searched with chromosome and start")
+                return
+            get_cluster = (
+                adapter.get_mei_variant if variant_type == "mei" else adapter.get_structural_variant
+            )
+            variant = None
+            for chrom, end_chrom in zip(chromosomes, end_chromosomes):
                 variant_query = {
-                    "chrom": chromosomes[1],
-                    "end_chrom": end_chromosomes[1] or chromosomes[1],
+                    "chrom": chrom,
+                    "end_chrom": end_chrom or chrom,
                     "sv_type": sv_type,
                     "pos": start,
-                    "end": end,
+                    # MEIs are point events
+                    "end": start if variant_type == "mei" else end,
                 }
-                variant = adapter.get_structural_variant(variant_query)
+                variant = get_cluster(variant_query)
+                if variant:
+                    break
+            variant = variant or {}
 
         else:
             variant = adapter.get_variant({"_id": variant_id})
 
         if not variant:
             LOG.info("Variant {0} does not exist in database".format(variant_id))
+            variant = {}
 
         if case_count:
             variant["total"] = nr_cases
@@ -173,6 +181,15 @@ def variants(
         result = list(adapter.get_variants(chromosome=chromosomes[0], start=start, end=end))
         if len(result) == 0:
             result = adapter.get_variants(chromosome=chromosomes[1], start=start, end=end)
+    elif variant_type == "mei":
+        LOG.info("Search for meis")
+        result = []
+        for chrom in dict.fromkeys(chromosomes):
+            result = list(
+                adapter.get_mei_variants(chromosome=chrom, sv_type=sv_type, pos=start, end=end)
+            )
+            if result:
+                break
     else:
         LOG.info("Search for svs")
         result = list(

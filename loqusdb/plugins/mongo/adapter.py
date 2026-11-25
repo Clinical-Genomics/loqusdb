@@ -4,13 +4,14 @@ from loqusdb import INDEXES
 from mongo_adapter import MongoAdapter as BaseAdapter
 
 from loqusdb.plugins.mongo.case import CaseMixin
+from loqusdb.plugins.mongo.mei_variant import MEIMixin
 from loqusdb.plugins.mongo.profile_variant import ProfileVariantMixin
 from loqusdb.plugins.mongo.variant import VariantMixin
 
 logger = logging.getLogger(__name__)
 
 
-class MongoAdapter(BaseAdapter, VariantMixin, CaseMixin, ProfileVariantMixin):
+class MongoAdapter(BaseAdapter, VariantMixin, MEIMixin, CaseMixin, ProfileVariantMixin):
     """docstring for MongoAdapter"""
 
     def wipe_db(self):

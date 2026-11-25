@@ -35,6 +35,13 @@ structural variants. Since structural variants have lower call quality than snvs
 regarded as inexact calls. These are therefore grouped into clusters with some extensions,
 intervals, around the endpoints. The interval size is a function of the size of the SV.
 
+## Mobile element insertions
+
+Mobile element insertions (MEIs) are stored as clusters in their own collection, in the same way
+as SVs. They are point events, clustered per element type (e.g. ALU, L1, SVA, HERV) with a fixed
+window around the insertion point (150 bp by default). The element is taken from a symbolic
+ALT such as `<INS:ME:ALU>`, from the first field of `MEINFO`, or from a non-generic `SVTYPE`.
+
 ## Sample profiling
 
 Loqusdb supports profiling of the samples loaded into the database. This is made to prevent the

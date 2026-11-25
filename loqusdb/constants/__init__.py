@@ -104,3 +104,10 @@ HAMMING_RANGES = {
     "[0.05, 0.10)": (0.05, 0.10),
     "[0.00, 0.05)": (0.00, 0.05),
 }
+
+# MongoDB collections holding clustered structural variants and mobile element insertions
+SV_COLLECTION = "structural_variant"
+MEI_COLLECTION = "mei_variant"
+
+# Default distance (bp) from the cluster mean within which mobile element insertions are merged
+MEI_WINDOW = 150

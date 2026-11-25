@@ -27,6 +27,9 @@ def build_case(
     profiles=None,
     matches=None,
     profile_path=None,
+    mei_individuals=None,
+    vcf_mei_path=None,
+    nr_mei_variants=None,
 ):
     """Build a Case from the given information.
 
@@ -41,6 +44,10 @@ def build_case(
         nr_sv_variants(int)
         profiles(dict): The profiles for each sample in vcf
         matches(dict(list)): list of similar samples for each sample in vcf.
+        profile_path(str)
+        mei_individuals(list): Show the order of inds in the MEI vcf file
+        vcf_mei_path(str)
+        nr_mei_variants(int)
 
     Returns:
         case_obj(models.Case)
@@ -48,6 +55,7 @@ def build_case(
     # Create a dict that maps the ind ids to the position they have in vcf
     individual_positions = get_individual_positions(vcf_individuals)
     sv_individual_positions = get_individual_positions(sv_individuals)
+    mei_individual_positions = get_individual_positions(mei_individuals)
 
     family_id = None
     if case:
@@ -72,15 +80,18 @@ def build_case(
         case_obj["vcf_sv_path"] = vcf_sv_path
         case_obj["nr_sv_variants"] = nr_sv_variants
 
+    if vcf_mei_path:
+        case_obj["vcf_mei_path"] = vcf_mei_path
+        case_obj["nr_mei_variants"] = nr_mei_variants
+
     if profile_path:
         case_obj["profile_path"] = profile_path
 
     ind_objs = []
     if case:
-        if individual_positions:
-            _ind_pos = individual_positions
-        else:
-            _ind_pos = sv_individual_positions
+        _ind_pos = (
+            individual_positions or sv_individual_positions or mei_individual_positions
+        )
 
         for ind_id in case.individuals:
             individual = case.individuals[ind_id]
@@ -119,6 +130,9 @@ def build_case(
         if vcf_sv_path:
             case_obj["sv_individuals"].append(dict(ind_obj))
             case_obj["_sv_inds"][ind_obj["ind_id"]] = dict(ind_obj)
+        if vcf_mei_path:
+            case_obj["mei_individuals"].append(dict(ind_obj))
+            case_obj["_mei_inds"][ind_obj["ind_id"]] = dict(ind_obj)
         if vcf_path:
             case_obj["individuals"].append(dict(ind_obj))
             case_obj["_inds"][ind_obj["ind_id"]] = dict(ind_obj)

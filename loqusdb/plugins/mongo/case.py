@@ -30,27 +30,35 @@ class CaseMixin:
         LOG.debug("Collecting all cases from database")
         return self.db.case.find()
 
-    def nr_cases(self, snv_cases=None, sv_cases=None):
+    def nr_cases(self, snv_cases=None, sv_cases=None, mei_cases=None):
         """Return the number of cases in the database
+
+        If exactly one of the variant types is requested, only cases with that type of VCF are
+        counted. Otherwise all cases are counted.
 
         Args:
             snv_cases(bool): If only snv cases should be searched
-            sv_cases(bool): If only snv cases should be searched
+            sv_cases(bool): If only sv cases should be searched
+            mei_cases(bool): If only mei cases should be searched
 
         Returns:
-            cases (Iterable(Case)): A iterable with mongo cases
+            nr_cases (int): The number of cases
         """
         LOG.info("Fetch number of cases")
         query = {}
 
-        if snv_cases:
-            LOG.info("Fetch all snv cases")
-            query = {"vcf_path": {"$ne": None}}
-        if sv_cases:
-            LOG.info("Fetch all sv cases")
-            query = {"vcf_sv_path": {"$ne": None}}
-        if snv_cases and sv_cases:
-            query = {}
+        requested = [
+            path_key
+            for path_key, requested_type in [
+                ("vcf_path", snv_cases),
+                ("vcf_sv_path", sv_cases),
+                ("vcf_mei_path", mei_cases),
+            ]
+            if requested_type
+        ]
+        if len(requested) == 1:
+            LOG.info("Fetch all cases with %s", requested[0])
+            query = {requested[0]: {"$ne": None}}
 
         return self.db.case.count_documents(query)
 

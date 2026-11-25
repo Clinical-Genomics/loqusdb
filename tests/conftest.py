@@ -137,6 +137,13 @@ def sv_vcf_path(request):
 
 
 @pytest.fixture(scope="function")
+def mei_vcf_path(request):
+    "Mobile element insertions on chromosome 1 for the recessive trio (18 records, ALU and L1)"
+    file_path = "tests/fixtures/test.MEI.vcf"
+    return file_path
+
+
+@pytest.fixture(scope="function")
 def double_vcf_path(request):
     "This will return a vcf with the same variant two times"
     file_path = "tests/fixtures/double_variant.vcf"
@@ -514,3 +521,25 @@ def chr_translocation_variant(request):
         var_type="sv",
         info_dict={"END": None, "SVLEN": None, "SVTYPE": "BND"},
     )
+
+
+@pytest.fixture(scope="function")
+def cyvcf2_variant(request):
+    """Return a mocked cyvcf2 variant"""
+    return CyvcfVariant()
+
+
+@pytest.fixture(scope="function")
+def mei_variant_factory(request):
+    """Return a function that creates mocked cyvcf2 mobile element insertions"""
+
+    def _mei_variant(chrom="1", pos=1000, element="ALU"):
+        return CyvcfVariant(
+            chrom=chrom,
+            pos=pos,
+            ref="N",
+            alt="<INS:ME>",
+            info_dict={"SVTYPE": "INS", "MEINFO": f"{element},{pos},{pos + 1},NA"},
+        )
+
+    return _mei_variant

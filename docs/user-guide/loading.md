@@ -8,6 +8,7 @@ When loading a case for the first time one could do any of the following:
 1. **Load a case with an SNV file**
 1. **Load a case with an SV file**
 1. **Load a case with an SNV file and an SV file**
+1. **Load a case with a mobile element insertion (MEI) file, alone or together with SNV and SV files**
 
 It is possible to add a file after a case is loaded with `loqusdb update`
 
@@ -26,6 +27,7 @@ Usage: loqusdb load [OPTIONS]
 Options:
   --variant-file <vcf_file>       Load a VCF with SNV/INDEL Variants
   --sv-variants <sv_vcf_file>     Load a VCF with Structural Variants
+  --mei-variants <mei_vcf_file>   Load a VCF with Mobile Element Insertions
   -f, --family-file <ped_file>
   -t, --family-type [ped|alt|cmms|mip]
                                   If the analysis use one of the known setups,
@@ -38,6 +40,9 @@ Options:
   --gq-threshold INTEGER           Threshold to consider variant  [default: 20]
   -m, --max-window INTEGER        Specify the maximum window size for svs
                                   [default: 2000]
+  --mei-window INTEGER            Distance from a MEI cluster centre within
+                                  which insertions of the same element are
+                                  merged  [default: 150]
   --check-profile PATH            Apply sample profiling for the samples,
                                   using the variants in this vcf
   --hard-threshold FLOAT          profile hamming distance to rejecting load
@@ -57,6 +62,10 @@ A few demo files could be used to test a loqusdb instance. They are included in 
 To load all variants for a case by providing both a VCF file containing SNV variants and a VCF file containing SV variants, use the following command:
 
 `loqusdb --uri mongodb://<user>:<password>@<host>:<port> --database <database_name> --load --variant-file tests/fixtures/643594.clinical.vcf.gz --sv-variants tests/fixtures/643594.clinical.SV.vcf --case-id 643594`
+
+MEIs, e.g. from RetroSeq, are loaded in the same way with `--mei-variants`:
+
+`loqusdb --database <database_name> load --mei-variants tests/fixtures/test.MEI.vcf -f tests/fixtures/recessive_trio.ped`
 
 where `643594` in the command above is an arbitrary name assigned to the group of samples present in the VCF file.
 

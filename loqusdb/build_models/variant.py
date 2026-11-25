@@ -32,6 +32,60 @@ def infer_sv_type(variant: cyvcf2.Variant) -> Optional[str]:
     return None
 
 
+def get_mei_type(variant: cyvcf2.Variant) -> str:
+    """Return the mobile element insertion type, e.g. INS:ME:ALU
+
+    MEIs are clustered on their element type, so that e.g. ALU and L1 insertions at the same
+    locus are counted separately. The element is taken from, in order of preference:
+    a symbolic ALT with an element (<INS:ME:ALU>), the first MEINFO field (ALU,start,end,polarity)
+    or an SVTYPE that is not a generic type (some callers use SVTYPE=ALU).
+    If no element can be found the generic INS:ME is returned.
+    """
+    alt = variant.ALT[0] if variant.ALT else ""
+    if alt.startswith("<") and alt.endswith(">"):
+        symbolic_parts = alt[1:-1].upper().split(":")
+        if len(symbolic_parts) > 2 and symbolic_parts[1] == "ME":
+            return ":".join(symbolic_parts)
+
+    element = None
+    mei_info = variant.INFO.get("MEINFO")
+    if mei_info:
+        if isinstance(mei_info, (tuple, list)):
+            element = mei_info[0]
+        else:
+            element = str(mei_info).split(",")[0]
+
+    if not element:
+        sv_type = variant.INFO.get("SVTYPE")
+        if sv_type and str(sv_type).upper() not in ("INS", "MEI", "ME", "INS:ME"):
+            element = str(sv_type)
+
+    if element and element != ".":
+        return f"INS:ME:{element.upper()}"
+    return "INS:ME"
+
+
+def get_mei_coords(variant: cyvcf2.Variant, keep_chr_prefix: Optional[bool] = False) -> dict:
+    """Return a dictionary with position information for a mobile element insertion
+
+    MEIs are treated as point events: the end is set to the insertion position, regardless of
+    any END/SVLEN annotation, since the length of the inserted element does not span reference.
+    """
+    chrom = variant.CHROM
+    if not keep_chr_prefix and chrom.lower().startswith("chr"):
+        chrom = chrom[3:]
+    pos = int(variant.POS)
+    length = variant.INFO.get("SVLEN")
+    return {
+        "chrom": chrom,
+        "end_chrom": chrom,
+        "pos": pos,
+        "end": pos,
+        "sv_length": abs(int(length)) if length else None,
+        "sv_type": get_mei_type(variant),
+    }
+
+
 # These are coordinate for the pseudo autosomal regions in GRCh37
 
 
@@ -292,3 +346,38 @@ def build_variant(
         )
 
     return variant_obj
+
+
+def build_mei_variant(
+    variant: cyvcf2.Variant,
+    case_id: Optional[str] = None,
+    keep_chr_prefix: Optional[bool] = False,
+) -> Variant:
+    """Return a Variant object for a mobile element insertion
+
+    As for other structural variants, all records in the VCF are considered observations for the
+    case, independent of genotype.
+
+    Args:
+        variant(cyvcf2.Variant)
+        case_id(str): The case id
+        keep_chr_prefix(bool): Retain chr/CHR/Chr prefix when present
+
+    Return:
+        formated_variant(models.Variant): A variant dictionary
+    """
+    coordinates = get_mei_coords(variant, keep_chr_prefix)
+    return Variant(
+        variant_id=get_variant_id(variant, keep_chr_prefix),
+        chrom=coordinates["chrom"],
+        pos=coordinates["pos"],
+        end=coordinates["end"],
+        ref=variant.REF,
+        alt=variant.ALT[0],
+        end_chrom=coordinates["end_chrom"],
+        sv_type=coordinates["sv_type"],
+        sv_len=coordinates["sv_length"],
+        case_id=case_id,
+        is_sv=True,
+        id_column=variant.ID,
+    )

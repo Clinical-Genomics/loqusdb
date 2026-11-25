@@ -46,6 +46,28 @@ INDEXES = {
             background=True,
         ),
     ],
+    "mei_variant": [
+        IndexModel(
+            [
+                ("sv_type", ASCENDING),
+                ("chrom", ASCENDING),
+                ("end_chrom", ASCENDING),
+                ("pos_left", ASCENDING),
+                ("pos_right", ASCENDING),
+            ],
+            name="coordinates",
+            background=True,
+        ),
+        IndexModel(
+            [
+                ("chrom", ASCENDING),
+                ("pos_left", ASCENDING),
+                ("end_right", ASCENDING),
+            ],
+            name="short_coordinates",
+            background=True,
+        ),
+    ],
     "identity": [
         IndexModel(
             [
