@@ -50,7 +50,9 @@ def test_load_mei_database_twice_merges(mongo_adapter, mei_vcf_path, ped_path):
         assert cluster["observations"] == 2
 
 
-def test_load_snv_sv_and_mei(real_mongo_adapter, vcf_path, sv_vcf_path, mei_vcf_path, ped_path, case_id):
+def test_load_snv_sv_and_mei(
+    real_mongo_adapter, vcf_path, sv_vcf_path, mei_vcf_path, ped_path, case_id
+):
     ## WHEN loading all three variant types at once
     load_database(
         adapter=real_mongo_adapter,

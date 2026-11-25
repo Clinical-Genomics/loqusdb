@@ -100,7 +100,7 @@ class SVMixin:
             collection=collection,
         )
 
-        res = self.db[collection].find_one_and_update(
+        self.db[collection].find_one_and_update(
             {"_id": cluster["_id"]},
             {
                 "$inc": {
@@ -126,7 +126,6 @@ class SVMixin:
         self.db.identity.insert_one(identity_obj)
 
     def delete_structural_variant(self, variant, max_window=3000, collection=SV_COLLECTION):
-
         # This will return the cluster most similar to variant or None
         cluster = self.get_structural_variant(variant, collection=collection)
 
@@ -164,7 +163,7 @@ class SVMixin:
             collection=collection,
         )
 
-        res = self.db[collection].find_one_and_update(
+        self.db[collection].find_one_and_update(
             {"_id": cluster["_id"]},
             {
                 "$inc": {
@@ -343,7 +342,7 @@ class SVMixin:
         if sv_type:
             query["sv_type"] = sv_type
         if pos:
-            if not "$and" in query:
+            if "$and" not in query:
                 query["$and"] = []
             query["$and"].append({"pos_left": {"$lte": pos}})
             query["$and"].append({"pos_right": {"$gte": pos}})
@@ -356,9 +355,7 @@ class SVMixin:
 
         LOG.info("Find all sv variants {}".format(query))
 
-        return self.db[collection].find(query).sort(
-            [("chrom", ASCENDING), ("pos_left", ASCENDING)]
-        )
+        return self.db[collection].find(query).sort([("chrom", ASCENDING), ("pos_left", ASCENDING)])
 
     def get_clusters(self, variant_id):
         """Search what clusters a variant belongs to

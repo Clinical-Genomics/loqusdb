@@ -117,7 +117,6 @@ def check_vcf(vcf_path, keep_chr_prefix=None, expected_type="snv"):
 
     nr_variants = 0
     for nr_variants, variant in enumerate(vcf, 1):
-
         # Classify the record as SNV or SV using inferred SVTYPE/ALT annotations.
         sv_type = infer_sv_type(variant)
         current_type = "sv" if sv_type else "snv"

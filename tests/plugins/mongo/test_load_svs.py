@@ -1,5 +1,5 @@
 from loqusdb.build_models.variant import build_variant
-from loqusdb.constants import GRCH37, GRCH38
+from loqusdb.constants import GRCH37
 
 
 def test_load_insertion(small_insert_variant, mongo_adapter, case_obj):

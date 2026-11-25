@@ -47,7 +47,7 @@ def annotate(ctx, variant_file, sv, mei):
             continue
         click.echo(header_line)
 
-    start_inserting = datetime.now()
+    datetime.now()
 
     if mei:
         annotated_variants = annotate_meis(adapter, vcf_obj, keep_chr_prefix)

@@ -91,7 +91,7 @@ def delete_variants(
     """
     case_id = case_id or case_obj["case_id"]
     nr_deleted = 0
-    start_deleting = datetime.now()
+    datetime.now()
     chrom_time = datetime.now()
     current_chrom = None
     new_chrom = None
@@ -160,7 +160,7 @@ def delete_structural_variants(
 
     case_id = case_id or case_obj["case_id"]
     nr_deleted = 0
-    start_deleting = datetime.now()
+    datetime.now()
     chrom_time = datetime.now()
     current_chrom = None
     new_chrom = None

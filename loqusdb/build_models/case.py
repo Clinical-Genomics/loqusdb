@@ -89,9 +89,7 @@ def build_case(
 
     ind_objs = []
     if case:
-        _ind_pos = (
-            individual_positions or sv_individual_positions or mei_individual_positions
-        )
+        _ind_pos = individual_positions or sv_individual_positions or mei_individual_positions
 
         for ind_id in case.individuals:
             individual = case.individuals[ind_id]

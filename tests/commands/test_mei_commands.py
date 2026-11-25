@@ -74,7 +74,9 @@ def test_export_meis(real_mongo_adapter, real_db_name, mei_vcf_path, ped_path, t
     assert elements == {"ALU", "L1"}
 
 
-def test_export_meis_per_element(real_mongo_adapter, real_db_name, mei_vcf_path, ped_path, tmp_path):
+def test_export_meis_per_element(
+    real_mongo_adapter, real_db_name, mei_vcf_path, ped_path, tmp_path
+):
     ## GIVEN a database with ALU and L1 insertions
     _load(real_db_name, mei_vcf_path, ped_path)
     ## WHEN exporting one element, given in lower case

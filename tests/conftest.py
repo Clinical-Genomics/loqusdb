@@ -200,17 +200,6 @@ def case_lines(request, ped_path):
 
 
 @pytest.fixture(scope="function")
-def case_id(request, ped_path):
-    """Return ped formated case lines"""
-    case_id = None
-    with open(ped_path, "r") as f:
-        for line in f:
-            case_id = line.split("\t")[0]
-
-    return case_id
-
-
-@pytest.fixture(scope="function")
 def vcf_obj(request, vcf_path):
     """return a cyvcf2.VCF obj"""
     return cyvcf2.VCF(vcf_path)

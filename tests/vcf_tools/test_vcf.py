@@ -30,7 +30,7 @@ def test_get_vcf_non_vcf(ped_path):
 
     ## THEN assert that a IOError is raised
     with pytest.raises(IOError):
-        vcf = get_file_handle(ped_path)
+        get_file_handle(ped_path)
 
 
 def test_get_vcf_non_existing():
@@ -40,7 +40,7 @@ def test_get_vcf_non_existing():
 
     ## THEN assert that a IOError is raised
     with pytest.raises(IOError):
-        vcf = get_file_handle("hello")
+        get_file_handle("hello")
 
 
 def test_check_vcf(vcf_path):

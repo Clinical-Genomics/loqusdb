@@ -69,6 +69,8 @@ class MEIMixin(SVMixin):
             query["pos_left"] = {"$lte": end or pos}
 
         LOG.info("Find all mei variants {}".format(query))
-        return self.db[MEI_COLLECTION].find(query).sort(
-            [("chrom", ASCENDING), ("pos_left", ASCENDING)]
+        return (
+            self.db[MEI_COLLECTION]
+            .find(query)
+            .sort([("chrom", ASCENDING), ("pos_left", ASCENDING)])
         )
