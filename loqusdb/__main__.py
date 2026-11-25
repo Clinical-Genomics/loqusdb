@@ -9,6 +9,7 @@ The main entry point for the command line interface.
 Invoke as ``loqusdb`` (if installed)
 or ``python -m loqusdb`` (no install required).
 """
+
 import sys
 
 from loqusdb.commands import base_command

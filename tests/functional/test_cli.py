@@ -6,7 +6,7 @@ from loqusdb.exceptions import ProfileError
 
 def test_base_command():
     runner = CliRunner()
-    result = runner.invoke(base_command, [])
+    result = runner.invoke(base_command, ["--help"])
 
     assert result.exit_code == 0
 
@@ -94,7 +94,7 @@ def test_load_command_check_profile(
     result = runner.invoke(base_command, command)
     ## THEN assert that exit_code is not 0 and error is raised
     assert result.exit_code != 0
-    assert type(result.exception) == ProfileError
+    assert isinstance(result.exception, ProfileError)
 
     ##WHEN try to insert the same case without --check-profile flag (should work)
     command = [

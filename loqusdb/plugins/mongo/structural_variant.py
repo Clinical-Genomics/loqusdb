@@ -90,7 +90,7 @@ class SVMixin:
             sv_type=cluster["sv_type"], pos_mean=pos_mean, end_mean=end_mean, max_window=max_window
         )
 
-        res = self.db.structural_variant.find_one_and_update(
+        self.db.structural_variant.find_one_and_update(
             {"_id": cluster["_id"]},
             {
                 "$inc": {
@@ -116,7 +116,6 @@ class SVMixin:
         self.db.identity.insert_one(identity_obj)
 
     def delete_structural_variant(self, variant, max_window=3000):
-
         # This will return the cluster most similar to variant or None
         cluster = self.get_structural_variant(variant)
 
@@ -150,7 +149,7 @@ class SVMixin:
             sv_type=cluster["sv_type"], pos_mean=pos_mean, end_mean=end_mean, max_window=max_window
         )
 
-        res = self.db.structural_variant.find_one_and_update(
+        self.db.structural_variant.find_one_and_update(
             {"_id": cluster["_id"]},
             {
                 "$inc": {
@@ -309,7 +308,7 @@ class SVMixin:
         if sv_type:
             query["sv_type"] = sv_type
         if pos:
-            if not "$and" in query:
+            if "$and" not in query:
                 query["$and"] = []
             query["$and"].append({"pos_left": {"$lte": pos}})
             query["$and"].append({"pos_right": {"$gte": pos}})

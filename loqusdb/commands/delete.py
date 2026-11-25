@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import logging
-from datetime import datetime
 
 import click
 from loqusdb.exceptions import CaseError
@@ -35,6 +34,7 @@ def delete(ctx, family_file, family_type, case_id):
         ctx.abort()
 
     adapter = ctx.obj["adapter"]
+    keep_chr_prefix = ctx.obj["keep_chr_prefix"]
 
     # Get a ped_parser.Family object from family file
     family = None
@@ -57,9 +57,13 @@ def delete(ctx, family_file, family_type, case_id):
         return
 
     genome_build = ctx.obj["genome_build"]
-    start_deleting = datetime.now()
     try:
-        delete_command(adapter=adapter, case_obj=existing_case, genome_build=genome_build)
+        delete_command(
+            adapter=adapter,
+            case_obj=existing_case,
+            genome_build=genome_build,
+            keep_chr_prefix=keep_chr_prefix,
+        )
     except (CaseError, IOError) as error:
         LOG.warning(error)
         ctx.abort()

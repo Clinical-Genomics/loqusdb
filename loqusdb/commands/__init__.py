@@ -10,3 +10,20 @@ from .restore import restore as restore_command
 from .update import update as update_command
 from .view import cases as cases_command, index as index_command, variants as variants_command
 from .wipe import wipe as wipe_command
+
+__all__ = [
+    "annotate_command",
+    "base_command",
+    "delete_command",
+    "export_command",
+    "identity_command",
+    "load_command",
+    "profile_command",
+    "migration_command",
+    "restore_command",
+    "update_command",
+    "cases_command",
+    "index_command",
+    "variants_command",
+    "wipe_command",
+]

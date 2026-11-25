@@ -21,6 +21,7 @@ LOG = logging.getLogger(__name__)
 def annotate(ctx, variant_file, sv):
     """Annotate the variants in a VCF"""
     adapter = ctx.obj["adapter"]
+    keep_chr_prefix = ctx.obj["keep_chr_prefix"]
 
     variant_path = os.path.abspath(variant_file)
 
@@ -37,12 +38,12 @@ def annotate(ctx, variant_file, sv):
             continue
         click.echo(header_line)
 
-    start_inserting = datetime.now()
+    datetime.now()
 
     if sv:
-        annotated_variants = annotate_svs(adapter, vcf_obj)
+        annotated_variants = annotate_svs(adapter, vcf_obj, keep_chr_prefix)
     else:
-        annotated_variants = annotate_snvs(adapter, vcf_obj)
+        annotated_variants = annotate_snvs(adapter, vcf_obj, keep_chr_prefix)
     # try:
     for variant in annotated_variants:
         click.echo(str(variant).rstrip())

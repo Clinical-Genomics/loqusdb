@@ -4,6 +4,50 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
+## [Unreleased]
+### Fixed
+- `identity` command no longer fails with an undefined name when a variant is found.
+- TIDDIT style SV types (`DUP:TANDEM`, `TDUP`, `IDUP` in `SVTYPE` or ALT) collapse to their primary type (`DUP`)
+
+## [2.8.0]
+### Changed
+- SV VCF validation now supports mixed Manta and GATK records by inferring structural variant types from `SVTYPE`, symbolic ALT values, and breakend notation.
+
+## [2.7.25]
+### Fixed
+- Update poetry lockfile with current versions of dependencies, fixing some issues that dependabot noticed
+
+## [2.7.24]
+### Changed
+- Migrate from deprecated setuptools resources to importlib resources
+
+## [2.7.23]
+### Fixed
+- Automation includes docs publishing
+
+## [2.7.22]
+### Changed
+- update export logic to better handle chromosomes for genome build GRCh38
+  
+## [2.7.21]
+### Changed
+- variant query using the `variant` command will now check the database using alternative representations of the chromosome (with or without the 'chr' prefix) if the variant is not found with the provided representation.
+
+## [2.7.20]
+### Added
+- Representation of chromsomes from GRCh38
+
+## [2.7.19]
+### Added
+- Flag to retain chr/CHR/Chr prefixes when they are present
+
+## [2.7.18]
+### Added
+- `ignore-gq-if-unset` flag to ignore GQ threshold check when GQ or QUAL field is unset for some variants in a VCF file.
+
+## [2.7.17]
+### Added
+- Flag to skip GQ check on SV files
 
 ## [2.7.16]
 ### Fixed 
@@ -75,7 +119,6 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 ### Fixed
 - Restore command accepts custom database name
 - Restore command uses either database URI or host:port params
-- Tiddit style variants (IDUP, TDUP or DUP:TANDEM also in SVTYPE, not only ALT field) collapse to primary type (DUP, DEL) 
 
 ## [2.5.2]
 

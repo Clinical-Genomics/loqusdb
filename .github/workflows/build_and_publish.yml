@@ -31,3 +31,19 @@ jobs:
        poetry publish --no-interaction --build \
          --username $PYPI_USERNAME \
          --password $PYPI_PASSWORD
+
+
+ deploy-docs:
+    name: Deploy Docs to GitHubIO
+    runs-on: ubuntu-latest
+    steps:
+     - name: Checkout repo
+       uses: actions/checkout@v4
+     - name: Setup environment for docs deployment
+       uses: actions/setup-python@v5
+       with:
+         python-version: 3.x
+     - name: Install mkdocs
+       run: pip install mkdocs mkdocs-material markdown-include
+     - name: Deploy documentation
+       run: mkdocs gh-deploy --force
