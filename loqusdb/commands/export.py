@@ -3,7 +3,7 @@ from datetime import datetime
 
 import click
 from loqusdb.constants import CHROMOSOMES, GRCH37, GRCH38
-from loqusdb.utils.variant import format_variant
+from loqusdb.utils.variant import format_variant, normalize_mei_type
 from vcftoolbox import HeaderParser, print_headers, print_variant
 
 from loqusdb.commands.cli import cli as base_command
@@ -21,16 +21,23 @@ LOG = logging.getLogger(__name__)
 @click.option(
     "-t",
     "--variant-type",
-    type=click.Choice(["sv", "snv"]),
+    type=click.Choice(["sv", "snv", "mei"]),
     default="snv",
     show_default=True,
-    help="If svs or snvs should be exported",
+    help="If svs, snvs or meis (mobile element insertions) should be exported",
 )
 @click.option(
     "-f", "--freq", is_flag=True, help="Include observation frequencies in the exported VCF"
 )
+@click.option(
+    "--mei-type",
+    help=(
+        "Only export mobile element insertions of this element, e.g. ALU, L1, SVA or HERV. "
+        "Records have a generic <INS:ME> ALT, so export one file per element for svdb --query."
+    ),
+)
 @click.pass_context
-def export(ctx, outfile, variant_type, freq):
+def export(ctx, outfile, variant_type, freq, mei_type):
     """Export the variants of a loqus db
 
     The variants are exported to a vcf file
@@ -38,10 +45,19 @@ def export(ctx, outfile, variant_type, freq):
     adapter = ctx.obj["adapter"]
     version = ctx.obj["version"]
 
+    if mei_type:
+        if variant_type != "mei":
+            LOG.warning("--mei-type can only be used with --variant-type mei")
+            ctx.abort()
+        mei_type = normalize_mei_type(mei_type)
+        if mei_type not in adapter.get_mei_types():
+            LOG.warning("No mobile element insertions of type %s in database", mei_type)
+
     LOG.info("Export the variants from {0}".format(adapter))
 
-    is_sv = variant_type == "sv"
-    existing_chromosomes = set(adapter.get_chromosomes(sv=is_sv))
+    existing_chromosomes = set(
+        adapter.get_chromosomes(sv=variant_type == "sv", mei=variant_type == "mei")
+    )
 
     genome = ctx.obj["genome_build"]
     chromosome_order = CHROMOSOMES[genome]
@@ -70,8 +86,10 @@ def export(ctx, outfile, variant_type, freq):
         nr_cases = adapter.nr_cases(snv_cases=True)
     elif variant_type == "sv":
         nr_cases = adapter.nr_cases(sv_cases=True)
+    elif variant_type == "mei":
+        nr_cases = adapter.nr_cases(mei_cases=True)
     else:
-        raise ValueError(f"Unknown variant_type: {variant_type}, expected 'snv' or 'sv'")
+        raise ValueError(f"Unknown variant_type: {variant_type}, expected 'snv', 'sv' or 'mei'")
 
     LOG.info(f"Found {nr_cases} cases in database")
 
@@ -95,6 +113,18 @@ def export(ctx, outfile, variant_type, freq):
         head.add_info("SVTYPE", "1", "String", "Type of structural variant")
         head.add_info("SVLEN", "1", "Integer", "Length of structural variant")
 
+    if variant_type == "mei":
+        head.add_info("SVTYPE", "1", "String", "Type of structural variant")
+        head.add_info(
+            "MEINFO",
+            "4",
+            "String",
+            "Mobile element info of the form NAME,START,END,POLARITY",
+        )
+        head.add_alt("INS:ME", "Insertion of a mobile element")
+        if mei_type:
+            head.add_meta_line("MEIType", mei_type)
+
     for chrom in ordered_chromosomes:
         length = adapter.get_max_position(chrom)
         head.add_contig(contig_id=chrom, length=str(length))
@@ -105,6 +135,9 @@ def export(ctx, outfile, variant_type, freq):
         if variant_type == "snv":
             LOG.info("Collecting all SNV variants")
             variants = adapter.get_variants(chromosome=chrom)
+        elif variant_type == "mei":
+            LOG.info("Collecting all MEI variants")
+            variants = adapter.get_mei_variants(chromosome=chrom, sv_type=mei_type)
         else:
             LOG.info("Collecting all SV variants")
             variants = adapter.get_sv_variants(chromosome=chrom)

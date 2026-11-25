@@ -13,7 +13,8 @@ import click
 
 from loqusdb.build_models.case import build_case
 from loqusdb.build_models.profile_variant import build_profile_variant
-from loqusdb.build_models.variant import build_variant
+from loqusdb.build_models.variant import build_mei_variant, build_variant
+from loqusdb.constants import MEI_WINDOW
 from loqusdb.exceptions import CaseError, VcfError
 from loqusdb.utils.case import get_case, update_case
 from loqusdb.utils.delete import delete
@@ -21,6 +22,9 @@ from loqusdb.utils.profiling import get_profiles, profile_match
 from loqusdb.utils.vcf import check_vcf, get_vcf
 
 LOG = logging.getLogger(__name__)
+
+# Case keys for variant files, and the variant type they hold, in the order they are loaded
+VARIANT_FILE_TYPES = [("vcf_path", "snv"), ("vcf_sv_path", "sv"), ("vcf_mei_path", "mei")]
 
 
 def load_database(
@@ -41,6 +45,8 @@ def load_database(
     soft_threshold=0.9,
     genome_build=None,
     ignore_gq_if_unset=False,
+    mei_file=None,
+    mei_window=MEI_WINDOW,
 ):
     """Load the database with a case and its variants
 
@@ -61,6 +67,8 @@ def load_database(
           soft_threshold(float): Stores similar samples if hamming distance above this is found
           genome_build(str): Store the genome version
           ignore_gq_if_unset(str): Ignore the gq threhsold check for variants that do not have a GQ or QUAL set
+          mei_file(str): Path to mobile element insertion variant file
+          mei_window(int): Distance from cluster mean within which MEIs are merged
 
     Returns:
           nr_inserted(int)
@@ -85,6 +93,15 @@ def load_database(
         vcf_files.append(sv_file)
         sv_individuals = vcf_info["individuals"]
 
+    nr_mei_variants = None
+    mei_individuals = None
+    if mei_file:
+        # Mobile element insertions are structural variants in the VCF sense
+        vcf_info = check_vcf(mei_file, keep_chr_prefix, "sv")
+        nr_mei_variants = vcf_info["nr_variants"]
+        vcf_files.append(mei_file)
+        mei_individuals = vcf_info["individuals"]
+
     profiles = None
     matches = None
     if profile_file:
@@ -96,9 +113,9 @@ def load_database(
 
     # If a gq threshold is used the variants need to have GQ (only SNVs if snv_gq_only)
     for _vcf_file in vcf_files:
-        is_sv = _vcf_file == sv_file
+        is_sv = _vcf_file in (sv_file, mei_file)
         if snv_gq_only and is_sv:
-            continue  # skip GQ check for SV VCF
+            continue  # skip GQ check for SV and MEI VCFs
 
         vcf = get_vcf(_vcf_file)
         if gq_threshold and not vcf.contains("GQ") and not qual_gq:
@@ -126,6 +143,9 @@ def load_database(
         vcf_sv_path=sv_file,
         sv_individuals=sv_individuals,
         nr_sv_variants=nr_sv_variants,
+        vcf_mei_path=mei_file,
+        mei_individuals=mei_individuals,
+        nr_mei_variants=nr_mei_variants,
         profiles=profiles,
         matches=matches,
         profile_path=profile_file,
@@ -138,10 +158,7 @@ def load_database(
 
     nr_inserted = 0
     # If case was succesfully added we can store the variants
-    for file_type in ["vcf_path", "vcf_sv_path"]:
-        variant_type = "snv"
-        if file_type == "vcf_sv_path":
-            variant_type = "sv"
+    for file_type, variant_type in VARIANT_FILE_TYPES:
         if case_obj.get(file_type) is None:
             continue
 
@@ -159,6 +176,7 @@ def load_database(
                 variant_type=variant_type,
                 genome_build=genome_build,
                 ignore_gq_if_unset=ignore_gq_if_unset,
+                mei_window=mei_window,
             )
         except Exception as err:
             # If something went wrong do a rollback
@@ -166,6 +184,9 @@ def load_database(
             delete(
                 adapter=adapter,
                 case_obj=case_obj,
+                keep_chr_prefix=keep_chr_prefix,
+                genome_build=genome_build,
+                mei_window=mei_window,
             )
             raise err
     return nr_inserted
@@ -208,6 +229,7 @@ def load_variants(
     variant_type="snv",
     genome_build=None,
     ignore_gq_if_unset=False,
+    mei_window=MEI_WINDOW,
 ):
     """Load variants for a family into the database.
 
@@ -221,22 +243,33 @@ def load_variants(
         gq_threshold(int)
         qual_gq(bool): whether to use QUAL instead of GQ
         max_window(int): Specify the max size for sv windows
-        variant_type(str): 'sv' or 'snv'
+        variant_type(str): 'snv', 'sv' or 'mei'
         genome_build(str): Genome version. Ex. GRCH37
         ignore_gq_if_unset (bool): whether to add entries that have missing GQ or QUAL field
+        mei_window(int): Distance from cluster mean within which MEIs are merged
 
     Returns:
         nr_inserted(int)
     """
-    if variant_type == "snv":
-        nr_variants = case_obj["nr_variants"]
-    else:
-        nr_variants = case_obj["nr_sv_variants"]
+    nr_variants_key = {"snv": "nr_variants", "sv": "nr_sv_variants", "mei": "nr_mei_variants"}
+    nr_variants = case_obj[nr_variants_key[variant_type]]
 
     nr_inserted = 0
     case_id = case_obj["case_id"]
     if skip_case_id:
         case_id = None
+
+    if variant_type == "mei":
+        with click.progressbar(vcf_obj, label="Inserting MEI variants", length=nr_variants) as bar:
+            for variant in bar:
+                mei_variant = build_mei_variant(
+                    variant, case_id=case_id, keep_chr_prefix=keep_chr_prefix
+                )
+                adapter.add_mei_variant(variant=mei_variant, mei_window=mei_window)
+                nr_inserted += 1
+        LOG.info("Inserted %s variants of type %s", nr_inserted, variant_type)
+        return nr_inserted
+
     # Loop over the variants in the vcf
     with click.progressbar(vcf_obj, label="Inserting variants", length=nr_variants) as bar:
         variants = (

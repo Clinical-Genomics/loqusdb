@@ -5,6 +5,7 @@ from datetime import datetime
 import click
 
 from loqusdb.commands.cli import cli as base_command
+from loqusdb.constants import MEI_WINDOW
 from loqusdb.exceptions import CaseError
 from loqusdb.utils.load import load_database
 
@@ -30,6 +31,12 @@ def validate_profile_threshold(ctx, param, value):
     type=click.Path(exists=True),
     metavar="<sv_vcf_file>",
     help="Load a VCF with Structural Variants",
+)
+@click.option(
+    "--mei-variants",
+    type=click.Path(exists=True),
+    metavar="<mei_vcf_file>",
+    help="Load a VCF with Mobile Element Insertions",
 )
 @click.option("-f", "--family-file", type=click.Path(exists=True), metavar="<ped_file>")
 @click.option(
@@ -70,6 +77,13 @@ def validate_profile_threshold(ctx, param, value):
     help="Specify the maximum window size for svs",
 )
 @click.option(
+    "--mei-window",
+    default=MEI_WINDOW,
+    show_default=True,
+    type=int,
+    help="Distance from a MEI cluster centre within which insertions of the same element are merged",
+)
+@click.option(
     "--check-profile",
     type=click.Path(exists=True),
     help="Apply sample profiling for the samples, using the variants in this vcf",
@@ -107,6 +121,7 @@ def load(
     ctx,
     variant_file,
     sv_variants,
+    mei_variants,
     family_file,
     family_type,
     skip_case_id,
@@ -120,6 +135,7 @@ def load(
     qual_gq,
     snv_gq_only,
     ignore_gq_if_unset,
+    mei_window,
 ):
     """Load the variants of a case
 
@@ -130,7 +146,7 @@ def load(
         LOG.warning("Please provide a family file or a case id")
         ctx.abort()
 
-    if not (variant_file or sv_variants):
+    if not (variant_file or sv_variants or mei_variants):
         LOG.warning("Please provide a VCF file")
         ctx.abort()
 
@@ -141,6 +157,10 @@ def load(
     variant_sv_path = None
     if sv_variants:
         variant_sv_path = os.path.abspath(sv_variants)
+
+    variant_mei_path = None
+    if mei_variants:
+        variant_mei_path = os.path.abspath(mei_variants)
 
     variant_profile_path = None
     if check_profile:
@@ -156,6 +176,8 @@ def load(
             adapter=adapter,
             variant_file=variant_path,
             sv_file=variant_sv_path,
+            mei_file=variant_mei_path,
+            mei_window=mei_window,
             family_file=family_file,
             family_type=family_type,
             skip_case_id=skip_case_id,

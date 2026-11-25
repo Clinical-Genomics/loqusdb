@@ -2,13 +2,14 @@ import logging
 
 from pymongo import ASCENDING
 
+from loqusdb.constants import MEI_COLLECTION, SV_COLLECTION
 from loqusdb.models import Identity
 
 LOG = logging.getLogger(__name__)
 
 
 class SVMixin:
-    def add_structural_variant(self, variant, max_window=3000):
+    def add_structural_variant(self, variant, max_window=3000, collection=SV_COLLECTION):
         """Add a variant to the structural variants collection
 
         The process of adding an SV variant differs quite a bit from the
@@ -25,6 +26,8 @@ class SVMixin:
         Args:
             variant (dict): A variant dictionary
             max_window(int): Specify the maximum window size for large svs
+            collection(str): Collection holding the clusters. For mobile element insertions
+                             (MEI_COLLECTION) max_window is used as a fixed window size.
 
 
                                         -
@@ -39,7 +42,7 @@ class SVMixin:
                 pos - interval_size             end + interval_size
         """
         # This will return the cluster most similar to variant or None
-        cluster = self.get_structural_variant(variant)
+        cluster = self.get_structural_variant(variant, collection=collection)
         # If there was no matcing cluster we need to create a new cluster
         if cluster is None:
             # The cluster will be populated with information later.
@@ -53,8 +56,11 @@ class SVMixin:
                 "sv_type": variant["sv_type"],
                 "families": [],
             }
+            if collection == MEI_COLLECTION:
+                # Keep the window the cluster was created with, so it is stable on updates/deletes
+                cluster["window"] = max_window
             # Insert variant to get a _id
-            _id = self.db.structural_variant.insert_one(cluster).inserted_id
+            _id = self.db[collection].insert_one(cluster).inserted_id
 
             cluster["_id"] = _id
 
@@ -86,11 +92,15 @@ class SVMixin:
         pos_mean = int((cluster["pos_sum"] + variant["pos"]) // (nr_events))
         end_mean = int((cluster["end_sum"] + variant["end"]) // (nr_events))
 
-        cluster_len, interval_size = self._update_sv_metrics(
-            sv_type=cluster["sv_type"], pos_mean=pos_mean, end_mean=end_mean, max_window=max_window
+        cluster_len, interval_size = self._cluster_metrics(
+            cluster=cluster,
+            pos_mean=pos_mean,
+            end_mean=end_mean,
+            max_window=max_window,
+            collection=collection,
         )
 
-        self.db.structural_variant.find_one_and_update(
+        self.db[collection].find_one_and_update(
             {"_id": cluster["_id"]},
             {
                 "$inc": {
@@ -115,9 +125,9 @@ class SVMixin:
         )
         self.db.identity.insert_one(identity_obj)
 
-    def delete_structural_variant(self, variant, max_window=3000):
+    def delete_structural_variant(self, variant, max_window=3000, collection=SV_COLLECTION):
         # This will return the cluster most similar to variant or None
-        cluster = self.get_structural_variant(variant)
+        cluster = self.get_structural_variant(variant, collection=collection)
 
         if cluster is None:
             return
@@ -132,7 +142,7 @@ class SVMixin:
 
         if nr_events == 0:
             # Remove SV if no observations remain
-            self.db.structural_variant.delete_one({"_id": cluster["_id"]})
+            self.db[collection].delete_one({"_id": cluster["_id"]})
 
             # remove identity
             identity_obj = Identity(
@@ -145,11 +155,15 @@ class SVMixin:
         pos_mean = int((cluster["pos_sum"] - variant["pos"]) // (nr_events))
         end_mean = int((cluster["end_sum"] - variant["end"]) // (nr_events))
 
-        cluster_len, interval_size = self._update_sv_metrics(
-            sv_type=cluster["sv_type"], pos_mean=pos_mean, end_mean=end_mean, max_window=max_window
+        cluster_len, interval_size = self._cluster_metrics(
+            cluster=cluster,
+            pos_mean=pos_mean,
+            end_mean=end_mean,
+            max_window=max_window,
+            collection=collection,
         )
 
-        self.db.structural_variant.find_one_and_update(
+        self.db[collection].find_one_and_update(
             {"_id": cluster["_id"]},
             {
                 "$inc": {
@@ -173,6 +187,18 @@ class SVMixin:
             cluster_id=cluster["_id"], variant_id=variant["id_column"], case_id=case_id
         )
         self.db.identity.delete_one(dict(identity_obj))
+
+    def _cluster_metrics(self, cluster, pos_mean, end_mean, max_window, collection):
+        """Return cluster length and interval size for a cluster in the given collection
+
+        Mobile element insertions are point events with imprecise breakpoints, so they use a
+        fixed window rather than one scaled by the event size.
+        """
+        if collection == MEI_COLLECTION:
+            return end_mean - pos_mean, cluster.get("window", max_window)
+        return self._update_sv_metrics(
+            sv_type=cluster["sv_type"], pos_mean=pos_mean, end_mean=end_mean, max_window=max_window
+        )
 
     def _update_sv_metrics(self, sv_type, pos_mean, end_mean, max_window):
         """
@@ -214,13 +240,14 @@ class SVMixin:
         # Otherwise the interval size is closest whole 100 number
         return cluster_len, interval_size
 
-    def get_structural_variant(self, variant):
+    def get_structural_variant(self, variant, collection=SV_COLLECTION):
         """Check if there are any overlapping sv clusters
 
         Search the sv variants with chrom start end_chrom end and sv_type
 
         Args:
             variant (dict): A variant dictionary
+            collection(str): Collection to search, structural_variant or mei_variant
 
         Returns:
             variant (dict): A variant dictionary
@@ -243,7 +270,7 @@ class SVMixin:
             f"{variant['end_chrom']}:{variant['end']} of type {variant['sv_type']}"
         )
 
-        res = self.db.structural_variant.find(query).sort("pos_left", 1)
+        res = self.db[collection].find(query).sort("pos_left", 1)
         match = None
         distance = None
         closest_hit = None
@@ -285,7 +312,13 @@ class SVMixin:
         return match
 
     def get_sv_variants(
-        self, chromosome=None, end_chromosome=None, sv_type=None, pos=None, end=None
+        self,
+        chromosome=None,
+        end_chromosome=None,
+        sv_type=None,
+        pos=None,
+        end=None,
+        collection=SV_COLLECTION,
     ):
         """Return all structural variants in the database
 
@@ -295,6 +328,7 @@ class SVMixin:
             sv_type (str)
             pos (int): Left position of SV
             end (int): Right position of SV
+            collection(str): Collection to search, structural_variant or mei_variant
 
         Returns:
             variants (Iterable(Variant))
@@ -321,9 +355,7 @@ class SVMixin:
 
         LOG.info("Find all sv variants {}".format(query))
 
-        return self.db.structural_variant.find(query).sort(
-            [("chrom", ASCENDING), ("pos_left", ASCENDING)]
-        )
+        return self.db[collection].find(query).sort([("chrom", ASCENDING), ("pos_left", ASCENDING)])
 
     def get_clusters(self, variant_id):
         """Search what clusters a variant belongs to

@@ -7,6 +7,7 @@ from loqusdb.exceptions import CaseError, VcfError
 from loqusdb.utils.update import update_database
 
 from loqusdb.commands.cli import cli as base_command
+from loqusdb.constants import MEI_WINDOW
 
 LOG = logging.getLogger(__name__)
 
@@ -23,6 +24,12 @@ LOG = logging.getLogger(__name__)
     type=click.Path(exists=True),
     metavar="<sv_vcf_file>",
     help="Load a VCF with Structural Variants",
+)
+@click.option(
+    "--mei-variants",
+    type=click.Path(exists=True),
+    metavar="<mei_vcf_file>",
+    help="Load a VCF with Mobile Element Insertions",
 )
 @click.option("-f", "--family-file", type=click.Path(exists=True), metavar="<ped_file>")
 @click.option(
@@ -55,11 +62,19 @@ LOG = logging.getLogger(__name__)
     show_default=True,
     help="Specify the maximum window size for svs",
 )
+@click.option(
+    "--mei-window",
+    default=MEI_WINDOW,
+    show_default=True,
+    type=int,
+    help="Distance from a MEI cluster centre within which insertions of the same element are merged",
+)
 @click.pass_context
 def update(
     ctx,
     variant_file,
     sv_variants,
+    mei_variants,
     family_file,
     family_type,
     skip_case_id,
@@ -67,6 +82,7 @@ def update(
     case_id,
     ensure_index,
     max_window,
+    mei_window,
 ):
     """Load the variants of a case
 
@@ -77,7 +93,7 @@ def update(
         LOG.warning("Please provide a family file or a case id")
         ctx.abort()
 
-    if not (variant_file or sv_variants):
+    if not (variant_file or sv_variants or mei_variants):
         LOG.warning("Please provide a VCF file")
         ctx.abort()
 
@@ -89,6 +105,10 @@ def update(
     if sv_variants:
         variant_sv_path = os.path.abspath(sv_variants)
 
+    variant_mei_path = None
+    if mei_variants:
+        variant_mei_path = os.path.abspath(mei_variants)
+
     adapter = ctx.obj["adapter"]
 
     start_inserting = datetime.now()
@@ -98,12 +118,16 @@ def update(
             adapter=adapter,
             variant_file=variant_path,
             sv_file=variant_sv_path,
+            mei_file=variant_mei_path,
+            mei_window=mei_window,
             family_file=family_file,
             family_type=family_type,
             skip_case_id=skip_case_id,
             case_id=case_id,
             gq_threshold=gq_threshold,
             max_window=max_window,
+            keep_chr_prefix=ctx.obj["keep_chr_prefix"],
+            genome_build=ctx.obj["genome_build"],
         )
     except (SyntaxError, CaseError, IOError, VcfError) as error:
         LOG.warning(error)

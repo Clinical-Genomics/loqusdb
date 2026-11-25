@@ -12,6 +12,8 @@ class Case(dict):
         nr_variants=None,
         nr_sv_variants=None,
         profile_path=None,
+        vcf_mei_path=None,
+        nr_mei_variants=None,
     ):
         super(Case, self).__init__(
             case_id=case_id,
@@ -20,11 +22,15 @@ class Case(dict):
             nr_variants=nr_variants,
             nr_sv_variants=nr_sv_variants,
             profile_path=profile_path,
+            vcf_mei_path=vcf_mei_path,
+            nr_mei_variants=nr_mei_variants,
         )
         self["individuals"] = []
         self["sv_individuals"] = []
         self["_inds"] = {}
         self["_sv_inds"] = {}
+        self["mei_individuals"] = []
+        self["_mei_inds"] = {}
 
 
 class Individual(dict):
@@ -42,7 +48,7 @@ class Individual(dict):
         profile=None,
         similar_samples=None,
     ):
-        """Construct a individual object
+        """Construct an individual object
 
         Args:
             ind_id (str): The individual id

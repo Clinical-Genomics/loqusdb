@@ -49,23 +49,23 @@ def update_case(case_obj, existing_case):
     Returns:
         updated_case(models.Case): Updated existing case
     """
-    variant_nrs = ["nr_variants", "nr_sv_variants"]
-    individuals = [("individuals", "_inds"), ("sv_individuals", "_sv_inds")]
+    variant_files = [
+        ("snv", "vcf_path", "nr_variants", "individuals", "_inds"),
+        ("sv", "vcf_sv_path", "nr_sv_variants", "sv_individuals", "_sv_inds"),
+        ("mei", "vcf_mei_path", "nr_mei_variants", "mei_individuals", "_mei_inds"),
+    ]
 
     updated_case = deepcopy(existing_case)
 
-    for i, file_name in enumerate(["vcf_path", "vcf_sv_path"]):
-        variant_type = "snv"
-        if file_name == "vcf_sv_path":
-            variant_type = "sv"
+    for variant_type, file_name, nr_variants_key, individuals_key, inds_key in variant_files:
         if case_obj.get(file_name):
             if updated_case.get(file_name):
                 LOG.warning("VCF of type %s already exists in case", variant_type)
                 raise CaseError("Can not replace VCF in existing case")
             else:
                 updated_case[file_name] = case_obj[file_name]
-                updated_case[variant_nrs[i]] = case_obj[variant_nrs[i]]
-                updated_case[individuals[i][0]] = case_obj[individuals[i][0]]
-                updated_case[individuals[i][1]] = case_obj[individuals[i][1]]
+                updated_case[nr_variants_key] = case_obj[nr_variants_key]
+                updated_case[individuals_key] = case_obj[individuals_key]
+                updated_case[inds_key] = case_obj[inds_key]
 
     return updated_case

@@ -4,13 +4,20 @@ from datetime import datetime
 
 
 from loqusdb.utils.vcf import get_vcf
-from loqusdb.build_models.variant import build_variant
+from loqusdb.build_models.variant import build_mei_variant, build_variant
+from loqusdb.constants import MEI_WINDOW
 
 LOG = logging.getLogger(__name__)
 
 
 def delete(
-    adapter, case_obj, keep_chr_prefix=None, update=False, existing_case=False, genome_build=None
+    adapter,
+    case_obj,
+    keep_chr_prefix=None,
+    update=False,
+    existing_case=False,
+    genome_build=None,
+    mei_window=MEI_WINDOW,
 ):
     """Delete a case and all of it's variants from the database.
 
@@ -22,15 +29,16 @@ def delete(
                                     to the original case
         keep_chr_prefix(bool): Retain chr/CHR/Chr prefixes in chromosome IDs when they are present
         genome_build(str): Genome build. Ex. GRCh37 or GRCh38
+        mei_window(int): MEI window, only used for clusters that lack a stored window
 
     """
     # This will overwrite the updated case with the previous one
     if update:
-        adapter.add_case(existing_case)
+        adapter.add_case(existing_case, update=True)
     else:
         adapter.delete_case(case_obj)
 
-    for file_type in ["vcf_path", "vcf_sv_path"]:
+    for file_type in ["vcf_path", "vcf_sv_path", "vcf_mei_path"]:
         if not case_obj.get(file_type):
             continue
         variant_file = case_obj[file_type]
@@ -54,6 +62,15 @@ def delete(
                 case_obj=case_obj,
                 keep_chr_prefix=keep_chr_prefix,
                 genome_build=genome_build,
+            )
+        elif file_type == "vcf_mei_path":
+            LOG.info("deleting mobile element insertions")
+            delete_mei_variants(
+                adapter=adapter,
+                vcf_obj=vcf_obj,
+                case_obj=case_obj,
+                keep_chr_prefix=keep_chr_prefix,
+                mei_window=mei_window,
             )
 
 
@@ -180,4 +197,34 @@ def delete_structural_variants(
             LOG.info("Start deleting chromosome {0}".format(new_chrom))
             current_chrom = new_chrom
 
+    return nr_deleted
+
+
+def delete_mei_variants(
+    adapter, vcf_obj, case_obj, keep_chr_prefix=None, case_id=None, mei_window=MEI_WINDOW
+):
+    """Delete mobile element insertions for a case in the database
+
+    Args:
+        adapter(loqusdb.plugins.Adapter)
+        vcf_obj(iterable(cyvcf2.Variant))
+        case_obj(models.Case)
+        keep_chr_prefix(bool): Retain chr/CHR/Chr prefixes in chromosome IDs when they are present
+        case_id(str)
+        mei_window(int): MEI window, only used for clusters that lack a stored window
+
+    Returns:
+        nr_deleted (int): Number of deleted variants"""
+
+    case_id = case_id or case_obj["case_id"]
+    nr_deleted = 0
+
+    for variant in vcf_obj:
+        formated_variant = build_mei_variant(
+            variant=variant, case_id=case_id, keep_chr_prefix=keep_chr_prefix
+        )
+        adapter.delete_mei_variant(formated_variant, mei_window=mei_window)
+        nr_deleted += 1
+
+    LOG.info("Deleted %s mobile element insertions", nr_deleted)
     return nr_deleted

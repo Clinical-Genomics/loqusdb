@@ -7,7 +7,7 @@ The methods for annotating SNVs and SVs differs a bit so they will be handeld in
 
 """
 
-from loqusdb.build_models.variant import get_coords, get_variant_id
+from loqusdb.build_models.variant import get_coords, get_mei_coords, get_variant_id
 
 
 def annotate_variant(variant, var_obj=None):
@@ -30,19 +30,39 @@ def annotate_variant(variant, var_obj=None):
     return variant
 
 
-def annotate_svs(adapter, vcf_obj, keep_chr_prefix):
+def annotate_svs(adapter, vcf_obj, keep_chr_prefix, genome_build):
     """Annotate all SV variants in a VCF
 
     Args:
         adapter(loqusdb.plugin.adapter)
         vcf_obj(cyvcf2.VCF)
+        keep_chr_prefix(bool)
+        genome_build(str): Genome build. Ex. GRCh37 or GRCh38
 
     Yields:
         variant(cyvcf2.Variant)
     """
     for nr_variants, variant in enumerate(vcf_obj, 1):
-        variant_info = get_coords(variant, keep_chr_prefix)
+        variant_info = get_coords(variant, keep_chr_prefix, genome_build=genome_build)
         match = adapter.get_structural_variant(variant_info)
+        if match:
+            annotate_variant(variant, match)
+        yield variant
+
+
+def annotate_meis(adapter, vcf_obj, keep_chr_prefix):
+    """Annotate all mobile element insertions in a VCF
+
+    Args:
+        adapter(loqusdb.plugin.adapter)
+        vcf_obj(cyvcf2.VCF)
+        keep_chr_prefix(bool)
+
+    Yields:
+        variant(cyvcf2.Variant)
+    """
+    for variant in vcf_obj:
+        match = adapter.get_mei_variant(get_mei_coords(variant, keep_chr_prefix))
         if match:
             annotate_variant(variant, match)
         yield variant

@@ -1,5 +1,6 @@
 import logging
 
+from loqusdb.constants import MEI_COLLECTION, SV_COLLECTION
 from loqusdb.plugins.mongo.structural_variant import SVMixin
 
 from pymongo import ASCENDING, DESCENDING, DeleteOne, UpdateOne
@@ -229,19 +230,21 @@ class VariantMixin(SVMixin):
         if operations:
             self.db.variant.bulk_write(operations, ordered=False)
 
-    def get_chromosomes(self, sv=False):
+    def get_chromosomes(self, sv=False, mei=False):
         """Return a list of all chromosomes found in database
 
         Args:
             sv(bool): if sv variants should be choosen
+            mei(bool): if mobile element insertions should be choosen
 
         Returns:
             res(iterable(str)): An iterable with all chromosomes in the database
         """
+        if mei:
+            return self.db[MEI_COLLECTION].distinct("chrom")
         if sv:
-            return self.db.structural_variant.distinct("chrom")
-        else:
-            return self.db.variant.distinct("chrom")
+            return self.db[SV_COLLECTION].distinct("chrom")
+        return self.db.variant.distinct("chrom")
 
     def get_max_position(self, chrom):
         """Get the last position observed on a chromosome in the database

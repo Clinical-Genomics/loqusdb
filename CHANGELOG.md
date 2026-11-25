@@ -5,8 +5,16 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
+### Added
+- Mobile element insertions (MEIs) can be loaded with `--mei-variants` on `load` and `update`. They are stored as clusters in a separate `mei_variant` collection, per element type (e.g. ALU, L1, SVA, HERV), using a fixed breakpoint window (`--mei-window`, default 150 bp)
+- MEI support in `delete`, `annotate --mei`, `cases -t mei` and `variants -t mei`
+- `export -t mei` exports MEIs as generic `<INS:ME>` records with the element in `MEINFO`; use `--mei-type` to export one file per element for `svdb --query`
 ### Fixed
 - `identity` command no longer fails with an undefined name when a variant is found.
+- `update` failed for SV files and when `genome_build` was needed, rolled back with a misleading "Case already exists" error, and reloaded the variant files already in the case
+- `variants --variant-id` lookup of SVs, as used by Scout, did not return the matching cluster
+- `annotate --sv` failed on missing genome build, and `annotate` counted SV cases for SNV annotation
+- Rollback after a failed `load` did not pass genome build and chromosome prefix settings to the deletion
 
 ## [2.8.0]
 ### Changed
