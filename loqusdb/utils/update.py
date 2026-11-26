@@ -10,7 +10,7 @@ This functions take an adapter which is the communication device for the databas
 import logging
 
 
-from loqusdb.constants import GRCH37
+from loqusdb.constants import GRCH38
 from loqusdb.exceptions import CaseError
 
 from loqusdb.utils.case import get_case
@@ -32,7 +32,7 @@ def update_database(
     gq_threshold=None,
     case_id=None,
     max_window=3000,
-    genome_build=GRCH37,
+    genome_build=GRCH38,
 ):
     """Update a case in the database
 
@@ -46,7 +46,7 @@ def update_database(
           gq_threshold(int): If only quality variants should be considered
           case_id(str): If different case id than the one in family file should be used
           max_window(int): Specify the max size for sv windows
-          genome_build(str): Genome build of the variants. Ex. GRCH37
+          genome_build(str): Genome build of the variants. Ex. GRCH38
 
     Returns:
           nr_inserted(int)
