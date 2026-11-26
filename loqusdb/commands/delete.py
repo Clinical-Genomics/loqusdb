@@ -26,8 +26,20 @@ LOG = logging.getLogger(__name__)
     type=str,
     help="If a different case id than the one in ped file should be used",
 )
+@click.option(
+    "--gq-threshold",
+    type=click.IntRange(min=0),
+    metavar="INTEGER",
+    help="Replay the original small-variant GQ threshold. Omit it or use 0 for no threshold.",
+)
+@click.option("--qual-gq", is_flag=True, help="Use QUAL instead of GQ, as in the original load.")
+@click.option(
+    "--ignore-gq-if-unset",
+    is_flag=True,
+    help="Accept missing GQ or QUAL, as in the original load.",
+)
 @click.pass_context
-def delete(ctx, family_file, family_type, case_id):
+def delete(ctx, family_file, family_type, case_id, gq_threshold, qual_gq, ignore_gq_if_unset):
     """Delete the variants of a case."""
     if not (family_file or case_id):
         LOG.error("Please provide a family file")
@@ -63,6 +75,9 @@ def delete(ctx, family_file, family_type, case_id):
             case_obj=existing_case,
             genome_build=genome_build,
             keep_chr_prefix=keep_chr_prefix,
+            gq_threshold=gq_threshold,
+            qual_gq=qual_gq,
+            ignore_gq_if_unset=ignore_gq_if_unset,
         )
     except (CaseError, IOError) as error:
         LOG.warning(error)
