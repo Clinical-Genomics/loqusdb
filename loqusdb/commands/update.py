@@ -104,6 +104,7 @@ def update(
             case_id=case_id,
             gq_threshold=gq_threshold,
             max_window=max_window,
+            genome_build=ctx.obj["genome_build"],
         )
     except (SyntaxError, CaseError, IOError, VcfError) as error:
         LOG.warning(error)
