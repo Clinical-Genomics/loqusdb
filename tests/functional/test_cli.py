@@ -242,17 +242,17 @@ def _resolved_genome_build(tmp_path, args, config_build=None):
     return result.output.strip().splitlines()[-1]
 
 
-def test_genome_build_defaults_to_grch37(tmp_path, genome_build_probe):
+def test_genome_build_defaults_to_grch38(tmp_path, genome_build_probe):
     ## GIVEN no genome build on the command line or in a config
     ## WHEN running the CLI
-    ## THEN GRCh37 is used
-    assert _resolved_genome_build(tmp_path, []) == GRCH37
+    ## THEN GRCh38 is used
+    assert _resolved_genome_build(tmp_path, []) == GRCH38
 
 
 def test_genome_build_from_config(tmp_path, genome_build_probe):
     ## GIVEN a config that sets GRCh38 and no genome build on the command line
     ## WHEN running the CLI
-    ## THEN the config value is used instead of the GRCh37 default
+    ## THEN the config value is used instead of the GRCh38 default
     assert _resolved_genome_build(tmp_path, [], config_build=GRCH38) == GRCH38
 
 
