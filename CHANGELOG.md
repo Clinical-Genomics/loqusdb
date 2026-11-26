@@ -11,6 +11,7 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 ### Fixed
 - `update` now validates SV files, uses the given genome build and only loads the VCF files passed in the update.
 - `identity` command no longer fails with an undefined name when a variant is found.
+- `--genome-build` no longer overrides the `genome_build` from the config file when the option is not given ([#204](https://github.com/Clinical-Genomics/loqusdb/pull/204), fixes [#195](https://github.com/Clinical-Genomics/loqusdb/issues/195)).
 
 ## [2.8.0]
 ### Changed
