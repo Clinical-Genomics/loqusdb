@@ -10,9 +10,20 @@ LOG = logging.getLogger(__name__)
 
 
 def delete(
-    adapter, case_obj, keep_chr_prefix=None, update=False, existing_case=False, genome_build=None
+    adapter,
+    case_obj,
+    keep_chr_prefix=None,
+    update=False,
+    existing_case=False,
+    genome_build=None,
+    *,
+    gq_threshold=None,
+    qual_gq=False,
+    ignore_gq_if_unset=False,
 ):
     """Delete a case and all of it's variants from the database.
+
+    Pass the original load's quality settings when replaying small variants.
 
     Args:
         adapter: Connection to database
@@ -45,6 +56,9 @@ def delete(
                 keep_chr_prefix=keep_chr_prefix,
                 case_obj=case_obj,
                 genome_build=genome_build,
+                gq_threshold=gq_threshold,
+                qual_gq=qual_gq,
+                ignore_gq_if_unset=ignore_gq_if_unset,
             )
         elif file_type == "vcf_sv_path":
             LOG.info("deleting structural variants")
@@ -58,7 +72,16 @@ def delete(
 
 
 def delete_variants(
-    adapter, vcf_obj, case_obj, keep_chr_prefix=None, case_id=None, genome_build=None
+    adapter,
+    vcf_obj,
+    case_obj,
+    keep_chr_prefix=None,
+    case_id=None,
+    genome_build=None,
+    *,
+    gq_threshold=None,
+    qual_gq=False,
+    ignore_gq_if_unset=False,
 ):
     """Delete variants for a case in the database
 
@@ -87,6 +110,9 @@ def delete_variants(
             keep_chr_prefix=keep_chr_prefix,
             case_id=case_id,
             genome_build=genome_build,
+            gq_threshold=gq_threshold,
+            gq_qual=qual_gq,
+            ignore_gq_if_unset=ignore_gq_if_unset,
         )
 
         if not formated_variant:

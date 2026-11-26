@@ -5,8 +5,14 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
+
+### Added
+- `--gq-threshold`, `--ignore-gq-if-unset`, `--qual-gq` to `delete` command
+
 ### Fixed
 - `identity` command no longer fails with an undefined name when a variant is found.
+- `delete` can reuse the original GQ settings to avoid subtracting SNV observations that were filtered out during load.
+
 
 ## [2.8.0]
 ### Changed
