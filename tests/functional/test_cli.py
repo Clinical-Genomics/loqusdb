@@ -1,6 +1,9 @@
+import click
+import pytest
 from click.testing import CliRunner
 
 from loqusdb.commands.cli import cli as base_command
+from loqusdb.constants import GRCH37, GRCH38
 from loqusdb.exceptions import ProfileError
 
 
@@ -211,3 +214,51 @@ def test_cases_command_non_existing(vcf_path, case_id, real_mongo_adapter, real_
 #     result = runner.invoke(base_command, wipe_command)
 #
 #     assert result.exit_code == 0
+
+
+@pytest.fixture
+def genome_build_probe():
+    """Add a hidden command that prints the genome build the CLI resolved"""
+
+    @base_command.command("genome-build-probe")
+    @click.pass_context
+    def probe(ctx):
+        click.echo(ctx.obj["genome_build"])
+
+    yield
+    base_command.commands.pop("genome-build-probe")
+
+
+def _resolved_genome_build(tmp_path, args, config_build=None):
+    """Run the CLI in test mode and return the genome build it resolved"""
+    command = ["--database", "genome-build-test"]
+    if config_build:
+        config_path = tmp_path / "config.yaml"
+        config_path.write_text(f"genome_build: {config_build}\n")
+        command += ["-c", str(config_path)]
+    command += args + ["genome-build-probe"]
+    result = CliRunner().invoke(base_command, command)
+    assert result.exit_code == 0
+    return result.output.strip().splitlines()[-1]
+
+
+def test_genome_build_defaults_to_grch37(tmp_path, genome_build_probe):
+    ## GIVEN no genome build on the command line or in a config
+    ## WHEN running the CLI
+    ## THEN GRCh37 is used
+    assert _resolved_genome_build(tmp_path, []) == GRCH37
+
+
+def test_genome_build_from_config(tmp_path, genome_build_probe):
+    ## GIVEN a config that sets GRCh38 and no genome build on the command line
+    ## WHEN running the CLI
+    ## THEN the config value is used instead of the GRCh37 default
+    assert _resolved_genome_build(tmp_path, [], config_build=GRCH38) == GRCH38
+
+
+def test_genome_build_option_overrides_config(tmp_path, genome_build_probe):
+    ## GIVEN a config that sets GRCh38
+    ## WHEN the genome build is also given on the command line as GRCh37
+    ## THEN the command line value wins
+    args = ["--genome-build", GRCH37]
+    assert _resolved_genome_build(tmp_path, args, config_build=GRCH38) == GRCH37
