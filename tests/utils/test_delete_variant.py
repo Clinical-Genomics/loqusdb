@@ -10,17 +10,21 @@ from loqusdb.constants import GRCH37, GRCH38
 def test_delete_replays_load_gq_threshold(
     real_mongo_adapter, het_variant, case_obj, has_qualifying_het
 ):
+    ## GIVEN a retained heterozygous observation and a case loaded with the same GQ threshold
     adapter = real_mongo_adapter
     other_case = {**case_obj, "case_id": "retained_case"}
     settings = {"gq_threshold": 20, "genome_build": GRCH37}
     assert load_variants(adapter, [het_variant], other_case, **settings) == 1
 
+    ## GIVEN the case to delete has a low-GQ homozygous call and may have a qualifying het call
     het_variant.gt_types = [1, 3, 0]
     het_variant.gt_quals = [60 if has_qualifying_het else 10, 10, 60]
     assert load_variants(adapter, [het_variant], case_obj, **settings) == int(has_qualifying_het)
 
+    ## WHEN deleting the case with the original GQ threshold
     delete_variants(adapter, [het_variant], case_obj, **settings)
 
+    ## THEN the other case's sighting remains and the homozygote count stays at zero
     variant = adapter.get_variant({"_id": get_variant_id(het_variant)})
     assert variant is not None
     assert variant["observations"] == 1
