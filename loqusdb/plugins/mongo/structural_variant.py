@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from pymongo import ASCENDING
 
@@ -285,7 +286,13 @@ class SVMixin:
         return match
 
     def get_sv_variants(
-        self, chromosome=None, end_chromosome=None, sv_type=None, pos=None, end=None
+        self,
+        chromosome=None,
+        end_chromosome=None,
+        sv_type=None,
+        pos=None,
+        end=None,
+        max_observations: Optional[int] = None,
     ):
         """Return all structural variants in the database
 
@@ -295,6 +302,8 @@ class SVMixin:
             sv_type (str)
             pos (int): Left position of SV
             end (int): Right position of SV
+            max_observations (int): Only return variants observed in at most
+                this number of individuals
 
         Returns:
             variants (Iterable(Variant))
@@ -307,6 +316,8 @@ class SVMixin:
             query["end_chrom"] = end_chromosome
         if sv_type:
             query["sv_type"] = sv_type
+        if max_observations is not None:
+            query["observations"] = {"$lte": max_observations}
         if pos:
             if "$and" not in query:
                 query["$and"] = []

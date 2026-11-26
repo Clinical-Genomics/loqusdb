@@ -5,6 +5,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
+### Added
+- `--max-obs` option for `export` to only export SNVs or SVs observed in at most the given number of individuals (`Obs <= MAX_OBS`).
+- `--include-case-ids` option for `export` to add the cases each variant was observed in as `Cases=` in INFO.
 ### Fixed
 - `update` now validates SV files, uses the given genome build and only loads the VCF files passed in the update.
 - `identity` command no longer fails with an undefined name when a variant is found.

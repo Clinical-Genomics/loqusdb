@@ -29,8 +29,19 @@ LOG = logging.getLogger(__name__)
 @click.option(
     "-f", "--freq", is_flag=True, help="Include observation frequencies in the exported VCF"
 )
+@click.option(
+    "--max-obs",
+    type=click.IntRange(min=1),
+    default=None,
+    help="Only export variants observed in at most this number of individuals (Obs <= MAX_OBS)",
+)
+@click.option(
+    "--include-case-ids",
+    is_flag=True,
+    help="Add the cases each variant was observed in to the INFO field (Cases=)",
+)
 @click.pass_context
-def export(ctx, outfile, variant_type, freq):
+def export(ctx, outfile, variant_type, freq, max_obs, include_case_ids):
     """Export the variants of a loqus db
 
     The variants are exported to a vcf file
@@ -88,6 +99,8 @@ def export(ctx, outfile, variant_type, freq):
     head.add_info("Obs", "1", "Integer", "The number of observations for the variant")
     head.add_info("Hom", "1", "Integer", "The number of observed homozygotes")
     head.add_info("Hem", "1", "Integer", "The number of observed hemizygotes")
+    if include_case_ids:
+        head.add_info("Cases", ".", "String", "Cases the variant was observed in")
     head.add_version_tracking("loqusdb", version, datetime.now().strftime("%Y-%m-%d %H:%M"))
 
     if variant_type == "sv":
@@ -104,13 +117,17 @@ def export(ctx, outfile, variant_type, freq):
     for chrom in ordered_chromosomes:
         if variant_type == "snv":
             LOG.info("Collecting all SNV variants")
-            variants = adapter.get_variants(chromosome=chrom)
+            variants = adapter.get_variants(chromosome=chrom, max_observations=max_obs)
         else:
             LOG.info("Collecting all SV variants")
-            variants = adapter.get_sv_variants(chromosome=chrom)
+            variants = adapter.get_sv_variants(chromosome=chrom, max_observations=max_obs)
         LOG.info(f"{adapter.nr_variants(chromosome=chrom)} variants found")
         for variant in variants:
             variant_line = format_variant(
-                variant, variant_type=variant_type, nr_cases=nr_cases, add_freq=freq
+                variant,
+                variant_type=variant_type,
+                nr_cases=nr_cases,
+                add_freq=freq,
+                include_case_ids=include_case_ids,
             )
             print_variant(variant_line=variant_line, outfile=outfile)
