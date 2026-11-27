@@ -1,3 +1,5 @@
+import pytest
+
 from loqusdb.build_models.variant import build_variant, get_coords, infer_sv_type
 from loqusdb.constants import GRCH37, GRCH38
 
@@ -54,10 +56,19 @@ def test_infer_sv_type_preserves_cyvcf2_svtype(del_variant):
     assert infer_sv_type(del_variant) == "DEL"
 
 
-def test_infer_sv_type_preserves_legacy_svtype_value(duptandem_variant):
-    duptandem_variant.INFO["SVTYPE"] = "DUP:TANDEM"
+@pytest.mark.parametrize("svtype", ["DUP:TANDEM", "TDUP", "IDUP"])
+def test_infer_sv_type_collapses_subtyped_svtype(duptandem_variant, svtype):
+    # TIDDIT style SVTYPE values collapse to their primary type
+    duptandem_variant.INFO["SVTYPE"] = svtype
 
-    assert infer_sv_type(duptandem_variant) == "DUP:TANDEM"
+    assert infer_sv_type(duptandem_variant) == "DUP"
+
+
+def test_infer_sv_type_collapses_alias_from_symbolic_alt(duptandem_old_tiddit_variant):
+    # Without SVTYPE, an old TIDDIT <TDUP> ALT still collapses to DUP
+    duptandem_old_tiddit_variant.INFO = {"END": duptandem_old_tiddit_variant.end}
+
+    assert infer_sv_type(duptandem_old_tiddit_variant) == "DUP"
 
 
 def test_infer_sv_type_from_single_breakend(single_bnd_variant):

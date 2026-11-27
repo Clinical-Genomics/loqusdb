@@ -11,6 +11,7 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 ### Fixed
 - `update` now validates SV files, uses the given genome build and only loads the VCF files passed in the update.
 - `identity` command no longer fails with an undefined name when a variant is found.
+- TIDDIT style SV types (`DUP:TANDEM`, `TDUP`, `IDUP` in `SVTYPE` or ALT) collapse to their primary type (`DUP`)
 
 ## [2.8.0]
 ### Changed

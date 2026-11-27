@@ -12,17 +12,27 @@ LOG = logging.getLogger(__name__)
 Position = namedtuple("Position", "chrom pos")
 
 
+# Caller specific SV type names that collapse to a primary type, e.g. older TIDDIT tandem/interspersed dups
+SV_TYPE_ALIASES = {"TDUP": "DUP", "IDUP": "DUP"}
+
+
+def _primary_sv_type(sv_type: str) -> str:
+    """Collapse a subtyped or caller specific SV type (DUP:TANDEM, TDUP, IDUP) to its primary type."""
+    primary = sv_type.split(":", 1)[0]
+    return SV_TYPE_ALIASES.get(primary, primary)
+
+
 def infer_sv_type(variant: cyvcf2.Variant) -> Optional[str]:
-    """Return the structural variant type using legacy and fallback annotations."""
+    """Return the primary structural variant type using legacy and fallback annotations."""
     sv_type = variant.INFO.get("SVTYPE")
     if sv_type:
-        return str(sv_type)
+        return _primary_sv_type(str(sv_type))
 
     # Some SV records are not classified as SV by cyvcf2, due to not having this info in the INFO column, so use their VCF
     # ALT annotations as a fallback.
     alt = variant.ALT[0]
     if alt.startswith("<") and alt.endswith(">"):
-        return alt[1:-1].split(":", 1)[0]
+        return _primary_sv_type(alt[1:-1])
     if "[" in alt or "]" in alt:
         return "BND"
     # Single breakends (unpaired mate) use a lone "." instead of bracket notation.
