@@ -52,10 +52,9 @@ LOG = logging.getLogger(__name__)
 @click.option(
     "-g",
     "--genome-build",
-    default="GRCh37",
-    show_default=True,
+    default=None,
     type=click.Choice([GRCH37, GRCH38]),
-    help="Specify what genome build to use",
+    help="Specify what genome build to use. Defaults to the config value, then GRCh38.",
 )
 @click.option(
     "--keep-chr-prefix",
@@ -123,7 +122,7 @@ def cli(
 
     adapter = MongoAdapter(client, db_name=database)
 
-    genome_build = genome_build or configs.get("genome_build")
+    genome_build = genome_build or configs.get("genome_build") or GRCH38
     keep_chr_prefix = keep_chr_prefix or configs.get("keep_chr_prefix")
 
     ctx.obj = {}
